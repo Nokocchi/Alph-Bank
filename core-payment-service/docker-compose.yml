@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5434:5432"
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: Alex
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 5435:8080

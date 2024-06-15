@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5436:5432"
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: Alex
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 5437:8080
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "rabbitcookie"
+      RABBITMQ_DEFAULT_USER: "Alex"
+      RABBITMQ_DEFAULT_PASS: "admin"
+    command: ["bash", "-c", "chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
+    volumes:
+      - ~/.docker-conf/rabbitmq/data:/var/lib/rabbitmq/mnesia
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq

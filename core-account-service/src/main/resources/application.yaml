@@ -1,0 +1,52 @@
+logging:
+  level:
+    com:
+      alphbank:
+        coreaccountservice: DEBUG
+    reactor.ipc.netty.channel.ChannelOperationsHandler: DEBUG
+    reactor.ipc.netty.http.server.HttpServer: DEBUG
+    reactor.ipc.netty.http.client: DEBUG
+    io.reactivex.netty.protocol.http.client: DEBUG
+    io.netty.handler: DEBUG
+    io.netty.handler.proxy.HttpProxyHandler: DEBUG
+    io.netty.handler.proxy.ProxyHandler: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
+    reactor.ipc.netty.channel: DEBUG
+
+
+reactor.ipc.netty.channel.ChannelOperationsHandler: DEBUG
+reactor.ipc.netty.http.server.HttpServer: DEBUG
+reactor.ipc.netty.http.client: DEBUG
+io.reactivex.netty.protocol.http.client: DEBUG
+io.netty.handler: DEBUG
+io.netty.handler.proxy.HttpProxyHandler: DEBUG
+io.netty.handler.proxy.ProxyHandler: DEBUG
+org.springframework.web.reactive.function.client: DEBUG
+reactor.ipc.netty.channel: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /v1/swagger-ui.html
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: CoreAccountService
+  r2dbc:
+    driverClassName: org.postgresql.Driver
+    url: r2dbc:postgresql://localhost:5432/Alex
+    username: Alex
+    password: admin
+  jdbc:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/Alex
+    username: Alex
+    password: admin
+  flyway:
+    url: jdbc:postgresql://localhost:5432/Alex
+    user: Alex
+    password: admin
+    enabled: true
+    validate-on-migrate: true
+    locations: classpath:/db/migration
