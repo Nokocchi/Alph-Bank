@@ -27,8 +27,8 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final AddressRepository addressRepository;
 
-    public Flux<Customer> findAllCustomersByGovernmentId(String governmentId) {
-        return customerRepository.findAllByGovernmentId(governmentId)
+    public Flux<Customer> findAllCustomers() {
+        return customerRepository.findAll()
                 .flatMap(this::findAddressAndConvertToRestModel);
     }
 
@@ -99,7 +99,8 @@ public class CustomerService {
         return Mono.just(newAddress)
                 .filter(Objects::nonNull)
                 .flatMap(newAddressNotNull -> addressRepository.findByCustomerId(customerId))
-                .map(entity -> updateAddressEntity(entity, newAddress));
+                .map(entity -> updateAddressEntity(entity, newAddress))
+                .flatMap(addressRepository::save);
     }
 
     private AddressEntity updateAddressEntity(AddressEntity addressEntity, Address newAddress) {

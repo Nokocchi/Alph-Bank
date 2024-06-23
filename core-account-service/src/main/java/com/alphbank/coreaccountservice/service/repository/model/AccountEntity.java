@@ -23,6 +23,9 @@ public class AccountEntity {
     @Id
     private UUID accountId;
 
+    @Column("account_name")
+    private String accountName;
+
     @Column("customer_id")
     private UUID customerId;
 
@@ -39,6 +42,7 @@ public class AccountEntity {
     public static AccountEntity from(CreateAccountRequest createAccountRequest) {
         return AccountEntity.builder()
                 .customerId(createAccountRequest.customerId())
+                .accountName(createAccountRequest.accountName())
                 .iban(new Iban.Builder()
                         .countryCode(CountryCode.getByCode(createAccountRequest.locale().getCountry()))
                         .bankCode("111")

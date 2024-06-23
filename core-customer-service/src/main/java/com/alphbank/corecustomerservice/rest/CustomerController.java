@@ -21,12 +21,11 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    // TODO: This should return a Mono<> and should take a country code as input
-    @GetMapping()
+    @GetMapping("/search")
     @Operation(summary = "Search customers by government id", description = "Returns a list of customers")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<ResponseEntity<CustomerSearchResponse>> searchCustomers(@RequestParam String governmentId){
-        return customerService.findAllCustomersByGovernmentId(governmentId)
+    public Mono<ResponseEntity<CustomerSearchResponse>> searchCustomers(){
+        return customerService.findAllCustomers()
                 .collectList()
                 .map(CustomerSearchResponse::new)
                 .map(this::toResponseEntity);

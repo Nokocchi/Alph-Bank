@@ -47,7 +47,7 @@ public class AccountService {
 
     private Account convertToRestModel(AccountEntity accountEntity) {
         Money balance = Money.of(accountEntity.getBalance(), accountEntity.getCurrencyCode());
-        return new Account(accountEntity.getAccountId(), balance, accountEntity.getIban());
+        return new Account(accountEntity.getAccountId(), accountEntity.getAccountName(), balance, accountEntity.getIban());
     }
 
     @Transactional

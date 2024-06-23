@@ -4,5 +4,7 @@ import javax.money.MonetaryAmount;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record CreatePaymentRequest(UUID customerId, UUID accountId, MonetaryAmount remittanceAmount, String messageToSelf, String recipientIban, LocalDateTime getExecutionDateTime) {
+public record CreatePaymentRequest(UUID fromCustomerId, UUID fromAccountId, String recipientIban,
+                                   MonetaryAmount remittanceAmount, String messageToSelf,
+                                   String messageToRecipient, LocalDateTime scheduledDateTime) {
 }

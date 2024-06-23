@@ -1,35 +1,7 @@
-Mono.fromCallable(() -> {
-    // blocking operation
-}).subscribeOn(Schedulers.boundedElastic());
-
-
-{
-  "locale": "sv_SE",
-  "governmentId": "191212121212",
-  "firstName": "Kalle",
-  "lastName": "Jansson",
-  "phoneNumber": "0737373737",
-  "address": {
-    "streetAddress": "Djuss street",
-    "city": "Djussity",
-    "country": "Djusland"
-  }
-}
-
-{
-  "customerId": "7373f9fd-f53d-4c6f-8ad0-7898177118b9",
-  "accountId": "e60a0086-9533-44c4-9410-ec82bff7940e",
-  "remittanceAmount": {
-    "amount": 99.96,
-    "currency": "SEK"
-  },
-  "messageToSelf": "Payment!",
-  "recipientIban": "SE5311100000000000685238",
-  "getExecutionDateTime": "2024-03-30T13:23:13.659Z"
-}
-
 TODO:
+Overall component diagram of all services
 Fix the starter with the correct build.gradle and figure out how to publish it
+Make a starter for useful common stuff like MonetaryAmount, logging objects as JSON, slf4j
 slf4j logging?
 Clean up database dependencies and properties.
 Created/Updated timestamp
@@ -40,6 +12,19 @@ Swagger @Tag annotation for all controllers
 Swagger examples for all request body parameters
 Make payment: Check that currency matches account? Or convert? 
 MoneyModule and swagger SpringDocs.replace in starter?
+OpenAPI spec, generate API? 
+Some kind of Oauth? Or at least a fake login with govId + countryCode?
+Continuous streaming of data, like a stock ticker, but more relevant?
+Pagination?
+Zod schema validation, or auto-generated types based on openapi spec? 
+How do services call each other? 
+Store all requests in central Elastic with traceid, customerId, etc.
+- It should be possible to search for customerId, traceId, service name, date/time
+- Maybe as a starter?
+Each service should have sequence and component diagrams
+Caching?
+Consider setting up Actuator/Spring Boot statistics in Grafana, maybe with some custom Prometheus metrics
+
 
 core-account-service:
 - self: 8080
@@ -63,17 +48,6 @@ core-customer-service
 - postgres 5438
 - adminer 5439
 
-
-Step 1:
-
-Auth-service
-- Sign up
-- Oauth2?
-- Generate JWT
-- GovernmentId + CountryCode + password instead of BankId
-- Grant permissions based on scope
-- Allow external parties access via client credentials and scope, etc.
-
 ----
 
 Step 2:
@@ -90,7 +64,7 @@ x Core-payment-service
 	x Previous payments, future payment execution orders
 	x Scheduled task to execute payment 
 	x update account balance
-- Core-loan-service
+x Core-loan-service
 	x Previous granted loans, future loan payout orders 
 	x Scheduled task to pay out loan
 	x Once loan payout task executes, increase bank account balance
@@ -169,9 +143,9 @@ Loan application service
 Step 8:
 
 Frontend
-- See your profile, settings (core-customer-service)
-- See your accounts, their balances etc (core-account-service)
-- Load individual account (core-payment-service, core-loan-service merged data)
+x See your profile, settings (core-customer-service)
+x See your accounts, their balances etc (core-account-service)
+x Load individual account (core-payment-service, core-loan-service merged data)
 - See all ongoing loan applications and status
 - Make payment, choose account from list
 - I18n, language selector?
@@ -189,24 +163,7 @@ Know-your-customer service
 - Assume no complex/multilayered logic / flows for when questions are mandatory. Mandatoryness is always absolute and defined per question.
 - If KYC service says that everything looks good, continue to profile
 
-----
 
-Figure out:
-
-How do services call each other? 
-Centralized s2s granter where a token request, signed by service's own private key, can be exchanged for a valid token with proper permissions if the private key matches the public key
-
-Extra ideas:
-
-Store all requests in central Elastic with traceid, customerId, etc.
-- It should be possible to search for customerId, traceId, service name, date/time
-- Maybe as a starter?
-
-Each service should have sequence and component diagrams
-
-Caching?
-
-Consider setting up Actuator/Spring Boot statistics in Grafana, maybe with some custom Prometheus metrics
 
 
 

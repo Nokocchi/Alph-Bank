@@ -1,7 +1,7 @@
-package com.alphbank.coreloanservice.service.rabbit;
+package com.alphbank.coreloanservice.service.amqp;
 
 import com.alphbank.coreloanservice.service.client.coreaccountservice.model.PayoutLoanRequest;
-import com.alphbank.coreloanservice.service.rabbit.configuration.RabbitConfigurationProperties;
+import com.alphbank.coreloanservice.service.amqp.configuration.RabbitConfigurationProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;

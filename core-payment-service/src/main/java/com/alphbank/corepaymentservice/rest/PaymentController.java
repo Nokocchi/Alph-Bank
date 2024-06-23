@@ -18,12 +18,16 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @GetMapping()
+    // TODO: Should probably just take an accountId or customerId and use accountService to find recipientIban to avoid wrong use of this endpoint
+    @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<ResponseEntity<SearchPaymentResponse>> searchPayments(@RequestParam UUID customerId, @RequestParam UUID accountId){
-        return paymentService.findAllPaymentsByCustomerIdAndAccountId(customerId, accountId)
+    public Mono<ResponseEntity<PaymentSearchRestResponse>> searchPayments(
+            @RequestParam(required = true) UUID fromAccountId,
+            @RequestParam(required = true) String recipientIban){
+        System.out.println("Received search request!");
+        return paymentService.findAllPaymentsOptionalFilters(fromAccountId, recipientIban)
                 .collectList()
-                .map(SearchPaymentResponse::new)
+                .map(PaymentSearchRestResponse::new)
                 .map(this::toResponseEntity);
     }
 
@@ -31,6 +35,7 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ResponseEntity<Payment>> createPayment(@RequestBody CreatePaymentRequest createPaymentRequest){
         return paymentService.createPayment(createPaymentRequest)
+                .doOnNext(p -> System.out.println("PaymentId!!!: " + p.getPaymentId()))
                 .map(this::toResponseEntity);
 
     }
@@ -45,6 +50,7 @@ public class PaymentController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<Payment>> getPayment(@PathVariable("id") UUID paymentId){
+        System.out.println("Received get request!");
         return paymentService
                 .getPayment(paymentId)
                 .map(this::toResponseEntity);

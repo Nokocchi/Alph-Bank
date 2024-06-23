@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class Payment {
+public class PaymentSearchResult {
 
     private UUID paymentId;
     private UUID fromCustomerId;
@@ -18,9 +18,7 @@ public class Payment {
     private MonetaryAmount remittanceAmount;
     private String recipientIban;
     private UUID recipientAccountId;
-    private String messageToSelf;
-    private String messageToRecipient;
-    private LocalDateTime executedDateTime;
-    private LocalDateTime scheduledDateTime;
+    private String message;
+    private LocalDateTime visibleOnAccountDateTime;
 
 }

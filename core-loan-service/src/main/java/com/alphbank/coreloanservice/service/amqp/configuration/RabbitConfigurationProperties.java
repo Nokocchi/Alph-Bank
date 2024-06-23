@@ -1,4 +1,4 @@
-package com.alphbank.coreloanservice.service.rabbit.configuration;
+package com.alphbank.coreloanservice.service.amqp.configuration;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

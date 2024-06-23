@@ -1,4 +1,4 @@
-package com.alphbank.coreloanservice.service.rabbit.configuration;
+package com.alphbank.coreloanservice.service.amqp.configuration;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.TopicExchange;

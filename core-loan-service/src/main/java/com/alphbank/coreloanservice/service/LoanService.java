@@ -5,7 +5,7 @@ import com.alphbank.coreloanservice.rest.model.Loan;
 import com.alphbank.coreloanservice.service.client.coreaccountservice.CoreAccountServiceInternalClient;
 import com.alphbank.coreloanservice.service.client.coreaccountservice.model.PayoutLoanRequest;
 import com.alphbank.coreloanservice.service.error.LoanNotFoundException;
-import com.alphbank.coreloanservice.service.rabbit.RabbitMQService;
+import com.alphbank.coreloanservice.service.amqp.RabbitMQService;
 import com.alphbank.coreloanservice.service.repository.LoanRepository;
 import com.alphbank.coreloanservice.service.repository.model.LoanEntity;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
 import java.util.UUID;

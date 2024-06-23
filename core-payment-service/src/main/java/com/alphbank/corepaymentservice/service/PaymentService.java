@@ -2,6 +2,8 @@ package com.alphbank.corepaymentservice.service;
 
 import com.alphbank.corepaymentservice.rest.model.CreatePaymentRequest;
 import com.alphbank.corepaymentservice.rest.model.Payment;
+import com.alphbank.corepaymentservice.rest.model.PaymentSearchRestResponse;
+import com.alphbank.corepaymentservice.rest.model.PaymentSearchResult;
 import com.alphbank.corepaymentservice.service.client.coreaccountservice.CoreAccountServiceInternalClient;
 import com.alphbank.corepaymentservice.service.client.coreaccountservice.model.AccountBalanceUpdateRequest;
 import com.alphbank.corepaymentservice.service.error.PaymentNotFoundException;
@@ -9,17 +11,15 @@ import com.alphbank.corepaymentservice.service.repository.PaymentRepository;
 import com.alphbank.corepaymentservice.service.repository.model.PaymentEntity;
 import lombok.RequiredArgsConstructor;
 import org.javamoney.moneta.Money;
-import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.money.MonetaryAmount;
-import java.time.Instant;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -38,20 +38,36 @@ public class PaymentService {
     }
     */
 
-    public Flux<Payment> findAllPaymentsByCustomerIdAndAccountId(UUID customerId, UUID accountId) {
-        return Mono.justOrEmpty(customerId)
-                .flatMapMany(paymentRepository::findAllPaymentsByCustomerId)
-                .filter(paymentEntity -> accountId == null || paymentEntity.getAccountId() == accountId)
-                .switchIfEmpty(paymentRepository.findAllPaymentsByAccountId(accountId))
-                .map(this::convertToRestModel);
+    public Flux<PaymentSearchResult> findAllPaymentsOptionalFilters(UUID fromAccountId, String recipientIban) {
+        return findAllPaymentsByFromAccountId(fromAccountId)
+                .concatWith(findAllPaymentsByRecipientIban(recipientIban));
+    }
+
+    private Flux<PaymentSearchResult> findAllPaymentsByFromAccountId(UUID fromAccountId){
+        if(fromAccountId == null){
+            return Flux.empty();
+        }
+         return paymentRepository.findAllPaymentsByFromAccountId(fromAccountId)
+                 .map(paymentEntity -> convertToSearchResponse(paymentEntity, false));
+    }
+
+    private Flux<PaymentSearchResult> findAllPaymentsByRecipientIban(String recipientIban){
+        if(recipientIban == null){
+            return Flux.empty();
+        }
+        return paymentRepository.findAllPaymentsByRecipientIban(recipientIban)
+                .map(paymentEntity -> convertToSearchResponse(paymentEntity, true));
     }
 
     @Transactional
     public Mono<Payment> createPayment(CreatePaymentRequest createPaymentRequest) {
+        // TODO: Add recipientAccountId as an async lookup to account-service - search based on IBAN?
+        // TODO: Run scheduleExecution on the persisted payment
         PaymentEntity paymentEntity = PaymentEntity.from(createPaymentRequest);
         return paymentRepository.save(paymentEntity)
-                .flatMap(this::scheduleExecution)
-                .then(Mono.just(convertToRestModel(paymentEntity)));
+                .map(this::convertToRestModel);
+                //.flatMap(this::scheduleExecution)
+                //.then(Mono.just(convertToRestModel(paymentEntity)));
     }
 
     public Mono<Payment> getPayment(UUID paymentId) {
@@ -80,7 +96,7 @@ public class PaymentService {
     public void transfer(PaymentEntity paymentEntity) {
         AccountBalanceUpdateRequest accountBalanceUpdateRequest = new AccountBalanceUpdateRequest
                 (Money.of(paymentEntity.getRemittanceAmount(), paymentEntity.getRemittanceCurrency()),
-                        paymentEntity.getAccountId(),
+                        paymentEntity.getFromAccountId(),
                         paymentEntity.getRecipientIban(),
                         paymentEntity.getPaymentId());
         coreAccountServiceInternalClient.updateBalances(accountBalanceUpdateRequest)
@@ -91,11 +107,32 @@ public class PaymentService {
 
     private Payment convertToRestModel(PaymentEntity paymentEntity) {
         return new Payment(paymentEntity.getPaymentId(),
-                paymentEntity.getCustomerId(),
-                paymentEntity.getAccountId(),
+                paymentEntity.getFromCustomerId(),
+                paymentEntity.getFromAccountId(),
                 paymentEntity.isExecuted(),
                 Money.of(paymentEntity.getRemittanceAmount(), paymentEntity.getRemittanceCurrency()),
                 paymentEntity.getRecipientIban(),
-                paymentEntity.getMessageToSelf());
+                paymentEntity.getRecipientAccountId(),
+                paymentEntity.getMessageToSelf(),
+                paymentEntity.getMessageToRecipient(),
+                paymentEntity.getExecutionDateTime(),
+                paymentEntity.getScheduledDateTime());
+    }
+
+    // Good candidate for compositional design, but realistically we will only ever have two options.
+    // Keep it simple with a boolean instead
+    private PaymentSearchResult convertToSearchResponse(PaymentEntity paymentEntity, boolean recipientPointOfView) {
+        String message = recipientPointOfView ? paymentEntity.getMessageToRecipient() : paymentEntity.getMessageToSelf();
+        BigDecimal remittanceAmount = recipientPointOfView ? paymentEntity.getRemittanceAmount() : paymentEntity.getRemittanceAmount().negate();
+
+        return new PaymentSearchResult(paymentEntity.getPaymentId(),
+                paymentEntity.getFromCustomerId(),
+                paymentEntity.getFromAccountId(),
+                paymentEntity.isExecuted(),
+                Money.of(remittanceAmount, paymentEntity.getRemittanceCurrency()),
+                paymentEntity.getRecipientIban(),
+                paymentEntity.getRecipientAccountId(),
+                message,
+                paymentEntity.getScheduledDateTime());
     }
 }
