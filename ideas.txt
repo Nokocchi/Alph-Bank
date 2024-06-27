@@ -1,4 +1,7 @@
 TODO:
+Make tests that prove that MonetaryAmount is encoded correctly by the baseWebClientBuilder
+Scheduled should be behind toggle, optional
+Figure out how to handle currencies. Automatic conversion, pick from list, can only pick currency of receiving account...? 
 Overall component diagram of all services
 Fix the starter with the correct build.gradle and figure out how to publish it
 Make a starter for useful common stuff like MonetaryAmount, logging objects as JSON, slf4j
@@ -25,6 +28,7 @@ Each service should have sequence and component diagrams
 Caching?
 Consider setting up Actuator/Spring Boot statistics in Grafana, maybe with some custom Prometheus metrics
 
+Test IBAN: SE0811100000000000296593
 
 core-account-service:
 - self: 8080

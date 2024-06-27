@@ -3,8 +3,6 @@ package com.alphbank.corepaymentservice.service.client.coreaccountservice.config
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
@@ -13,11 +11,12 @@ public class CoreAccountServiceInternalClientConfiguration {
 
     private final CoreAccountServiceInternalClientConfigurationProperties properties;
 
+    private final WebClient.Builder alphBaseWebClient;
+
     @Bean
     public WebClient coreAccountServiceClient(){
-        return WebClient.builder()
+        return alphBaseWebClient
                 .baseUrl(properties.getUri())
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
 

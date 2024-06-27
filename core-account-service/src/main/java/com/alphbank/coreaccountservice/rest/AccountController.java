@@ -23,11 +23,9 @@ public class AccountController {
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<AccountSearchResponse>> searchAccounts(@RequestParam(name = "customer_id") String customerId){
-        System.out.println(String.format("Received search response with customerId %s!", customerId));
         return accountService.getAllAccountsByCustomerId(customerId)
                 .collectList()
                 .map(AccountSearchResponse::new)
-                .doOnNext(res -> System.out.println(res.accounts().size()))
                 .map(this::toResponseEntity);
     }
 
@@ -49,7 +47,6 @@ public class AccountController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<Account>> getAccount(@PathVariable("id") UUID accountId){
-        System.out.println("Received request!");
         return accountService
                 .getAccount(accountId)
                 .map(this::toResponseEntity);

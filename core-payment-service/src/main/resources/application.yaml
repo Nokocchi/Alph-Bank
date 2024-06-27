@@ -1,14 +1,37 @@
-server:
-  port: 8081
-
 logging:
   level:
     com:
       alphbank:
         corepaymentservice: DEBUG
+    reactor.ipc.netty.channel.ChannelOperationsHandler: DEBUG
+    reactor.ipc.netty.http.server.HttpServer: DEBUG
+    reactor.ipc.netty.http.client: DEBUG
+    io.reactivex.netty.protocol.http.client: DEBUG
+    io.netty.handler: DEBUG
+    io.netty.handler.proxy.HttpProxyHandler: DEBUG
+    io.netty.handler.proxy.ProxyHandler: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
+    reactor.ipc.netty.channel: DEBUG
+    reactor.netty.http.client: DEBUG
+    reactor.netty.tcp.TcpServer: DEBUG
     org:
       springframework:
         web: DEBUG
+
+reactor.ipc.netty.channel.ChannelOperationsHandler: DEBUG
+reactor.ipc.netty.http.server.HttpServer: DEBUG
+reactor.ipc.netty.http.client: DEBUG
+io.reactivex.netty.protocol.http.client: DEBUG
+io.netty.handler: DEBUG
+io.netty.handler.proxy.HttpProxyHandler: DEBUG
+io.netty.handler.proxy.ProxyHandler: DEBUG
+org.springframework.web.reactive.function.client: DEBUG
+reactor.ipc.netty.channel: DEBUG
+reactor.netty.http.client: DEBUG
+reactor.netty.tcp.TcpServer: DEBUG
+
+server:
+  port: 8081
 
 client:
   coreaccountservice:

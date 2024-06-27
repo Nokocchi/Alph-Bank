@@ -152,6 +152,8 @@
 	</form>
 </div>
 
+<a href="/customer/{customer.id}/payment/create">Make payment</a>
+
 <div class="column-form">
 	<h2>Create account</h2>
 	<form method="POST" use:createAccountEnhance>

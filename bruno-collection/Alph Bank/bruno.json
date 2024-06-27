@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Alph Bank",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

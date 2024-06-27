@@ -61,6 +61,7 @@ public class PaymentEntity {
 
 
     public static PaymentEntity from(CreatePaymentRequest createPaymentRequest) {
+        LocalDateTime scheduledDateTimeNullable = createPaymentRequest.scheduledDateTime();
         return PaymentEntity.builder()
                 .fromAccountId(createPaymentRequest.fromAccountId())
                 .fromCustomerId(createPaymentRequest.fromCustomerId())
@@ -69,7 +70,7 @@ public class PaymentEntity {
                 .recipientIban(createPaymentRequest.recipientIban())
                 .remittanceAmount(createPaymentRequest.remittanceAmount().getNumber().numberValueExact(BigDecimal.class))
                 .remittanceCurrency(createPaymentRequest.remittanceAmount().getCurrency().getCurrencyCode())
-                .scheduledDateTime(createPaymentRequest.scheduledDateTime())
+                .scheduledDateTime(scheduledDateTimeNullable != null ? scheduledDateTimeNullable : LocalDateTime.now())
                 .build();
     }
 }
