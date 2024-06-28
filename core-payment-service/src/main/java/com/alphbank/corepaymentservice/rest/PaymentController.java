@@ -1,7 +1,10 @@
 package com.alphbank.corepaymentservice.rest;
 
-import com.alphbank.corepaymentservice.rest.model.*;
+import com.alphbank.corepaymentservice.rest.model.CreatePaymentRequest;
+import com.alphbank.corepaymentservice.rest.model.Payment;
+import com.alphbank.corepaymentservice.rest.model.PaymentSearchRestResponse;
 import com.alphbank.corepaymentservice.service.PaymentService;
+import com.alphbank.reactivelogging.chicken.StarterImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import java.util.UUID;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final StarterImpl starterImpl;
 
     // TODO: Should probably just take an accountId or customerId and use accountService to find recipientIban to avoid wrong use of this endpoint
     @GetMapping("/search")
@@ -24,6 +28,7 @@ public class PaymentController {
     public Mono<ResponseEntity<PaymentSearchRestResponse>> searchPayments(
             @RequestParam(required = true) UUID fromAccountId,
             @RequestParam(required = true) String recipientIban){
+        starterImpl.test();
         return paymentService.findAllPaymentsOptionalFilters(fromAccountId, recipientIban)
                 .collectList()
                 .map(PaymentSearchRestResponse::new)

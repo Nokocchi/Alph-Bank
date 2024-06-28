@@ -12,6 +12,7 @@ java {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 }
 
@@ -23,9 +24,7 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core:10.10.0'
 	implementation 'org.flywaydb:flyway-database-postgresql:10.10.0'
 	implementation 'org.postgresql:r2dbc-postgresql:1.0.4.RELEASE'
-	implementation 'org.javamoney:moneta:1.4.4'
-	implementation 'org.zalando:jackson-datatype-money:1.3.0'
-	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.4.0'
+	implementation 'com.alphbank:common-webflux-starter:0.0.4-SNAPSHOT'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok:1.18.20'
 	annotationProcessor 'org.projectlombok:lombok:1.18.20'

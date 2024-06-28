@@ -30,6 +30,9 @@ reactor.ipc.netty.channel: DEBUG
 reactor.netty.http.client: DEBUG
 reactor.netty.tcp.TcpServer: DEBUG
 
+reactivelogging:
+  enabled: true
+
 server:
   port: 8081
 

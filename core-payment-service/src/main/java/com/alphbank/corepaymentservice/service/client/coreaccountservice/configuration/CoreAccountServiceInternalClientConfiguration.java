@@ -11,10 +11,8 @@ public class CoreAccountServiceInternalClientConfiguration {
 
     private final CoreAccountServiceInternalClientConfigurationProperties properties;
 
-    private final WebClient.Builder alphBaseWebClient;
-
     @Bean
-    public WebClient coreAccountServiceClient(){
+    public WebClient coreAccountServiceClient(WebClient.Builder alphBaseWebClient){
         return alphBaseWebClient
                 .baseUrl(properties.getUri())
                 .build();
