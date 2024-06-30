@@ -5,7 +5,24 @@ meta {
 }
 
 post {
-  url: 
-  body: none
+  url: http://localhost:8080/internal_account/account_transfer
+  body: json
   auth: none
+}
+
+headers {
+  ~Accept: application/json
+  ~Content-Type: application/json
+}
+
+body:json {
+  {
+    "remittanceAmount": {
+      "amount": 200.00,
+      "currency": "SEK"
+    },
+    "debtorAccountId": "c3dda1f9-dac3-466e-93f7-50633bbcb830",
+    "recipientIban": "SE0811100000000000296593",
+    "paymentReference": "99ceb95b-0cc3-4e19-88e6-ab992bb7dbe1"
+  }
 }

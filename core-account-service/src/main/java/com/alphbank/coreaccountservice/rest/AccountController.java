@@ -5,6 +5,7 @@ import com.alphbank.coreaccountservice.rest.model.AccountSearchResponse;
 import com.alphbank.coreaccountservice.rest.model.CreateAccountRequest;
 import com.alphbank.coreaccountservice.service.AccountService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@Slf4j
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor

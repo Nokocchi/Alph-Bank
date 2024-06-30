@@ -16,19 +16,12 @@ spring:
   application:
     name: CoreCustomerService
   r2dbc:
-    driverClassName: org.postgresql.Driver
-    url: r2dbc:postgresql://localhost:5438/Alex
-    username: Alex
-    password: admin
-  jdbc:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5438/Alex
-    username: Alex
+    url: r2dbc:postgresql://localhost:5438/customer
+    username: customer
     password: admin
   flyway:
-    url: jdbc:postgresql://localhost:5438/Alex
-    user: Alex
+    url: jdbc:postgresql://localhost:5438/customer
+    user: customer
     password: admin
-    enabled: true
     validate-on-migrate: true
     locations: classpath:/db/migration

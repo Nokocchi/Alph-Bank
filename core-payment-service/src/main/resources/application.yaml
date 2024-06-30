@@ -3,43 +3,25 @@ logging:
     com:
       alphbank:
         corepaymentservice: DEBUG
-    reactor.ipc.netty.channel.ChannelOperationsHandler: DEBUG
-    reactor.ipc.netty.http.server.HttpServer: DEBUG
-    reactor.ipc.netty.http.client: DEBUG
-    io.reactivex.netty.protocol.http.client: DEBUG
-    io.netty.handler: DEBUG
-    io.netty.handler.proxy.HttpProxyHandler: DEBUG
-    io.netty.handler.proxy.ProxyHandler: DEBUG
-    org.springframework.web.reactive.function.client: DEBUG
-    reactor.ipc.netty.channel: DEBUG
-    reactor.netty.http.client: DEBUG
-    reactor.netty.tcp.TcpServer: DEBUG
-    org:
-      springframework:
-        web: DEBUG
+    reactor:
+      netty:
+        http:
+          client:
+            HttpClient: INFO
+          server:
+            HttpServer: INFO
 
-reactor.ipc.netty.channel.ChannelOperationsHandler: DEBUG
-reactor.ipc.netty.http.server.HttpServer: DEBUG
-reactor.ipc.netty.http.client: DEBUG
-io.reactivex.netty.protocol.http.client: DEBUG
-io.netty.handler: DEBUG
-io.netty.handler.proxy.HttpProxyHandler: DEBUG
-io.netty.handler.proxy.ProxyHandler: DEBUG
-org.springframework.web.reactive.function.client: DEBUG
-reactor.ipc.netty.channel: DEBUG
-reactor.netty.http.client: DEBUG
-reactor.netty.tcp.TcpServer: DEBUG
-
-reactivelogging:
-  enabled: true
+alph-commons:
+  wiretapEnabled: false
 
 server:
   port: 8081
 
-client:
-  coreaccountservice:
-    internal:
-      uri: http://localhost:8080/internal_account
+alph:
+  client:
+    coreaccountservice:
+      internal:
+        uri: http://localhost:8080/internal_account
 
 spring:
   main:
@@ -47,19 +29,12 @@ spring:
   application:
     name: CorePaymentService
   r2dbc:
-    driverClassName: org.postgresql.Driver
-    url: r2dbc:postgresql://localhost:5434/Alex
-    username: Alex
-    password: admin
-  jdbc:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5434/Alex
-    username: Alex
+    url: r2dbc:postgresql://localhost:5434/payment
+    username: payment
     password: admin
   flyway:
-    url: jdbc:postgresql://localhost:5434/Alex
-    user: Alex
+    url: jdbc:postgresql://localhost:5434/payment
+    user: payment
     password: admin
-    enabled: true
     validate-on-migrate: true
     locations: classpath:/db/migration

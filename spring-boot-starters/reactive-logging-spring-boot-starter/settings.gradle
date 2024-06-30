@@ -1,3 +1,0 @@
-rootProject.name = 'gradle-spring-boot-starter'
-include 'reactive-logging-autoconfigure'
-

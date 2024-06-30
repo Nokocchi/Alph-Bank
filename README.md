@@ -5,7 +5,8 @@ A personal project to create a bank, including the following features and more:
 * Core banking functionality
 * Transaction history
 * Payments to and from other customers using PSD2 inspired API (Payment baskets)
-* Scheduled payments, recurring payments
+* Scheduled payments
+* Recurring payments
 * Simulated compliance-based nightly batch uploads to government entities
 * Loan applications
 * Simulated signing flow for authorizing payments and applying for loans, utilizing asynchronous callbacks when customer has signed
@@ -31,3 +32,6 @@ What is not included:
 * Proper authentication and authorization
 * No proper deployment that can be tested. Local testing only
 * Mostly intended to show backend skills and banking knowledge, so the front-end is quite barebones and does not use or provide good accessibility, best practices, nice user experiences across devices and browsers etc.
+
+![overall-component-diagram](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Nokocchi/Alph-Bank/master/docs/overall-component-diagram.puml)
+
