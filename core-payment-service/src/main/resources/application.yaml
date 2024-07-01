@@ -29,12 +29,12 @@ spring:
   application:
     name: CorePaymentService
   r2dbc:
-    url: r2dbc:postgresql://localhost:5434/payment
-    username: payment
+    url: r2dbc:postgresql://localhost:5432/payment
+    username: alph
     password: admin
   flyway:
-    url: jdbc:postgresql://localhost:5434/payment
-    user: payment
+    url: jdbc:postgresql://localhost:5432/payment
+    user: alph
     password: admin
     validate-on-migrate: true
     locations: classpath:/db/migration

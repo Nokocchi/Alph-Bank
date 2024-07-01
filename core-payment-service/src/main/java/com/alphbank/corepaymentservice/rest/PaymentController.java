@@ -30,17 +30,22 @@ public class PaymentController {
     public Mono<ResponseEntity<PaymentSearchRestResponse>> searchPayments(
             @RequestParam(required = true) UUID fromAccountId,
             @RequestParam(required = true) String recipientIban){
+        log.info("Searching payments with fromAccountId {} and recipientIban {}", fromAccountId, recipientIban);
         return paymentService.findAllPaymentsOptionalFilters(fromAccountId, recipientIban)
                 .collectList()
                 .map(PaymentSearchRestResponse::new)
-                .map(this::toResponseEntity)
-                .doOnNext(response -> log.info("Response: {}", jsonLog.format(response)));
+                .doOnNext(response -> log.info("Returning payments {}", jsonLog.format(response)))
+                .doOnError(e -> log.error("Error searching payments", e))
+                .map(this::toResponseEntity);
     }
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ResponseEntity<Payment>> createPayment(@RequestBody CreatePaymentRequest createPaymentRequest){
+        log.info("Creating payment with request body {}", jsonLog.format(createPaymentRequest));
         return paymentService.createPayment(createPaymentRequest)
+                .doOnNext(response -> log.info("Returning newly created payment {}", jsonLog.format(response)))
+                .doOnError(e -> log.error("Error creating payment", e))
                 .map(this::toResponseEntity);
 
     }
@@ -48,15 +53,21 @@ public class PaymentController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<UUID>> deletePayment(@PathVariable("id") UUID paymentId){
+        log.info("Deleting payment with paymentId {}", paymentId);
         return paymentService.deletePayment(paymentId)
+                .doOnSuccess(response -> log.info("Deleted payment with id {}", paymentId))
+                .doOnError(e -> log.error("Error deleting payment with id " + paymentId, e))
                 .then(Mono.just(toResponseEntity(paymentId)));
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<Payment>> getPayment(@PathVariable("id") UUID paymentId){
+        log.info("Getting payment with paymentId {}", paymentId);
         return paymentService
                 .getPayment(paymentId)
+                .doOnNext(response -> log.info("Getting payment with id {}", paymentId))
+                .doOnError(e -> log.error("Error getting payment with id " + paymentId, e))
                 .map(this::toResponseEntity);
     }
 

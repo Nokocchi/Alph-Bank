@@ -152,7 +152,10 @@
 	</form>
 </div>
 
-<a href="/customer/{customer.id}/payment/create">Make payment</a>
+{#if accounts.length}
+	<a href="/customer/{customer.id}/payment/create">Make payment</a>
+	<a href="/customer/{customer.id}/loan/create">Apply for loan</a>
+{/if}
 
 <div class="column-form">
 	<h2>Create account</h2>
@@ -180,7 +183,6 @@
 <button on:click={deleteCustomerBtnHandler}>Delete customer</button>
 
 <style>
-
 	.account-list-panel {
 		margin: 40px 0;
 		display: flex;
@@ -190,5 +192,4 @@
 	h2 {
 		font-weight: bold;
 	}
-
 </style>

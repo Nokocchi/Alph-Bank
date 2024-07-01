@@ -31,7 +31,7 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 
 	// Alph Bank starters
-	implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.7-SNAPSHOT'
+	implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.8-SNAPSHOT'
 
 	// Testing
 	testImplementation 'io.projectreactor:reactor-test'

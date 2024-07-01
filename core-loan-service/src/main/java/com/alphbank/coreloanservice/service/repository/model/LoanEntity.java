@@ -30,22 +30,19 @@ public class LoanEntity {
     //CreatedTimestamp
     //private Timestamp? executeTime
 
-    @With
-    @Column("paid_out")
-    private boolean paidOut;
-
-    @Column("amount")
-    private BigDecimal amount;
+    @Column("principal")
+    private BigDecimal principal;
 
     @Column("currency")
     private String currency;
 
-    @Column("fixed_rate_interest")
-    private BigDecimal fixedRateInterest;
+    @Column("fixed_rate_interest_apr")
+    private BigDecimal fixedRateInterestAPR;
 
-    @Column("loan_period_months")
+    @Column("loan_term_months")
     private int loanPeriodMonths;
 
+    @With
     @Column("payout_date_time")
     private LocalDateTime payoutDateTime;
 
@@ -53,11 +50,10 @@ public class LoanEntity {
         return LoanEntity.builder()
                 .accountId(createLoanRequest.accountId())
                 .customerId(createLoanRequest.customerId())
-                .amount(createLoanRequest.loanAmount().getNumber().numberValue(BigDecimal.class))
-                .currency(createLoanRequest.loanAmount().getCurrency().getCurrencyCode())
-                .fixedRateInterest(createLoanRequest.fixedRateInterest())
-                .loanPeriodMonths(createLoanRequest.loanPeriodMonths())
-                .payoutDateTime(createLoanRequest.payoutDateTime())
+                .principal(createLoanRequest.principal().getNumber().numberValue(BigDecimal.class))
+                .currency(createLoanRequest.principal().getCurrency().getCurrencyCode())
+                .fixedRateInterestAPR(createLoanRequest.fixedRateInterestAPR())
+                .loanPeriodMonths(createLoanRequest.loanTermMonths())
                 .build();
     }
 }

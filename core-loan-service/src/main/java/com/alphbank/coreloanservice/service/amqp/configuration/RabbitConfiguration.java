@@ -14,7 +14,7 @@ import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 @RequiredArgsConstructor
 public class RabbitConfiguration {
 
-    private RabbitConfigurationProperties rabbitConfigurationProperties;
+    private final RabbitConfigurationProperties rabbitConfigurationProperties;
 
     @Bean
     public TaskScheduler taskScheduler() {

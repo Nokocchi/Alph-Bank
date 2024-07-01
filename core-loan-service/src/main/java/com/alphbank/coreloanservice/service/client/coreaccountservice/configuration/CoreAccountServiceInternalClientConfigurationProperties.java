@@ -7,10 +7,9 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "client.coreaccountservice.internal")
+@ConfigurationProperties(prefix = "alph.client.coreaccountservice.internal")
 public class CoreAccountServiceInternalClientConfigurationProperties {
 
-    @Value("${uri}")
     private String uri;
 
 

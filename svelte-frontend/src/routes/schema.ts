@@ -2,6 +2,12 @@ import { z } from 'zod';
 
 export const LocaleSchema = z.string().min(5);
 
+export const CustomerIdSchema = z.string().uuid();
+export const AccountIdSchema = z.string().uuid();
+export const PaymentIdSchema = z.string().uuid();
+export const LoanIdSchema = z.string().uuid();
+export const GovernmentIdSchema = z.string().min(1);
+
 export const AddressSchema = z.object({
 	streetAddress: z.string().min(1),
 	city: z.string().min(1),
@@ -11,7 +17,7 @@ export const AddressSchema = z.object({
 // Define at the top-level so it stays in memory and the adapter can be cached
 export const CreateCustomerSchema = z.object({
 	locale: LocaleSchema,
-	governmentId: z.string().min(1),
+	governmentId: GovernmentIdSchema,
 	phoneNumber: z.string().optional(),
 	firstName: z.string().min(1),
 	lastName: z.string().min(1),
@@ -19,8 +25,8 @@ export const CreateCustomerSchema = z.object({
 });
 
 export const CustomerSchema = z.object({
-    id: z.string().uuid(),
-    governmentId: z.string().min(1),
+    id: CustomerIdSchema,
+    governmentId: GovernmentIdSchema,
     phoneNumber: z.string().min(1).optional(),
     locale: LocaleSchema,
     firstName: z.string().min(1),
@@ -29,22 +35,22 @@ export const CustomerSchema = z.object({
 });
 
 export const CreateAccountSchema = z.object({
-	customerId: z.string().uuid(),
+	customerId: CustomerIdSchema,
 	accountName: z.string(),
 	locale: LocaleSchema
 })
 
-export const MonetaryAmount = z.object({
-	amount: z.number().gt(0),
+export const MonetaryAmountSchema = z.object({
+	amount: z.number(),
 	currency: z.string().min(3).max(3)
 })
 
 export const PaymentSchema = z.object({
-	paymentId: z.string().uuid(),
-	fromCustomerId: z.string().uuid(),
-	fromAccountId: z.string().uuid(),
+	paymentId: PaymentIdSchema,
+	fromCustomerId: CustomerIdSchema,
+	fromAccountId: AccountIdSchema,
 	executed: z.boolean(),
-	remittanceAmount: MonetaryAmount,
+	remittanceAmount: MonetaryAmountSchema,
 	recipientIban: z.string().min(1),
 	recipientAccountId: z.string().uuid(),
 	messageToSelf: z.string(),
@@ -54,11 +60,11 @@ export const PaymentSchema = z.object({
 })
 
 export const PaymentSearchResultSchema = z.object({
-	paymentId: z.string().uuid(),
-	fromCustomerId: z.string().uuid(),
-	fromAccountId: z.string().uuid(),
+	paymentId: PaymentIdSchema,
+	fromCustomerId: CustomerIdSchema,
+	fromAccountId: AccountIdSchema,
 	executed: z.boolean(),
-	remittanceAmount: MonetaryAmount,
+	remittanceAmount: MonetaryAmountSchema,
 	recipientIban: z.string().min(1),
 	recipientAccountId: z.string().uuid(),
 	message: z.string(),
@@ -66,10 +72,10 @@ export const PaymentSearchResultSchema = z.object({
 })
 
 export const CreatePaymentSchema = z.object({
-	fromCustomerId: z.string().uuid(),
-	fromAccountId: z.string().uuid(),
+	fromCustomerId: CustomerIdSchema,
+	fromAccountId: AccountIdSchema,
 	recipientIban: z.string().min(1),
-	remittanceAmount: MonetaryAmount,
+	remittanceAmount: MonetaryAmountSchema,
 	messageToSelf: z.string(),
 	messageToRecipient: z.string(),
 	scheduledDateTime: z.string()
@@ -83,7 +89,25 @@ export const UpdateCustomerRequestSchema = z.object({
 })
 
 export const CreateAccountRequestSchema = z.object({
-	customerId: z.string().uuid(),
+	customerId: CustomerIdSchema,
 	locale: LocaleSchema,
 	accountName: z.string().min(1)
+})
+
+export const CreateLoanRequestSchema = z.object({
+	customerId: CustomerIdSchema,
+	accountId: AccountIdSchema,
+	principal: MonetaryAmountSchema,
+	fixedRateInterestAPR: z.number(),
+	loanTermMonths: z.number().int(),
+})
+
+export const LoanSchema = z.object({
+	loanId: LoanIdSchema,
+	customerId: CustomerIdSchema,
+	accountId: AccountIdSchema,
+	principal: MonetaryAmountSchema,
+	fixedRateInterestAPR: z.number(),
+	loanTermMonths: z.number().int(),
+	payoutDateTime: z.date()
 })

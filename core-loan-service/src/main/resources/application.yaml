@@ -9,11 +9,22 @@ logging:
     org:
       springframework:
         web: DEBUG
+    reactor:
+      netty:
+        http:
+          client:
+            HttpClient: DEBUG
+          server:
+            HttpServer: DEBUG
 
-client:
-  coreaccountservice:
-    internal:
-      uri: http://localhost:8080/api/internal_account
+alph:
+  client:
+    coreaccountservice:
+      internal:
+        uri: http://localhost:8080/api/internal_account
+
+alph-commons:
+  wiretapEnabled: true
 
 spring:
   main:
@@ -21,20 +32,13 @@ spring:
   application:
     name: CoreLoanService
   r2dbc:
-    driverClassName: org.postgresql.Driver
-    url: r2dbc:postgresql://localhost:5436/Alex
-    username: Alex
-    password: admin
-  jdbc:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5436/Alex
-    username: Alex
+    url: r2dbc:postgresql://localhost:5432/loan
+    username: alph
     password: admin
   flyway:
-    url: jdbc:postgresql://localhost:5436/Alex
-    user: Alex
+    url: jdbc:postgresql://localhost:5432/loan
+    user: alph
     password: admin
-    enabled: true
     validate-on-migrate: true
     locations: classpath:/db/migration
   rabbitmq:

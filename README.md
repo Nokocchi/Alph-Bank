@@ -8,7 +8,7 @@ A personal project to create a bank, including the following features and more:
 * Scheduled payments
 * Recurring payments
 * Simulated compliance-based nightly batch uploads to government entities
-* Loan applications
+* Personal Loan applications with fixed-rate interest
 * Simulated signing flow for authorizing payments and applying for loans, utilizing asynchronous callbacks when customer has signed
 * Simulated credit worthiness checks for loan applications
 * Simulated AML and fraud checks for payments and loan applications, triggering reports to government entities
@@ -20,7 +20,7 @@ A personal project to create a bank, including the following features and more:
 Architecture:
 * Backend written in Java, using Spring Webflux
 * Reactive microservice architecture
-* Client-facing REST API
+* Client-facing REST-like API (No HATEOAS :) )
 * Frontend written in SvelteKit and Typescript
 * Well-documented OpenAPI based API
 * Largely asynchronous, using scheduled tasks and message queues
@@ -35,3 +35,5 @@ What is not included:
 
 ![overall-component-diagram](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Nokocchi/Alph-Bank/master/docs/overall-component-diagram.puml)
 
+# How to run
+This is a microservice based project, so each microservice is a gradle project that can be launched independently. All the postgres databases, Postgres admin, RabbitMQ broker, RabbitMQ admin etc. can be launched by the docker-compose.yaml file

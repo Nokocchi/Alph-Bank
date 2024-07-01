@@ -41,6 +41,7 @@
 </div>
 
 <a href="/customer/{data.customerId}/payment/create/{account.id}">Make payment</a>
+<a href="/customer/{data.customerId}/loan/create/{account.id}">Apply for loan</a>
 
 Balance: {account.balance.amount}
 {account.balance.currency}

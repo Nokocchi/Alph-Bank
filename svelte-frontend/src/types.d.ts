@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { CreateAccountSchema, CustomerSchema, PaymentSchema, PaymentSearchResultSchema, CreateCustomerSchema, UpdateCustomerRequestSchema } from './routes/schema';
+import type { CreateAccountSchema, CustomerSchema, PaymentSchema, PaymentSearchResultSchema, CreateCustomerSchema, UpdateCustomerRequestSchema, LoanSchema } from './routes/schema';
 
 type Address = {
     streetAddress: string,
@@ -45,3 +45,5 @@ type CountryCodeAndCountry = {
 }
 
 type UpdateCustomerRequest = z.infer<typeof UpdateCustomerRequestSchema>;
+
+type Loan = z.infer<typeof LoanSchema>;

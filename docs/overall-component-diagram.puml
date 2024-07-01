@@ -25,6 +25,7 @@ actor Government
 
 Government --> govreq
 govtransfer --> Government
+govreq --> customer
 
 svelte --> payment
 svelte --> signing

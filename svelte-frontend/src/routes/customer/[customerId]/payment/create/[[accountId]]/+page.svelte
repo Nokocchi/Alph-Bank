@@ -2,7 +2,7 @@
 	import { defaults, setError, setMessage, superForm, type Infer } from "sveltekit-superforms";
 	import { zod } from "sveltekit-superforms/adapters";
 	import { CreatePaymentSchema } from "../../../../../schema";
-	import type { Account, Payment } from "../../../../../../types";
+	import type { Payment } from "../../../../../../types";
 	import { PAYMENT_SERVICE_URL } from "../../../../../globals";
 	import type { PageData } from "../[[accountId]]/$types";
 
