@@ -1,5 +1,8 @@
 TODO:
 	Swagger, API, types:
+LoanApplication, add statuses like "denied" depending on credit check or manual inspection
+Norwegian customer with danish locale cannot create account because of IBAN creation error - still shows account in UI
+Put MonetaryAmount.getAmount => BigDecimal in starter or library
 Zod schema validation, or auto-generated types based on openapi spec? 
 OpenAPI spec, generate API? 
 Better swagger examples (like possible response codes)
@@ -10,6 +13,7 @@ Request body validators
 Proper response entities with http codes
 
 	Business logic:
+If services don't respond, just ignore the data if possible instead of crashing with 500 internal server error
 Input validation on recipient IBAN when making payment - trim and validate IBAN format?
 Scheduled should be behind toggle, optional
 Figure out how to handle currencies. Automatic conversion, pick from list, can only pick currency of receiving account...? 
@@ -32,51 +36,11 @@ Feature toggles
 
 ----------------------------------------------------------------------------------------------------------------------------------
 
-Test IBAN: DK4001110000784327
-
-core-account-service:
-- self: 8080
-- postgres 5432
-- adminer 5433
-
-core-payment-service
-- self: 8081
-- postgres 5434
-- adminer 5435
-
-core-loan-service
-- self: 8082
-- postgres 5436
-- adminer 5437
-- rabbit 5672
-- rabbit web 15672
-
-core-customer-service
-- self: 8083
-- postgres 5438
-- adminer 5439
-
-----
-
-Step 2:
-
-
-Bank system
-x Everything unique based on composite key (GovernmentId + Country Code)
-x Core-account-service
-	x Account number, balance
-	x Internal, hidden endpoint for core-payment-service and core-loan-service to update balance
-x Core-customer-service
-	x Name, address, phone number
-x Core-payment-service
-	x Previous payments, future payment execution orders
-	x Scheduled task to execute payment 
-	x update account balance
-x Core-loan-service
-	x Previous granted loans, future loan payout orders 
-	x Scheduled task to pay out loan
-	x Once loan payout task executes, increase bank account balance
-	x Once loan payout happens, send message by RabbitMQ to GovernmentReportingTransferService
+core-account-service: 8080
+core-payment-service: 8081
+core-loan-service: 8082
+core-customer-service: 8083
+Rabbit: 5672/15672
 
 ----
 
@@ -155,7 +119,7 @@ x See your profile, settings (core-customer-service)
 x See your accounts, their balances etc (core-account-service)
 x Load individual account (core-payment-service, core-loan-service merged data)
 - See all ongoing loan applications and status
-- Make payment, choose account from list
+x Make payment, choose account from list
 - I18n, language selector?
 
 ----

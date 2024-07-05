@@ -1,10 +1,12 @@
 package com.alphbank.coreloanservice.service.amqp.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
@@ -30,13 +32,15 @@ public class RabbitConfiguration {
     }
 
     @Bean
-    public RabbitAdmin amqpAdmin() {
-        return new RabbitAdmin(rabbitConnectionFactory());
+    public RabbitAdmin amqpAdmin(CachingConnectionFactory rabbitConnectionFactory) {
+        return new RabbitAdmin(rabbitConnectionFactory);
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate() {
-        return new RabbitTemplate(rabbitConnectionFactory());
+    public RabbitTemplate rabbitTemplate(CachingConnectionFactory rabbitConnectionFactory, ObjectMapper objectMapper) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(rabbitConnectionFactory);
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter(objectMapper));
+        return rabbitTemplate;
     }
 
     @Bean

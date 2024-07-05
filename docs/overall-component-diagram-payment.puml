@@ -1,40 +1,28 @@
 @startuml
 
-queue "RabbitMQ" as rabbitloan 
+
 queue "RabbitMQ" as rabbitsign
 
-[government-reporting-transfer-service] as govtransfer
 [payment-service] as payment
 [signing-service] as signing
 [government-request-service] as govreq
-[credit-worthiness-assessment-service] as creditworth
 [fraud-analysis-service] as fraud
-[loan-application-service] as loan
 [know-your-customer-service] as kyc
-[customer-service] as customer
 
-folder core {
+
 [core-account-service] as caccount
 [core-customer-service] as ccustomer
 [core-payment-service] as cpayment
-[core-loan-service] as cloan
-}
+
 
 actor "Svelte Frontend" as svelte
 actor Government
 
 Government --> govreq
-govtransfer --> Government
-govreq --> customer
 
 svelte --> payment
 svelte --> signing
 svelte --> kyc
-svelte --> loan
-svelte --> customer
-
-cloan --> rabbitloan 
-rabbitloan --> govtransfer
 
 payment --> signing
 signing --> rabbitsign 
@@ -42,12 +30,12 @@ rabbitsign --> payment
 payment --> cpayment
 payment --> fraud
 
-loan --> creditworth
-loan --> cloan
+govreq --> caccount
+govreq --> cpayment
+govreq  --> ccustomer
 
-customer --> caccount
-customer --> cpayment
-customer --> cloan
-customer --> ccustomer
+svelte --> caccount
+svelte --> cpayment
+svelte --> ccustomer
 
 @enduml

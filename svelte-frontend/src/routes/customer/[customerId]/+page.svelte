@@ -124,7 +124,7 @@
 	<div class="message">{$updateCustomerMessage}</div>
 {/if}
 <div class="column-form">
-	<h2>Your profile</h2>
+	<h2>My profile</h2>
 	<form method="POST" use:updateCustomerEnhance>
 		<!--use:enhance?-->
 		<label>
@@ -170,7 +170,7 @@
 </div>
 
 <div class="account-list-panel">
-	<h2>Your accounts</h2>
+	<h2>My accounts</h2>
 	{#each accounts as account}
 		<a href="/customer/{customer.id}/account/{account.id}">
 			{account.accountName}

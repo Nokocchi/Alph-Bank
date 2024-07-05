@@ -33,7 +33,17 @@ What is not included:
 * No proper deployment that can be tested. Local testing only
 * Mostly intended to show backend skills and banking knowledge, so the front-end is quite barebones and does not use or provide good accessibility, best practices, nice user experiences across devices and browsers etc.
 
-![overall-component-diagram](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Nokocchi/Alph-Bank/master/docs/overall-component-diagram.puml)
+## Component diagram in the loan flow
+
+![overall-component-diagram-loan](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Nokocchi/Alph-Bank/master/docs/overall-component-diagram-loan.puml)
+
+## Component diagram in the payment flow
+
+![overall-component-diagram-payment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Nokocchi/Alph-Bank/master/docs/overall-component-diagram-payment.puml)
 
 # How to run
 This is a microservice based project, so each microservice is a gradle project that can be launched independently. All the postgres databases, Postgres admin, RabbitMQ broker, RabbitMQ admin etc. can be launched by the docker-compose.yaml file
+
+# Overall architecture explanation
+Core services basically trust anything - keeps the banking core clean and focuses on internal business logic. Assumes that things have already been signed, approved, decided, etc.
+Core services not reachable from frontend

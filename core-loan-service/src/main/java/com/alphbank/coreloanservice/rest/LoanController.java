@@ -1,7 +1,9 @@
 package com.alphbank.coreloanservice.rest;
 
 import com.alphbank.commons.impl.JsonLog;
-import com.alphbank.coreloanservice.rest.model.*;
+import com.alphbank.coreloanservice.rest.model.CreateLoanRequest;
+import com.alphbank.coreloanservice.rest.model.Loan;
+import com.alphbank.coreloanservice.rest.model.SearchLoansResponse;
 import com.alphbank.coreloanservice.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +18,13 @@ import java.util.UUID;
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/loan")
 public class LoanController {
 
     private final LoanService loanService;
     private final JsonLog jsonLog;
 
-    @GetMapping("/loan")
+    @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<SearchLoansResponse>> searchLoans(
             @RequestParam(required = false) UUID customerId,
@@ -35,7 +38,7 @@ public class LoanController {
                 .map(this::toResponseEntity);
     }
 
-    @PostMapping("/loan")
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ResponseEntity<Loan>> createLoan(@RequestBody CreateLoanRequest createLoanRequest){
         log.info("Creating loan {}", jsonLog.format(createLoanRequest));
@@ -46,7 +49,7 @@ public class LoanController {
 
     }
 
-    @DeleteMapping("/loan/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<UUID>> deleteLoan(@PathVariable("id") UUID loanId){
         log.info("Deleting loan with id {}", loanId);
@@ -56,7 +59,7 @@ public class LoanController {
                 .then(Mono.just(toResponseEntity(loanId)));
     }
 
-    @GetMapping("/loan/{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<Loan>> getLoan(@PathVariable("id") UUID loanId){
         log.info("Getting loan with id {}", loanId);

@@ -1,12 +1,16 @@
 import { z } from 'zod';
+import { LOAN_APPLICATION_STATUSES, SIGNING_STATUSES } from './globals';
+
+// BASICS
 
 export const LocaleSchema = z.string().min(5);
-
 export const CustomerIdSchema = z.string().uuid();
 export const AccountIdSchema = z.string().uuid();
 export const PaymentIdSchema = z.string().uuid();
 export const LoanIdSchema = z.string().uuid();
+export const LoanApplicationIdSchema = z.string().uuid();
 export const GovernmentIdSchema = z.string().min(1);
+export const SigningSessionIdSchema = z.string().uuid();
 
 export const AddressSchema = z.object({
 	streetAddress: z.string().min(1),
@@ -14,7 +18,6 @@ export const AddressSchema = z.object({
 	country: z.string().min(1)
 })
 
-// Define at the top-level so it stays in memory and the adapter can be cached
 export const CreateCustomerSchema = z.object({
 	locale: LocaleSchema,
 	governmentId: GovernmentIdSchema,
@@ -25,13 +28,13 @@ export const CreateCustomerSchema = z.object({
 });
 
 export const CustomerSchema = z.object({
-    id: CustomerIdSchema,
-    governmentId: GovernmentIdSchema,
-    phoneNumber: z.string().min(1).optional(),
-    locale: LocaleSchema,
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
-    address: AddressSchema
+	id: CustomerIdSchema,
+	governmentId: GovernmentIdSchema,
+	phoneNumber: z.string().min(1).optional(),
+	locale: LocaleSchema,
+	firstName: z.string().min(1),
+	lastName: z.string().min(1),
+	address: AddressSchema
 });
 
 export const CreateAccountSchema = z.object({
@@ -94,13 +97,29 @@ export const CreateAccountRequestSchema = z.object({
 	accountName: z.string().min(1)
 })
 
-export const CreateLoanRequestSchema = z.object({
+export const CreateLoanApplicationRequestSchema = z.object({
 	customerId: CustomerIdSchema,
 	accountId: AccountIdSchema,
+	governmentId: GovernmentIdSchema,
+	locale: LocaleSchema,
 	principal: MonetaryAmountSchema,
 	fixedRateInterestAPR: z.number(),
 	loanTermMonths: z.number().int(),
+	onSigningSuccessRedirectUrl: z.string().min(1),
+	onSigningFailedRedirectUrl: z.string().min(1)
 })
+
+export const CreateLoanApplicationResponseSchema = z.object({
+	signingUrl: z.string().min(1)
+})
+
+export const SigningStatusEnumSchema = z.enum(SIGNING_STATUSES);
+export const LoanApplicationStatusEnumSchema = z.enum(LOAN_APPLICATION_STATUSES);
+
+export const UpdateSigningStatusRequestSchema = z.object({
+	newStatus: SigningSessionIdSchema
+})
+
 
 export const LoanSchema = z.object({
 	loanId: LoanIdSchema,
@@ -111,3 +130,38 @@ export const LoanSchema = z.object({
 	loanTermMonths: z.number().int(),
 	payoutDateTime: z.date()
 })
+
+export const LoanApplicationSchema = z.object({
+	loanApplicationId: LoanIdSchema,
+	customerId: CustomerIdSchema,
+	accountId: AccountIdSchema,
+	locale: LocaleSchema,
+	governmentId: GovernmentIdSchema,
+	principal: MonetaryAmountSchema,
+	fixedRateInterestAPR: z.number(),
+	loanTermMonths: z.number().int(),
+	applicationStatus: LoanApplicationStatusEnumSchema
+})
+
+export const SearchLoanApplicationsResponseSchema = z.object({
+	loanApplications: z.array(LoanApplicationSchema)
+});
+
+export const SearchLoansResponseSchema = z.object({
+	loans: z.array(LoanSchema)
+});
+
+export const SigningSessionSchema = z.object({
+	signingSessionId: SigningSessionIdSchema,
+	customerId: CustomerIdSchema,
+	governmentId: GovernmentIdSchema,
+	locale: LocaleSchema,
+	signingStatus: z.string(),
+	documentToSign: z.string(),
+	signingStatusUpdatedRoutingKey: z.string(),
+	onSuccessRedirectUrl: z.string(),
+	onFailRedirectUrl: z.string(),
+	signingUrl: z.string()
+})
+
+

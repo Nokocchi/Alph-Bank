@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { CreateAccountSchema, CustomerSchema, PaymentSchema, PaymentSearchResultSchema, CreateCustomerSchema, UpdateCustomerRequestSchema, LoanSchema } from './routes/schema';
+import type { CreateAccountSchema, CustomerSchema, PaymentSchema, PaymentSearchResultSchema, CreateCustomerSchema, UpdateCustomerRequestSchema, LoanSchema, SigningSessionSchema, SigningStatusEnumSchema, UpdateSigningStatusRequestSchema, CreateLoanApplicationResponseSchema, SearchLoanApplicationsResponseSchema, SearchLoansResponseSchema, LoanApplicationSchema } from './routes/schema';
 
 type Address = {
     streetAddress: string,
@@ -46,4 +46,15 @@ type CountryCodeAndCountry = {
 
 type UpdateCustomerRequest = z.infer<typeof UpdateCustomerRequestSchema>;
 
+type SigningSession = z.infer<typeof SigningSessionSchema>;
+
+type SigningStatusEnum = z.infer<typeof SigningStatusEnumSchema>;
+
+type UpdateSigningStatusRequest = z.infer<typeof UpdateSigningStatusRequestSchema>;
+
+type CreateLoanApplicationResponse = z.infer<typeof CreateLoanApplicationResponseSchema>;
+
+type SearchLoanApplicationsResponse = z.infer<typeof SearchLoanApplicationsResponseSchema>;
+type SearchLoansResponse = z.infer<typeof SearchLoansResponseSchema>;
 type Loan = z.infer<typeof LoanSchema>;
+type LoanApplication = z.infer<typeof LoanApplicationSchema>;

@@ -3,6 +3,6 @@
 import javax.money.MonetaryAmount;
 import java.util.UUID;
 
-    public record LoanPayoutRequest(MonetaryAmount remittanceAmount, UUID debtorAccountId, UUID loanReference) {
+    public record LoanPayoutRequest(MonetaryAmount principal, UUID debtorAccountId, UUID loanReference) {
 
     }

@@ -59,7 +59,7 @@ public class AccountService {
     }
 
     public Mono<Void> payoutLoan(LoanPayoutRequest loanPayoutRequest) {
-        return increaseBalance(loanPayoutRequest.debtorAccountId(), loanPayoutRequest.remittanceAmount())
+        return increaseBalance(loanPayoutRequest.debtorAccountId(), loanPayoutRequest.principal())
                 .then();
     }
 

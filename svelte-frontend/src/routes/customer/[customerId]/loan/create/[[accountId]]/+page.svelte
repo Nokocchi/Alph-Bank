@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { defaults, setError, setMessage, superForm } from "sveltekit-superforms";
+	import { defaults, setError, superForm } from "sveltekit-superforms";
 	import { zod } from "sveltekit-superforms/adapters";
-	import { CreateLoanRequestSchema } from "../../../../../schema";
-	import type { Loan } from "../../../../../../types";
-	import { LOAN_SERVICE_URL } from "../../../../../globals";
+	import { CreateLoanApplicationRequestSchema } from "../../../../../schema";
+	import { LOAN_APPLICATION_SERVICE_URL } from "../../../../../globals";
 	import type { PageData } from "../[[accountId]]/$types";
+    import { goto } from "$app/navigation";
+    import type { CreateLoanApplicationResponse } from "../../../../../../types";
 
 	export let data: PageData;
 	// $form.fromAccountId is bound to the account selection dropdown, so selectedAccount will always be the account selected in that dropdown and vice vers
@@ -19,34 +20,38 @@
 		return monthlyInstallment * loanTermMonths;
 	}	
 
-
-	const defaultdata = defaults(zod(CreateLoanRequestSchema));
+	const defaultdata = defaults(zod(CreateLoanApplicationRequestSchema));
 
 	const { form, errors, message, enhance, delayed } = superForm(defaultdata, {
 		SPA: true,
 		dataType: "json",
 		resetForm: true,
 		clearOnSubmit: "errors-and-message",
-		validators: zod(CreateLoanRequestSchema),
+		validators: zod(CreateLoanApplicationRequestSchema),
 		onSubmit() {
-			$form.customerId = data.customerId;
 			if (!selectedAccount) {
 					throw new TypeError("Account should always be present");
 				}
+			$form.customerId = data.customer.id;
+			$form.locale = data.customer.locale;
+			$form.governmentId = data.customer.governmentId;
+			$form.onSigningSuccessRedirectUrl = "/customer/" + data.customer.id + "/loan/success";
+			$form.onSigningFailedRedirectUrl = "/customer/" + data.customer.id + "/loan/fail";
 			$form.principal.currency = selectedAccount.balance.currency;
 		},
 		async onUpdate({ form }) {
 			if (!form.valid) return;
 			try {
-				const newLoan: Loan = (await fetch(LOAN_SERVICE_URL + "/loan", {
+				const signingUrlResponse = await fetch(LOAN_APPLICATION_SERVICE_URL + "/loan_application", {
 					method: "POST",
 					headers: {
 						Accept: "application/json",
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify($form),
-				}).then((response) => response.json())) as Loan;
-				setMessage(form, "Applied for loan!");
+				});
+				const signingUrlObject = await signingUrlResponse.json() as CreateLoanApplicationResponse;
+				goto(signingUrlObject.signingUrl);
 			} catch (e) {
 				setError(form, "Error applying for loan");
 			}
@@ -60,10 +65,10 @@
 	<div class="breadcrumb-bar">
 		<a href="/">Home</a>
 		-
-		<a href="/customer/{data.customerId}">My profile</a>
+		<a href="/customer/{data.customer.id}">My profile</a>
 		{#if selectedAccount}
 			-
-			<a href="/customer/{data.customerId}/account/{selectedAccount.id}">{selectedAccount.accountName}</a>
+			<a href="/customer/{data.customer.id}/account/{selectedAccount.id}">{selectedAccount.accountName}</a>
 		{/if}
 		- Apply for loan
 	</div>

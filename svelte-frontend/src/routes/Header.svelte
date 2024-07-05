@@ -22,7 +22,7 @@
 				<a href="/">Home</a>
 			</li>
 			<li aria-current={$page.url.pathname === "/customer" ? "page" : undefined}>
-				<a href="/customer/search">Search for customers</a>
+				<a href="/customer/search">Customers</a>
 			</li>
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
@@ -31,7 +31,7 @@
 	</nav>
 
 	<div class="corner">
-		<a href="https://github.com/sveltejs/kit">
+		<a href="https://github.com/Nokocchi/Alph-Bank">
 			<img src={github} alt="GitHub" />
 		</a>
 		<LocaleSelect/>

@@ -31,7 +31,7 @@ public class InternalAccountController {
     @PostMapping(value = "/account_transfer", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<UUID>> transferBetweenAccounts(@RequestBody @Valid AccountTransferRequest accountTransferRequest){
-        log.info("Transfer between accounts {}", jsonLog.format(accountTransferRequest));
+        log.info("Received request to transfer between accounts {}", jsonLog.format(accountTransferRequest));
         return accountService.transferBetweenAccounts(accountTransferRequest)
                 .doOnSuccess(response -> log.info("Executed payment {}, transferred {} from account {} to account with IBAN {}", accountTransferRequest.paymentReference(), accountTransferRequest.remittanceAmount(), accountTransferRequest.debtorAccountId(), accountTransferRequest.recipientIban()))
                 .doOnError(e -> log.error("Error executing payment", e))
@@ -41,9 +41,9 @@ public class InternalAccountController {
     @PostMapping("/loan_payout")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<UUID>> payoutLoan(@RequestBody LoanPayoutRequest loanPayoutRequest) {
-        log.info("Pay out loan {}", jsonLog.format(loanPayoutRequest));
+        log.info("Received request to pay out loan {}", jsonLog.format(loanPayoutRequest));
         return accountService.payoutLoan(loanPayoutRequest)
-                .doOnSuccess(response -> log.info("Paid out loan of {} with id {} to {}", loanPayoutRequest.remittanceAmount(), loanPayoutRequest.loanReference(), loanPayoutRequest.debtorAccountId()))
+                .doOnSuccess(response -> log.info("Paid out loan of {} with id {} to accountId {}", loanPayoutRequest.principal(), loanPayoutRequest.loanReference(), loanPayoutRequest.debtorAccountId()))
                 .doOnError(e -> log.error("Error paying out loan", e))
                 .then(Mono.just(toResponseEntity(loanPayoutRequest.loanReference())));
 

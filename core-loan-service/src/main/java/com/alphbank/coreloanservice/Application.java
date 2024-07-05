@@ -7,7 +7,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
 @EnableR2dbcRepositories
-@EnableWebFlux
 @SpringBootApplication
 @EnableScheduling
 public class Application {
