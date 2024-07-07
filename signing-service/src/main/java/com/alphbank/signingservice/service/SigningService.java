@@ -27,10 +27,15 @@ public class SigningService {
     public Mono<SetupSigningSessionResponse> setupSigningSession(SetupSigningSessionRequest setupSigningSessionRequest) {
         SigningSessionEntity signingSessionEntity = SigningSessionEntity.from(setupSigningSessionRequest);
         return signingRepository.save(signingSessionEntity)
-                .map(persistedSigningSessionEntity -> converToSetupSigningSessionResponse(persistedSigningSessionEntity.getSigningSessionId()));
+                .flatMap(this::publishSigningEntityOnRabbitMqAndConvertToSigningSessionSetupResponse);
     }
 
-    private SetupSigningSessionResponse converToSetupSigningSessionResponse(UUID signingSessionId){
+    private Mono<SetupSigningSessionResponse> publishSigningEntityOnRabbitMqAndConvertToSigningSessionSetupResponse(SigningSessionEntity signingSessionEntity){
+        return publishSigningEntityOnRabbitMq(signingSessionEntity)
+                .thenReturn(converToSetupSigningSessionResponse(signingSessionEntity.getSigningSessionId()));
+    }
+
+    private SetupSigningSessionResponse converToSetupSigningSessionResponse(UUID signingSessionId) {
         return new SetupSigningSessionResponse(signingSessionId, getSigningUrl(signingSessionId));
     }
 
@@ -55,7 +60,7 @@ public class SigningService {
                 .build();
     }
 
-    private String getSigningUrl(UUID signingSessionId){
+    private String getSigningUrl(UUID signingSessionId) {
         return String.format(properties.getSigningServiceUrlTemplate(), signingSessionId);
     }
 
@@ -64,7 +69,11 @@ public class SigningService {
                 .switchIfEmpty(Mono.error(new SigningSessionNotFoundException()))
                 .map(signingEntity -> signingEntity.withSigningStatus(newStatus.name()))
                 .flatMap(signingRepository::save)
-                .flatMap(updatedEntity -> rabbitMQService.send(convertToRestModel(updatedEntity)));
+                .flatMap(this::publishSigningEntityOnRabbitMq);
 
+    }
+
+    private Mono<Void> publishSigningEntityOnRabbitMq(SigningSessionEntity signingSessionEntity) {
+        return rabbitMQService.send(convertToRestModel(signingSessionEntity));
     }
 }

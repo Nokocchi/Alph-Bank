@@ -47,6 +47,6 @@ spring:
     host: localhost
     username: alph
     password: admin
-    loan-application-signing-status-routing-key: signingservice.status.update
+    loan-application-signing-status-routing-key: loanapplicationservice.signingstatus.status.update
     loan-application-signing-status-exchange: signingservice
     loan-application-signing-status-queue: loanapplication.signing
