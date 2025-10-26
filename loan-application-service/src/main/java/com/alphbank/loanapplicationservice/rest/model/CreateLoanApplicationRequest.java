@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 public record CreateLoanApplicationRequest(UUID customerId,
-                                           String governmentId,
+                                           String nationalId,
                                            UUID accountId,
                                            Locale locale,
                                            MonetaryAmount principal,

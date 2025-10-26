@@ -2,6 +2,12 @@
 
 This service represents the banking core of Alph Bank. It consists of four fundamental parts
 
+## Links
+
+Swagger: http://localhost:8080/webjars/swagger-ui/index.html
+
+Adminer DB page: http://localhost:5433/?pgsql=postgres&username=alph&db=core
+
 ## Customer
 
 Examples of data points:

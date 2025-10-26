@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record SetupSigningSessionRestRequest(
         UUID customerId,
-        String governmentId,
+        String nationalId,
         Locale locale,
         String onSigningSuccessRedirectUrl,
         String onSigningFailedRedirectUrl) {

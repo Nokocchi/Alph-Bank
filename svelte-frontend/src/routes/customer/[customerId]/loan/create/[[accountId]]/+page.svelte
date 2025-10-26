@@ -34,7 +34,7 @@
 				}
 			$form.customerId = data.customer.id;
 			$form.locale = data.customer.locale;
-			$form.governmentId = data.customer.governmentId;
+			$form.nationalId = data.customer.nationalId;
 			$form.onSigningSuccessRedirectUrl = "/customer/" + data.customer.id + "/loan/success";
 			$form.onSigningFailedRedirectUrl = "/customer/" + data.customer.id + "/loan/fail";
 			$form.principal.currency = selectedAccount.balance.currency;

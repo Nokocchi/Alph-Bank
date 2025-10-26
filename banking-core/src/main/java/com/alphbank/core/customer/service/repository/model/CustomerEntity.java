@@ -18,7 +18,7 @@ public class CustomerEntity {
     @Id
     private UUID customerId;
 
-    @Column("government_id")
+    @Column("national_id")
     private String nationalId;
 
     @Column("first_name")

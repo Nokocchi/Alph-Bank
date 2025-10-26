@@ -1,3 +1,9 @@
+Get back up to speed:
+- Mermaid diagrams in each README
+- Replace Locale with country+language
+
+
+
 TODO:
 	- Others
 LoanApplication, add statuses like "denied" depending on credit check or manual inspection
@@ -8,7 +14,10 @@ Norwegian customer with danish locale cannot create account because of IBAN crea
 
 	- Swagger, API, types:
 Zod schema validation, or auto-generated types based on openapi spec? 
-OpenAPI spec, generate API? 
+OpenAPI spec
+	- Autogenerate controllers
+	- Autogenerate webclients (Java)
+	- Autogenerate webclients (Frontend?)
 Better swagger examples (like possible response codes)
 Swagger @Tag annotation for all controllers
 Swagger examples for all request body parameters

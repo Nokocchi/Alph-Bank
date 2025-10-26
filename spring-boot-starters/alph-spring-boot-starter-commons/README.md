@@ -59,17 +59,7 @@ logging:
 
 A Swagger page is available for all services at
 
-### Core account service
-http://localhost:8080/swagger-ui.html
-
-### Core payment service
-http://localhost:8081/swagger-ui.html
-
-### Core loan service
-http://localhost:8082/swagger-ui.html
-
-### Core customer service
-http://localhost:8083/swagger-ui.html
+http://localhost:\<service-port\>/swagger-ui.html
 
 ### Configuration
 This starter overwrites the standard JSON representation of MonetaryAmount within Swagger. This means that any example values of MonetaryAmount presented to consumers in Swagger will be a simple (Amount, Currency) tuple instead of a big complex JSON object.

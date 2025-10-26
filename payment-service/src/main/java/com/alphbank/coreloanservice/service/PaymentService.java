@@ -154,7 +154,7 @@ public class PaymentService {
     private SetupSigningSessionRequest createSetupSigningSessionRequest(String formattedDocument, SetupSigningSessionRestRequest request) {
         return new SetupSigningSessionRequest(
                 request.customerId(),
-                request.governmentId(),
+                request.nationalId(),
                 request.locale(),
                 rabbitProperties.getPaymentSigningStatusRoutingKey(),
                 formattedDocument,

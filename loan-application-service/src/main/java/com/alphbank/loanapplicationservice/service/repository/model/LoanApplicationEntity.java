@@ -31,8 +31,8 @@ public class LoanApplicationEntity {
     @Column("signing_session_id")
     private UUID signingSessionId;
 
-    @Column("government_id")
-    private String governmentId;
+    @Column("national_id")
+    private String nationalId;
 
     @Column("country_code")
     private String countryCode;
@@ -62,7 +62,7 @@ public class LoanApplicationEntity {
         return LoanApplicationEntity.builder()
                 .customerId(createLoanApplicationRequest.customerId())
                 .accountId(createLoanApplicationRequest.accountId())
-                .governmentId(createLoanApplicationRequest.governmentId())
+                .nationalId(createLoanApplicationRequest.nationalId())
                 .countryCode(createLoanApplicationRequest.locale().getCountry())
                 .locale(createLoanApplicationRequest.locale().getLanguage())
                 .principal(createLoanApplicationRequest.principal().getNumber().numberValue(BigDecimal.class))

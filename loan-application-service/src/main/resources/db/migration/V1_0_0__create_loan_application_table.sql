@@ -5,7 +5,7 @@ CREATE TABLE loanapplication (
     customer_id UUID NOT NULL,
     account_id UUID NOT NULL,
     signing_session_id UUID,
-    government_id TEXT NOT NULL,
+    national_id TEXT NOT NULL,
     country_code TEXT NOT NULL,
     locale TEXT NOT NULL,
     principal NUMERIC(19,6) NOT NULL,

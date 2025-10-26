@@ -124,7 +124,7 @@ public class LoanApplicationService {
                 .loanApplicationId(loanApplicationEntity.getLoanApplicationId())
                 .customerId(loanApplicationEntity.getCustomerId())
                 .accountId(loanApplicationEntity.getAccountId())
-                .governmentId(loanApplicationEntity.getGovernmentId())
+                .nationalId(loanApplicationEntity.getNationalId())
                 .locale(new Locale(loanApplicationEntity.getLocale(), loanApplicationEntity.getCountryCode()))
                 .principal(Money.of(loanApplicationEntity.getPrincipal(), loanApplicationEntity.getCurrency()))
                 .fixedRateInterestAPR(loanApplicationEntity.getFixedRateInterestAPR())
@@ -137,7 +137,7 @@ public class LoanApplicationService {
     private SetupSigningSessionRequest createSetupSigningSessionRequest(CreateLoanApplicationRequest createLoanApplicationRequest) {
         return new SetupSigningSessionRequest(
                 createLoanApplicationRequest.customerId(),
-                createLoanApplicationRequest.governmentId(),
+                createLoanApplicationRequest.nationalId()(),
                 createLoanApplicationRequest.locale(),
                 rabbitConfigurationProperties.getLoanApplicationSigningStatusRoutingKey(),
                 getDocumentToSign(createLoanApplicationRequest),

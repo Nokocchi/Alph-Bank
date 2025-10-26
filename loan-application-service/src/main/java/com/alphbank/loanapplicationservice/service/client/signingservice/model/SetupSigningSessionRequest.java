@@ -4,7 +4,7 @@
     import java.util.UUID;
 
     public record SetupSigningSessionRequest(UUID customerId,
-                                             String governmentId,
+                                             String nationalId,
                                              Locale locale,
                                              String signingStatusUpdatedRoutingKey,
                                              String documentToSign,

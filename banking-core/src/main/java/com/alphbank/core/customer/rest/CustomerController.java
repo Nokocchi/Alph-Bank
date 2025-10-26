@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @Slf4j
-@CrossOrigin
+@CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/customer")

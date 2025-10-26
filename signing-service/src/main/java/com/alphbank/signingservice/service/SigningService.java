@@ -50,7 +50,7 @@ public class SigningService {
                 .signingSessionId(signingSessionEntity.getSigningSessionId())
                 .customerId(signingSessionEntity.getCustomerId())
                 .signingStatus(SigningStatus.valueOf(signingSessionEntity.getSigningStatus()))
-                .governmentId(signingSessionEntity.getGovernmentId())
+                .nationalId(signingSessionEntity.getNationalId())
                 .documentToSign(signingSessionEntity.getDocumentToSign())
                 .onFailRedirectUrl(signingSessionEntity.getOnFailRedirectUrl())
                 .onSuccessRedirectUrl(signingSessionEntity.getOnSuccessRedirectUrl())

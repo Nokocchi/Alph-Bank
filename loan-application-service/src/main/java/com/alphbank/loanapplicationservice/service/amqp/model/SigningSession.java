@@ -14,7 +14,7 @@ public class SigningSession {
 
     private UUID signingSessionId;
     private UUID customerId;
-    private String governmentId;
+    private String nationalId;
     private Locale locale;
     private SigningStatus signingStatus;
     private String documentToSign;

@@ -3,7 +3,7 @@ CREATE EXTENSION "uuid-ossp";
 CREATE TABLE signingsession (
     id UUID NOT NULL DEFAULT uuid_generate_v4(),
     customer_id UUID NOT NULL,
-    government_id TEXT NOT NULL,
+    national_id TEXT NOT NULL,
     country_code TEXT NOT NULL,
     locale TEXT NOT NULL,
     signing_status TEXT NOT NULL,

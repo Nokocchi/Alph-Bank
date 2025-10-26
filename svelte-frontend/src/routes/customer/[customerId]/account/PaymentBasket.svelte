@@ -13,7 +13,7 @@
 
         let authorizeRequest: AuthorizePaymentBasket = {
             customerId: customer.id,
-            governmentId: customer.governmentId,
+            nationalId: customer.nationalId,
             locale: customer.locale,
             onSigningSuccessRedirectUrl: "wow",
             onSigningFailedRedirectUrl: "not wow"

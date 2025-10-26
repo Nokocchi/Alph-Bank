@@ -5,7 +5,7 @@ import { LOAN_APPLICATION_STATUSES, SIGNING_STATUSES } from './globals';
 
 export const uuidSchema = z.string().uuid();
 export const LocaleSchema = z.string().min(5);
-export const GovernmentIdSchema = z.string().min(1);
+export const NationalIdSchema = z.string().min(1);
 export const CustomerIdSchema = uuidSchema;
 export const AccountIdSchema = uuidSchema;
 export const CorePaymentIdSchema = uuidSchema;
@@ -23,7 +23,7 @@ export const AddressSchema = z.object({
 
 export const CreateCustomerSchema = z.object({
 	locale: LocaleSchema,
-	governmentId: GovernmentIdSchema,
+	nationalId: NationalIdSchema,
 	phoneNumber: z.string().optional(),
 	firstName: z.string().min(1),
 	lastName: z.string().min(1),
@@ -32,7 +32,7 @@ export const CreateCustomerSchema = z.object({
 
 export const CustomerSchema = z.object({
 	id: CustomerIdSchema,
-	governmentId: GovernmentIdSchema,
+	nationalId: NationalIdSchema,
 	phoneNumber: z.string().min(1).optional(),
 	locale: LocaleSchema,
 	firstName: z.string().min(1),
@@ -68,7 +68,7 @@ export const CreateAccountRequestSchema = z.object({
 export const CreateLoanApplicationRequestSchema = z.object({
 	customerId: CustomerIdSchema,
 	accountId: AccountIdSchema,
-	governmentId: GovernmentIdSchema,
+	nationalId: NationalIdSchema,
 	locale: LocaleSchema,
 	principal: MonetaryAmountSchema,
 	fixedRateInterestAPR: z.number(),
@@ -104,7 +104,7 @@ export const LoanApplicationSchema = z.object({
 	customerId: CustomerIdSchema,
 	accountId: AccountIdSchema,
 	locale: LocaleSchema,
-	governmentId: GovernmentIdSchema,
+	nationalId: NationalIdSchema,
 	principal: MonetaryAmountSchema,
 	fixedRateInterestAPR: z.number(),
 	loanTermMonths: z.number().int(),
@@ -122,7 +122,7 @@ export const SearchLoansResponseSchema = z.object({
 export const SigningSessionSchema = z.object({
 	signingSessionId: SigningSessionIdSchema,
 	customerId: CustomerIdSchema,
-	governmentId: GovernmentIdSchema,
+	nationalId: NationalIdSchema,
 	locale: LocaleSchema,
 	signingStatus: z.string(),
 	documentToSign: z.string(),
@@ -187,7 +187,7 @@ export const BasketSchema = z.object({
 
 export const AuthorizePaymentBasketSchema = z.object({
 	customerId: CustomerIdSchema,
-	governmentId: GovernmentIdSchema,
+	nationalId: NationalIdSchema,
 	locale: LocaleSchema,
 	onSigningSuccessRedirectUrl: z.string().min(1),
 	onSigningFailedRedirectUrl: z.string().min(1)

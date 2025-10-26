@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Customer } from "../../../types";
-    import { COUNTRIES } from "../../globals";
+    import { COUNTRIES, CUSTOMER_SERVICE_URL } from "../../globals";
 	import { CreateCustomerSchema } from "../../schema";
 	import { languageStore } from "../../stores";
 	import type { PageData } from "./$types";
@@ -26,7 +26,7 @@
 			async onUpdate({ form }) {
 				if (!form.valid) return;
 				try {
-					const newCustomer: Customer = (await fetch("http://localhost:8083/customer", {
+					const newCustomer: Customer = (await fetch(CUSTOMER_SERVICE_URL + "/customer", {
 						method: "POST",
 						headers: {
 							Accept: "application/json",
@@ -78,9 +78,9 @@
 			{#if $errors.address?.country}<span class="invalid">{$errors.address?.country}</span>{/if}
 		</label>
 		<label>
-			Government id
-			<input bind:value={$form.governmentId} name="governmentId" type="text" />
-			{#if $errors.governmentId}<span class="invalid">{$errors.governmentId}</span>{/if}
+			National id
+			<input bind:value={$form.nationalId} name="nationalId" type="text" />
+			{#if $errors.nationalId}<span class="invalid">{$errors.nationalId}</span>{/if}
 		</label>
 		<button>Create customer</button>
 	</form>
@@ -88,6 +88,6 @@
 
 {#each customerList as customer}
 	<a href="/customer/{customer.id}"
-		>Log in to customer {customer.firstName} {customer.lastName} - {customer.locale}:{customer.governmentId}</a
+		>Log in to customer {customer.firstName} {customer.lastName} - {customer.locale}:{customer.nationalId}</a
 	>
 {/each}

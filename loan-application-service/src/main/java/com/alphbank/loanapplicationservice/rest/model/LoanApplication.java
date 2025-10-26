@@ -17,7 +17,7 @@ public class LoanApplication {
     private UUID loanApplicationId;
     private UUID customerId;
     private UUID accountId;
-    private String governmentId;
+    private String nationalId;
     private Locale locale;
     MonetaryAmount principal;
     BigDecimal fixedRateInterestAPR;

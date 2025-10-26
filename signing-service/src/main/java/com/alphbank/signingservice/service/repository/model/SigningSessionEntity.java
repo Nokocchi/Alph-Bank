@@ -23,8 +23,8 @@ public class SigningSessionEntity {
     @Column("customer_id")
     private UUID customerId;
 
-    @Column("government_id")
-    private String governmentId;
+    @Column("national_id")
+    private String nationalId;
 
     @Column("country_code")
     private String countryCode;
@@ -52,7 +52,7 @@ public class SigningSessionEntity {
     public static SigningSessionEntity from(SetupSigningSessionRequest setupSigningSessionRequest) {
         return SigningSessionEntity.builder()
                 .customerId(setupSigningSessionRequest.customerId())
-                .governmentId(setupSigningSessionRequest.governmentId())
+                .nationalId(setupSigningSessionRequest.nationalId())
                 .countryCode(setupSigningSessionRequest.locale().getCountry())
                 .documentToSign(setupSigningSessionRequest.documentToSign())
                 .locale(setupSigningSessionRequest.locale().getLanguage())
