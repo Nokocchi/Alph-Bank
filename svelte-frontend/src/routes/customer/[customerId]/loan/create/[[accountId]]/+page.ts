@@ -13,7 +13,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
     },
   });
 
-  let queryParams: URLSearchParams = new URLSearchParams({ customer_id: params.customerId });
+  let queryParams: URLSearchParams = new URLSearchParams({ "customer-id": params.customerId });
   const accountSearchRes = await fetch(ACCOUNT_SERVICE_URL + '/account/search?' + queryParams.toString(), {
     method: 'GET',
     headers: {

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.money.MonetaryAmount;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,9 +12,11 @@ import java.util.UUID;
 public class Payment {
 
     private UUID paymentId;
-    private UUID accountId;
+    private UUID fromAccountId;
     private UUID basketId;
-    private String recipientIBAN;
+    private String recipientIban;
+    private String messageToSelf;
+    private String messageToRecipient;
     private MonetaryAmount paymentAmount;
     private LocalDateTime scheduledDateTime;
 

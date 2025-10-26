@@ -5,7 +5,7 @@ import type { PageLoad } from '../$types';
 
 export const load: PageLoad = async ({ fetch, params }) => {
 
-  let queryParams: URLSearchParams = new URLSearchParams({ customerId: params.customerId });
+  let queryParams: URLSearchParams = new URLSearchParams({ "customer-id": params.customerId });
 
   const loanApplicationsResponse = await fetch(LOAN_APPLICATION_SERVICE_URL + '/loan_application/search?' + queryParams.toString(), {
     method: 'GET',

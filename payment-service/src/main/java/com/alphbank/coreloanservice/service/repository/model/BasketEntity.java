@@ -26,6 +26,7 @@ public class BasketEntity {
     @Column("signing_session_id")
     private UUID signingSessionId;
 
+    @Builder.Default
     @With
     @Column("signing_status")
     private String signingStatus = BasketSigningStatus.NOT_YET_STARTED.toString();

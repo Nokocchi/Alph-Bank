@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { CreateAccountSchema, CustomerSchema, PaymentSchema, PaymentSearchResultSchema, CreateCustomerSchema, UpdateCustomerRequestSchema, LoanSchema, SigningSessionSchema, SigningStatusEnumSchema, UpdateSigningStatusRequestSchema, CreateLoanApplicationResponseSchema, SearchLoanApplicationsResponseSchema, SearchLoansResponseSchema, LoanApplicationSchema } from './routes/schema';
+import type { CreateAccountSchema, CustomerSchema, CorePaymentSchema, CorePaymentSearchResultSchema, CreateCustomerSchema, UpdateCustomerRequestSchema, LoanSchema, SigningSessionSchema, SigningStatusEnumSchema, UpdateSigningStatusRequestSchema, CreateLoanApplicationResponseSchema, SearchLoanApplicationsResponseSchema, SearchLoansResponseSchema, LoanApplicationSchema, CreatePaymentSchema, PaymentSchema, BasketSchema, AuthorizePaymentBasketSchema, AuthorizePaymentBasketResponseSchema } from './routes/schema';
 
 type Address = {
     streetAddress: string,
@@ -31,13 +31,19 @@ type AccountList = {
 
 type CreateAccountRequest = z.infer<typeof CreateAccountSchema>;
 
+type CorePayment = z.infer<typeof CorePaymentSchema>;
+
+type CorePaymentSearchResult = z.infer<typeof CorePaymentSearchResultSchema>;
+
+type CorePaymentSearchRestResponse = {
+    payments: CorePaymentSearchResult[];
+}
+
+type CreatePayment = z.infer<typeof CreatePaymentSchema>;
+
 type Payment = z.infer<typeof PaymentSchema>;
 
-type PaymentSearchResult = z.infer<typeof PaymentSearchResultSchema>;
-
-type PaymentSearchRestResponse = {
-    payments: PaymentSearchResult[];
-}
+type Basket = z.infer<typeof BasketSchema>;
 
 type CountryCodeAndCountry = {
     countryCode: string,
@@ -58,3 +64,6 @@ type SearchLoanApplicationsResponse = z.infer<typeof SearchLoanApplicationsRespo
 type SearchLoansResponse = z.infer<typeof SearchLoansResponseSchema>;
 type Loan = z.infer<typeof LoanSchema>;
 type LoanApplication = z.infer<typeof LoanApplicationSchema>;
+
+type AuthorizePaymentBasket = z.infer<typeof AuthorizePaymentBasketSchema>;
+type AuthorizePaymentBasketResponse = z.infer<typeof AuthorizePaymentBasketResponseSchema>;

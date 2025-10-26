@@ -41,19 +41,19 @@ public class PaymentEntity {
     @Column("payment_currency")
     private String currency;
 
-    @Column("payout_date_time")
+    @Column("scheduled_date_time")
     private LocalDateTime scheduledDateTime;
 
     public static PaymentEntity from(UUID basketId, CreatePaymentRequest createPaymentRequest) {
         return PaymentEntity.builder()
                 .basketId(basketId)
                 .accountId(createPaymentRequest.fromAccountId())
-                .amount(createPaymentRequest.amountAndCurrency().getNumber().numberValue(BigDecimal.class))
-                .currency(createPaymentRequest.amountAndCurrency().getCurrency().getCurrencyCode())
-                .recipientIBAN(createPaymentRequest.recipientIBAN())
+                .amount(createPaymentRequest.paymentAmount().getNumber().numberValue(BigDecimal.class))
+                .currency(createPaymentRequest.paymentAmount().getCurrency().getCurrencyCode())
+                .recipientIBAN(createPaymentRequest.recipientIban())
                 .messageToSelf(createPaymentRequest.messageToSelf())
                 .messageToRecipient(createPaymentRequest.messageToRecipient())
-                .scheduledDateTime(createPaymentRequest.scheduledAt())
+                .scheduledDateTime(createPaymentRequest.scheduledDateTime())
                 .build();
     }
 }

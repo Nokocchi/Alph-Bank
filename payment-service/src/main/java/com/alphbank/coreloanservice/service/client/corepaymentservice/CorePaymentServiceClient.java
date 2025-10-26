@@ -16,7 +16,7 @@ public class CorePaymentServiceClient {
     public Mono<Void> sendPaymentToCore(CreateCorePaymentRequest request){
         return corePaymentServiceWebClient
                 .post()
-                .uri("/loan")
+                .uri("/payment")
                 .bodyValue(request)
                 .exchangeToMono(ClientResponse::releaseBody);
     }

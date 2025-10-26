@@ -1,5 +1,3 @@
-CREATE EXTENSION "uuid-ossp";
-
 CREATE TABLE payment (
     id UUID NOT NULL DEFAULT uuid_generate_v4(),
     basket_id UUID NOT NULL,

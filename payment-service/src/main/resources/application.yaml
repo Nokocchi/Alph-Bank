@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8087
 
 logging:
   level:
@@ -13,9 +13,9 @@ logging:
       netty:
         http:
           client:
-            HttpClient: INFO
+            HttpClient: DEBUG
           server:
-            HttpServer: INFO
+            HttpServer: DEBUG
 
 alph:
   client:
@@ -23,22 +23,22 @@ alph:
       uri: http://localhost:8081
     signing-service:
       uri: http://localhost:8085
-      single-payment-document-to-sign-template: "I hereby authorize this payment of %s %s to the recipient IBAN number %s, with execution date and time %"
+      single-payment-document-to-sign-template: "I hereby authorize this payment of %s %s to the recipient IBAN number %s, with execution date and time %s"
 
 alph-commons:
-  wiretapEnabled: false
+  wiretapEnabled: true
 
 spring:
   main:
     web-application-type: reactive
   application:
-    name: CoreLoanService
+    name: PaymentService
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/loan
+    url: r2dbc:postgresql://localhost:5432/payment
     username: alph
     password: admin
   flyway:
-    url: jdbc:postgresql://localhost:5432/loan
+    url: jdbc:postgresql://localhost:5432/payment
     user: alph
     password: admin
     validate-on-migrate: true

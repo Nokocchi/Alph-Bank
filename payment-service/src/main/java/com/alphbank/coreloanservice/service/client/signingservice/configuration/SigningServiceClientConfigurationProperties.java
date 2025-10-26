@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class SigningServiceClientConfigurationProperties {
 
     private String uri;
-    private String documentToSignTemplate;
+    private String singlePaymentDocumentToSignTemplate;
 
 
 }

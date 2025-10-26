@@ -73,6 +73,8 @@ public class PaymentService {
                 paymentEntity.getAccountId(),
                 paymentEntity.getBasketId(),
                 paymentEntity.getRecipientIBAN(),
+                paymentEntity.getMessageToSelf(),
+                paymentEntity.getMessageToRecipient(),
                 Money.of(paymentEntity.getAmount(), paymentEntity.getCurrency()),
                 paymentEntity.getScheduledDateTime());
     }
@@ -117,8 +119,9 @@ public class PaymentService {
         };
     }
 
-    public Mono<Basket> findBasketByCustomerId(UUID customerId) {
+    public Mono<Basket> findActiveBasketByCustomerId(UUID customerId) {
         return basketRepository.findByCustomerId(customerId)
+                .filter(basket -> !BasketSigningStatus.COMPLETED.toString().equals(basket.getSigningStatus()))
                 .map(BasketEntity::getBasketId)
                 .zipWhen(this::findPaymentsByBasketId)
                 .map(TupleUtils.function(this::convertBasketToRestModel));
@@ -167,7 +170,7 @@ public class PaymentService {
     }
 
     private String asFormattedDocument(PaymentEntity paymentEntity) {
-        return String.format(signingServiceProperties.getDocumentToSignTemplate(),
+        return String.format(signingServiceProperties.getSinglePaymentDocumentToSignTemplate(),
                 paymentEntity.getAmount(),
                 paymentEntity.getCurrency(),
                 paymentEntity.getRecipientIBAN(),

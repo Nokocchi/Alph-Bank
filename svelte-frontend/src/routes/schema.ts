@@ -3,14 +3,17 @@ import { LOAN_APPLICATION_STATUSES, SIGNING_STATUSES } from './globals';
 
 // BASICS
 
+export const uuidSchema = z.string().uuid();
 export const LocaleSchema = z.string().min(5);
-export const CustomerIdSchema = z.string().uuid();
-export const AccountIdSchema = z.string().uuid();
-export const PaymentIdSchema = z.string().uuid();
-export const LoanIdSchema = z.string().uuid();
-export const LoanApplicationIdSchema = z.string().uuid();
 export const GovernmentIdSchema = z.string().min(1);
-export const SigningSessionIdSchema = z.string().uuid();
+export const CustomerIdSchema = uuidSchema;
+export const AccountIdSchema = uuidSchema;
+export const CorePaymentIdSchema = uuidSchema;
+export const PaymentIdSchema = uuidSchema;
+export const LoanIdSchema = uuidSchema;
+export const LoanApplicationIdSchema = uuidSchema;
+export const SigningSessionIdSchema = uuidSchema;
+export const BasketIdSchema = uuidSchema;
 
 export const AddressSchema = z.object({
 	streetAddress: z.string().min(1),
@@ -48,41 +51,6 @@ export const MonetaryAmountSchema = z.object({
 	currency: z.string().min(3).max(3)
 })
 
-export const PaymentSchema = z.object({
-	paymentId: PaymentIdSchema,
-	fromCustomerId: CustomerIdSchema,
-	fromAccountId: AccountIdSchema,
-	executed: z.boolean(),
-	remittanceAmount: MonetaryAmountSchema,
-	recipientIban: z.string().min(1),
-	recipientAccountId: z.string().uuid(),
-	messageToSelf: z.string(),
-	messageToRecipient: z.string(),
-	executionDateTime: z.date(),
-	scheduledDateTime: z.date()
-})
-
-export const PaymentSearchResultSchema = z.object({
-	paymentId: PaymentIdSchema,
-	fromCustomerId: CustomerIdSchema,
-	fromAccountId: AccountIdSchema,
-	executed: z.boolean(),
-	remittanceAmount: MonetaryAmountSchema,
-	recipientIban: z.string().min(1),
-	recipientAccountId: z.string().uuid(),
-	message: z.string(),
-	visibleOnAccountDateTime: z.date()
-})
-
-export const CreatePaymentSchema = z.object({
-	fromCustomerId: CustomerIdSchema,
-	fromAccountId: AccountIdSchema,
-	recipientIban: z.string().min(1),
-	remittanceAmount: MonetaryAmountSchema,
-	messageToSelf: z.string(),
-	messageToRecipient: z.string(),
-	scheduledDateTime: z.string()
-})
 
 export const UpdateCustomerRequestSchema = z.object({
 	address: AddressSchema,
@@ -165,3 +133,66 @@ export const SigningSessionSchema = z.object({
 })
 
 
+export const CorePaymentSchema = z.object({
+	paymentId: CorePaymentIdSchema,
+	fromCustomerId: CustomerIdSchema,
+	fromAccountId: AccountIdSchema,
+	executed: z.boolean(),
+	remittanceAmount: MonetaryAmountSchema,
+	recipientIban: z.string().min(1),
+	recipientAccountId: z.string().uuid(),
+	messageToSelf: z.string(),
+	messageToRecipient: z.string(),
+	executionDateTime: z.date(),
+	scheduledDateTime: z.date()
+})
+
+export const CorePaymentSearchResultSchema = z.object({
+	paymentId: CorePaymentIdSchema,
+	fromCustomerId: CustomerIdSchema,
+	fromAccountId: AccountIdSchema,
+	executed: z.boolean(),
+	remittanceAmount: MonetaryAmountSchema,
+	recipientIban: z.string().min(1),
+	recipientAccountId: z.string().uuid(),
+	message: z.string(),
+	visibleOnAccountDateTime: z.date()
+})
+
+export const CreatePaymentSchema = z.object({
+	fromCustomerId: CustomerIdSchema,
+	fromAccountId: AccountIdSchema,
+	recipientIban: z.string().min(1),
+	paymentAmount: MonetaryAmountSchema,
+	messageToSelf: z.string(),
+	messageToRecipient: z.string(),
+	scheduledDateTime: z.string()
+})
+
+export const PaymentSchema = z.object({
+	paymentId: PaymentIdSchema,
+	fromAccountId: AccountIdSchema,
+	basketId: BasketIdSchema,
+	paymentAmount: MonetaryAmountSchema,
+	recipientIban: z.string().min(1),
+	messageToSelf: z.string(),
+	messageToRecipient: z.string(),
+	scheduledDateTime: z.date()
+})
+
+export const BasketSchema = z.object({
+	basketId: BasketIdSchema,
+	payments: z.array(PaymentSchema)
+})
+
+export const AuthorizePaymentBasketSchema = z.object({
+	customerId: CustomerIdSchema,
+	governmentId: GovernmentIdSchema,
+	locale: LocaleSchema,
+	onSigningSuccessRedirectUrl: z.string().min(1),
+	onSigningFailedRedirectUrl: z.string().min(1)
+})
+
+export const AuthorizePaymentBasketResponseSchema = z.object({
+	signingUrl: z.string().min(1)
+})

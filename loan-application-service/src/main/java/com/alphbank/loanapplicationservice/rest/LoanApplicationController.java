@@ -27,8 +27,8 @@ public class LoanApplicationController {
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<SearchLoansResponse>> searchLoans(
-            @RequestParam(required = false) UUID customerId,
-            @RequestParam(required = false) UUID accountId){
+            @RequestParam(name = "customer-id", required = false) UUID customerId,
+            @RequestParam(name = "account-id", required = false) UUID accountId){
         log.info("Search loan applications by customerId {}, accountId {}", customerId, accountId);
         return loanApplicationService.findAllLoanApplicationsByCustomerIdOrAccountId(customerId, accountId)
                 .collectList()

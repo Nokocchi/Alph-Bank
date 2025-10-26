@@ -1,11 +1,13 @@
 import type { CountryCodeAndCountry } from "../types";
 
 export const ACCOUNT_SERVICE_URL: string = "http://localhost:8080";
-export const PAYMENT_SERVICE_URL: string = "http://localhost:8081";
+export const CORE_PAYMENT_SERVICE_URL: string = "http://localhost:8081";
 export const LOAN_SERVICE_URL: string = "http://localhost:8082";
-export const LOAN_APPLICATION_SERVICE_URL: string = "http://localhost:8086";
-export const SIGNING_SERVICE_URL: string = "http://localhost:8085";
 export const CUSTOMER_SERVICE_URL: string = "http://localhost:8083";
+export const SIGNING_SERVICE_URL: string = "http://localhost:8085";
+export const LOAN_APPLICATION_SERVICE_URL: string = "http://localhost:8086";
+export const PAYMENT_SERVICE_URL: string = "http://localhost:8087";
+
 
 export const COUNTRIES: CountryCodeAndCountry[] = [
     { countryCode: "DK", asText: "Danmark" },

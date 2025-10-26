@@ -2,6 +2,7 @@
 	import { goto } from "$app/navigation";
 	import type { Account, PaymentSearchResult } from "../../../../../types";
 	import { ACCOUNT_SERVICE_URL } from "../../../../globals";
+    import PaymentBasket from "../PaymentBasket.svelte";
 	import TransactionList from "../TransactionList.svelte";
 	import type { PageData } from "./$types";
 

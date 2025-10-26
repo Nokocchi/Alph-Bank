@@ -2,9 +2,11 @@
 	import { defaults, setError, setMessage, superForm, type Infer } from "sveltekit-superforms";
 	import { zod } from "sveltekit-superforms/adapters";
 	import { CreatePaymentSchema } from "../../../../../schema";
-	import type { Payment } from "../../../../../../types";
+	import type { CorePayment, Payment } from "../../../../../../types";
 	import { PAYMENT_SERVICE_URL } from "../../../../../globals";
 	import type { PageData } from "../[[accountId]]/$types";
+    import TransactionList from "../../../account/TransactionList.svelte";
+    import PaymentBasket from "../../../account/PaymentBasket.svelte";
 
 	export let data: PageData;
 	// $form.fromAccountId is bound to the account selection dropdown, so selectedAccount will always be the account selected in that dropdown and vice vers
@@ -24,7 +26,7 @@
 			if (!selectedAccount) {
 					throw new TypeError("Account should always be present");
 				}
-			$form.remittanceAmount.currency = selectedAccount.balance.currency;
+			$form.paymentAmount.currency = selectedAccount.balance.currency;
 		},
 		async onUpdate({ form }) {
 			if (!form.valid) return;
@@ -60,6 +62,10 @@
 	</div>
 {/key}
 
+{#if data.currentBasket}
+<PaymentBasket basketId={data.currentBasket.basketId} customer={data.customer} caption="soup" payments={data.currentBasket.payments}/>
+{/if}
+
 <div class="column-form">
 	<label>
 		From account
@@ -79,8 +85,8 @@
 
 		<label>
 			Amount
-			<input bind:value={$form.remittanceAmount.amount} name="remittanceAmount" type="number" />
-			{#if $errors.remittanceAmount?.amount}<span class="invalid">{$errors.remittanceAmount.amount}</span>{/if}
+			<input bind:value={$form.paymentAmount.amount} name="remittanceAmount" type="number" />
+			{#if $errors.paymentAmount?.amount}<span class="invalid">{$errors.paymentAmount.amount}</span>{/if}
 		</label>
 
 		<label>

@@ -6,9 +6,9 @@ import java.util.UUID;
 
 public record CreatePaymentRequest(UUID fromCustomerId,
                                    UUID fromAccountId,
-                                   String recipientIBAN,
+                                   String recipientIban,
                                    String messageToSelf,
                                    String messageToRecipient,
-                                   MonetaryAmount amountAndCurrency,
-                                   LocalDateTime scheduledAt) {
+                                   MonetaryAmount paymentAmount,
+                                   LocalDateTime scheduledDateTime) {
 }

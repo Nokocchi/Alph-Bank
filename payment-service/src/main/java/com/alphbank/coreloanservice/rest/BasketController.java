@@ -2,7 +2,6 @@ package com.alphbank.coreloanservice.rest;
 
 import com.alphbank.commons.impl.JsonLog;
 import com.alphbank.coreloanservice.rest.model.Basket;
-import com.alphbank.coreloanservice.rest.model.Payment;
 import com.alphbank.coreloanservice.rest.model.SetupSigningSessionRestRequest;
 import com.alphbank.coreloanservice.rest.model.SetupSigningSessionRestResponse;
 import com.alphbank.coreloanservice.service.PaymentService;
@@ -27,9 +26,9 @@ public class BasketController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<ResponseEntity<Basket>> findBasketByCustomerId(@RequestParam(required = true) UUID customerId){
+    public Mono<ResponseEntity<Basket>> findActiveBasketByCustomerId(@RequestParam(name = "customer-id") UUID customerId){
         log.info("Searching payment basket by fromCustomerId {}", customerId);
-        return paymentBasketService.findBasketByCustomerId(customerId)
+        return paymentBasketService.findActiveBasketByCustomerId(customerId)
                 .doOnNext(response -> log.info("Returning basket {}", jsonLog.format(response)))
                 .doOnError(e -> log.error("Error searching for basket with fromCustomerId " + customerId, e))
                 .map(this::toResponseEntity);

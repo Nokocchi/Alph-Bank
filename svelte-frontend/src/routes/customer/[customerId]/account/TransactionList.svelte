@@ -1,7 +1,7 @@
 <script lang="ts">
-    import type { PaymentSearchResult } from "../../../../types";
+    import type { CorePaymentSearchResult } from "../../../../types";
 
-    export let payments: PaymentSearchResult[];
+    export let payments: CorePaymentSearchResult[];
     export let caption: string;
     export let currency: string;
 </script>
