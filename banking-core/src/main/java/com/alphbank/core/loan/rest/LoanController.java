@@ -9,14 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
 @Slf4j
-@CrossOrigin
+@CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/loan")
@@ -28,54 +27,45 @@ public class LoanController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<ResponseEntity<SearchLoansResponse>> searchLoans(
+    public Mono<SearchLoansResponse> searchLoans(
             @RequestParam(required = false) UUID customerId,
-            @RequestParam(required = false) UUID accountId){
+            @RequestParam(required = false) UUID accountId) {
         log.info("Search loans by customerId {}, accountId {}", customerId, accountId);
         return loanService.findAllLoansByCustomerIdOrAccountId(customerId, accountId)
                 .collectList()
                 .map(SearchLoansResponse::new)
                 .doOnNext(response -> log.info("Returning loans {}", jsonLog.format(response)))
-                .doOnError(e -> log.error("Error searching loans", e))
-                .map(this::toResponseEntity);
+                .doOnError(e -> log.error("Error searching loans", e));
     }
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<ResponseEntity<Loan>> createLoan(@RequestBody CreateLoanRequest createLoanRequest){
+    public Mono<Loan> createLoan(@RequestBody CreateLoanRequest createLoanRequest) {
         log.info("Creating loan {}", jsonLog.format(createLoanRequest));
         return loanService.createLoan(createLoanRequest)
                 .doOnNext(response -> log.info("Returning newly created loan {}", jsonLog.format(response)))
-                .doOnError(e -> log.error("Error creating loan", e))
-                .map(this::toResponseEntity);
+                .doOnError(e -> log.error("Error creating loan", e));
 
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Mono<ResponseEntity<UUID>> deleteLoan(@PathVariable("id") UUID loanId){
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<UUID> deleteLoan(@PathVariable("id") UUID loanId) {
         log.info("Deleting loan with id {}", loanId);
         return loanService.deleteLoan(loanId)
                 .doOnSuccess(response -> log.info("Deleted loan with id {}", loanId))
                 .doOnError(e -> log.error("Error deleting loan with id " + loanId, e))
-                .then(Mono.just(toResponseEntity(loanId)));
+                .thenReturn(loanId);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<ResponseEntity<Loan>> getLoan(@PathVariable("id") UUID loanId){
+    public Mono<Loan> getLoan(@PathVariable("id") UUID loanId) {
         log.info("Getting loan with id {}", loanId);
         return loanService
                 .getLoan(loanId)
                 .doOnNext(response -> log.info("Returning loan {}", jsonLog.format(response)))
-                .doOnError(e -> log.error("Error getting loan with id " + loanId, e))
-                .map(this::toResponseEntity);
-    }
-
-    private <T> ResponseEntity<T> toResponseEntity(T responseBody) {
-        return ResponseEntity.ok()
-                .header("Access-Control-Allow-Origin", "*")
-                .body(responseBody);
+                .doOnError(e -> log.error("Error getting loan with id " + loanId, e));
     }
 
 }

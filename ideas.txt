@@ -19,7 +19,6 @@ OpenAPI spec
 	- Autogenerate webclients (Java)
 	- Autogenerate webclients (Frontend?)
 Better swagger examples (like possible response codes)
-Swagger @Tag annotation for all controllers
 Swagger examples for all request body parameters
 Check that SpringDocs.replace in starter works
 Request body validators
@@ -72,12 +71,11 @@ Credit worthiness assessment service
 - Use this to calculate how much money the customer can loan
 - Very complex, so just assume we are calling external vendor, generate random data
 - Stores information about loan limit and interest or similar - I don't know how this actually works
-- Scheduled job that deletes data after 5 years
 
 Fraud service
 - Check if customer or loan application is fraudulent 
-- Very complex, assume we are calling external vendor.
-- Always return true
+- Very complex, assume we are calling external vendor. 
+- Simulate different cases, where fraud=true, fraud=false or needsManualCheck
 - If fraudulent activity detected, send message to GovernmentReportingTransferService
 
 Loan application service

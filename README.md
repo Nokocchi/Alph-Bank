@@ -35,7 +35,7 @@ What is not included:
 
 ## Documentation:
 
-[Banking Core](/banking-core/README.md)
+[Banking Core](/banking-core)
 
 ## Component diagram in the loan flow
 
