@@ -11,7 +11,7 @@ services:
     volumes:
      - ./docker-postgresql-multiple-databases:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_MULTIPLE_DATABASES: account,customer,payment,loan,loanapplication,signing,paymentservice
+      POSTGRES_MULTIPLE_DATABASES: core,loanapplication,signing,payment
       POSTGRES_PASSWORD: admin
       POSTGRES_USER: alph
 

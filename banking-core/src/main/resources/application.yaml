@@ -1,0 +1,44 @@
+logging:
+  level:
+    com:
+      alphbank:
+        core: DEBUG
+    org:
+      springframework:
+        web: DEBUG
+    reactor:
+      netty:
+        http:
+          client:
+            HttpClient: DEBUG
+          server:
+            HttpServer: DEBUG
+
+alph-commons:
+  wiretapEnabled: true
+
+alph:
+  loan:
+    rabbitmq:
+      routing-key: loan.payout
+      exchange: loan.topic.exchange
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: BankingCore
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/core
+    username: alph
+    password: admin
+  flyway:
+    url: jdbc:postgresql://localhost:5432/core
+    user: alph
+    password: admin
+    validate-on-migrate: true
+    locations: classpath:/db/migration
+  rabbitmq:
+    host: localhost
+    username: alph
+    password: admin
