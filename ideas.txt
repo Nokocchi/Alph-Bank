@@ -1,7 +1,10 @@
 Get back up to speed:
 - Mermaid diagrams in each README
+- Contract tests, to verify that the MonetaryAmount encoding and alphWebClient work as expected
+- Integration tests with Wiremock
+- Testcontainers for RabbitMQ and Database?
 - Replace Locale with country+language
-
+- Creating loans and payments should check that the account/customerIDs exist
 
 
 TODO:
@@ -20,9 +23,7 @@ OpenAPI spec
 	- Autogenerate webclients (Frontend?)
 Better swagger examples (like possible response codes)
 Swagger examples for all request body parameters
-Check that SpringDocs.replace in starter works
 Request body validators
-Proper response entities with http codes
 
 	- Business logic:
 If services don't respond, just ignore the data if possible instead of crashing with 500 internal server error

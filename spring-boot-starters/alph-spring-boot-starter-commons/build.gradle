@@ -1,24 +1,25 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id "io.freefair.lombok" version "8.6"
+    id "io.freefair.lombok" version "9.0.0"
 }
 
 group = 'com.alphbank'
-version = '0.0.8-SNAPSHOT'
+version = '0.0.12-SNAPSHOT'
 
-sourceCompatibility = JavaVersion.VERSION_18
+java {
+    withSourcesJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
 ext {
-    springBootVersion = '3.2.3'
-}
-
-java {
-    withSourcesJar()
+    springBootVersion = '3.5.7'
 }
 
 dependencies {
@@ -27,14 +28,15 @@ dependencies {
     annotationProcessor platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
     testAnnotationProcessor platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
 
-    api 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.4.0'
-    api 'org.javamoney:moneta:1.4.4'
+    api 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.11'
+    api 'org.javamoney:moneta:1.4.5'
     implementation 'org.zalando:jackson-datatype-money:1.3.0'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
     implementation 'org.springframework.boot:spring-boot-starter'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
     //compileOnly 'org.springframework.boot:spring-boot-starter-actuator'
 }
 

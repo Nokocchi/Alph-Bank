@@ -34,7 +34,6 @@ public class CommonsConfiguration {
         this.properties = properties;
     }
 
-    // TODO: Test if this still works now that it's in a starter
     // Overwrites the representation of MonetaryAmount in Swagger so that it looks like a simple amount-currency tuple
     static {
         SpringDocUtils.getConfig().replaceWithClass(MonetaryAmount.class, org.springdoc.core.converters.models.MonetaryAmount.class);

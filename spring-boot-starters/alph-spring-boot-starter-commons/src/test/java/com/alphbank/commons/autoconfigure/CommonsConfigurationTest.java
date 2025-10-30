@@ -18,6 +18,7 @@ public class CommonsConfigurationTest {
     void testContextRunner() {
         contextRunner.run(context -> {
             assertTrue(context.containsBean("ServerRequestWiretap"));
+            assertTrue(context.containsBean("alphBaseWebClientBuilder"));
             assertTrue(context.containsBean("jsonLog"));
         });
     }
