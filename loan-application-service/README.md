@@ -9,4 +9,4 @@ and does the following business logic:
 * If the credit worthiness result demands manual inspection, a caseworker can see the loan application in their dashboard
 * If the caseworker has approved the loan application, or if the credit worthiness check was successful, the loan application is sent to core-loan-service for execution
 
-This keeps the core-loan-service clean from "business logic", and allows it to only worry about internal core logic.
+This keeps the Banking Core clean from "business logic", and allows it to only worry about internal core logic.

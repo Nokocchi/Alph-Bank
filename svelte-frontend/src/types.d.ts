@@ -1,12 +1,15 @@
 import { z } from 'zod';
 import type { CreateAccountSchema, CustomerSchema, CorePaymentSchema, CorePaymentSearchResultSchema, CreateCustomerSchema, UpdateCustomerRequestSchema, LoanSchema, SigningSessionSchema, SigningStatusEnumSchema, UpdateSigningStatusRequestSchema, CreateLoanApplicationResponseSchema, SearchLoanApplicationsResponseSchema, SearchLoansResponseSchema, LoanApplicationSchema, CreatePaymentSchema, PaymentSchema, BasketSchema, AuthorizePaymentBasketSchema, AuthorizePaymentBasketResponseSchema } from './routes/schema';
 
+
 type Address = {
     streetAddress: string,
     city: string,
     country: string
 }
 
+// Should instead be interface Address extends z.infer<typeof CustomerSchema>
+// https://www.reddit.com/r/typescript/comments/10f8kah/is_using_zod_as_the_primary_source_of_truth_for/jbuhb6l/
 type Customer = z.infer<typeof CustomerSchema>;
 
 type CustomerList = {
