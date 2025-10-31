@@ -35,9 +35,8 @@ public class CustomerService {
     public Mono<Customer> createCustomer(CreateCustomerRequest createCustomerRequest) {
         CustomerEntity customerEntity = CustomerEntity.from(createCustomerRequest);
         return customerRepository.save(customerEntity)
-                .onErrorMap(DuplicateKeyException.class, e -> {
-                    throw new DuplicateCustomerException(createCustomerRequest.nationalId(), createCustomerRequest.locale().getCountry(), e);
-                })
+                .onErrorMap(DuplicateKeyException.class,
+                        e -> new DuplicateCustomerException(createCustomerRequest.nationalId(), createCustomerRequest.locale().getCountry(), e))
                 .flatMap(persistedCustomerEntity -> createAddress(persistedCustomerEntity.getCustomerId(), createCustomerRequest.address()))
                 .map(addressEntity -> convertToRestModel(customerEntity, addressEntity));
     }

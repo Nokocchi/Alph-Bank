@@ -1,7 +1,12 @@
 Get back up to speed:
 - Mermaid diagrams in each README
-- Contract tests, to verify that the MonetaryAmount encoding and alphWebClient work as expected
-- Integration tests with Wiremock
+- Contract tests, to verify that the MonetaryAmount encoding works as expected
+- Set up integration tests with Wiremock, mocking BankingCore
+- Write code style document. 
+	- Unit testing only for complex standalone functions without dependencies. In rare cases repositories/etc. can be mocked, if necessary
+	- Integration tests are the main testing method and should cover most behavior
+	- Service structure, Reactive, where and how to convert between models (Static from, or to()?), naming of models in different layers
+	- Do contract tests even make sense in this local-only project without any pipelines/online repository to save the stubs to?
 - Testcontainers for RabbitMQ and Database?
 - Replace Locale with country+language
 - Creating loans and payments should check that the account/customerIDs exist
@@ -37,7 +42,6 @@ Each service should have sequence and component diagrams
 Overall component diagram of all services
 
 	- Ideas:
-Make tests that prove that MonetaryAmount is encoded correctly by the baseWebClientBuilder
 Some kind of Oauth? Or at least a fake login with govId + countryCode?
 Continuous streaming of data, like a stock ticker, but more relevant?
 Caching?
@@ -63,6 +67,7 @@ Payment-service
 - How to schedule next payments?
 - Each action is signed via signing-service
 - Callback on RabbitMQ sends a payment execution order to BankSystem
+- Check if payment is fraudulent
 
 GovernmentRequestService
 - Gathers information about accounts, customer information, etc. and returns it as XML
@@ -73,15 +78,15 @@ Credit worthiness assessment service
 - Very complex, so just assume we are calling external vendor, generate random data
 - Stores information about loan limit and interest or similar - I don't know how this actually works
 
-Fraud service
-- Check if customer or loan application is fraudulent 
+Fraud detection service
+- Check if payment or loan application is fraudulent 
 - Very complex, assume we are calling external vendor. 
 - Simulate different cases, where fraud=true, fraud=false or needsManualCheck
 - If fraudulent activity detected, send message to GovernmentReportingTransferService
 
 Loan application service
 - Uses some external credit worthiness assessment service to find loan limit and interest (?)
-- Checks fraud-service if fraudulent
+- Checks fraud-detection-service if fraudulent
 - Show error page if credit worthiness not high enough or application fraudulent.
 
 Frontend
