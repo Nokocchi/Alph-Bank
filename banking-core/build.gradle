@@ -1,11 +1,15 @@
+import org.springframework.cloud.contract.verifier.config.TestFramework
+import org.springframework.cloud.contract.verifier.config.TestMode
+
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.5.7'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id "io.freefair.lombok" version "9.0.0"
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'io.freefair.lombok' version '9.0.0'
+    id 'org.springframework.cloud.contract' version '4.3.0'
 }
 
-group = 'com.example'
+group = 'com.alphbank'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -50,12 +54,30 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
 	// Testing
+    testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
+    testImplementation 'io.rest-assured:spring-web-test-client'
 	testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.assertj:assertj-core'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation "org.mockito:mockito-core"
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:r2dbc'
 	implementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner'
 	testImplementation 'org.wiremock.integrations:wiremock-spring-boot:3.10.0'
+}
+
+tasks.named('contractTest') {
+    useJUnitPlatform()
+}
+
+contracts {
+    testMode = TestMode.WEBTESTCLIENT
+    testFramework = TestFramework.JUNIT5
+    baseClassMappings {
+        baseClassMapping "customer": "com.alph.core.customer.CustomerBase"
+    }
 }
 
 tasks.named('test') {

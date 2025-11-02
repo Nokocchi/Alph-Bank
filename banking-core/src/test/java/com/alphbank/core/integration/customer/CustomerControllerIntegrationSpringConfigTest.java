@@ -3,20 +3,32 @@ package com.alphbank.core.integration.customer;
 import com.alphbank.core.customer.rest.model.Address;
 import com.alphbank.core.customer.rest.model.CreateCustomerRequest;
 import com.alphbank.core.customer.rest.model.Customer;
+import com.alphbank.core.customer.service.repository.CustomerRepository;
 import com.alphbank.core.integration.IntegrationTestBase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// Defaults to MOCK, but we need the server to start up on the port we defined (8080)
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class CustomerControllerIntegrationTest extends IntegrationTestBase {
+public class CustomerControllerIntegrationSpringConfigTest extends IntegrationTestBase {
+
+    @Autowired
+    CustomerRepository repository;
+
+    @BeforeEach
+    public void cleanup() {
+        repository.deleteAll().block();
+    }
 
     @Test
-    public void testCreateCustomer(){
+    public void testCreateCustomer() {
         CreateCustomerRequest request = new CreateCustomerRequest(Locale.of("sv", "SE"), "123456789", "John", "Doe", new Address("Street", "City", "Country"));
         Customer customer = alphWebClient.post()
                 .uri(uri -> uri.path("/customer").build())

@@ -1,31 +1,34 @@
 package com.alphbank.core.integration;
 
-import com.alphbank.core.integration.config.SpringBootStarterTestConfiguration;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 import org.wiremock.spring.EnableWireMock;
 
-@SpringBootTest
-@Import(SpringBootStarterTestConfiguration.class)
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @EnableWireMock
-public class WiremockExampleTest {
+public class WiremockExampleTest extends IntegrationTestBase {
 
     @Value("${wiremock.server.baseUrl}")
     private String wireMockUrl;
-
-    @Autowired
-    private WebClient alphWebClient;
 
     // BankingCore does not make any external calls, so wiremock is not needed here.
     // I'm leaving this here until I add integration tests to upstream services.
 
     @Test
     public void testIt() {
-        assert true;
-    }
+        stubFor(get("/ping").willReturn(ok("pong")));
 
+        RestClient client = RestClient.create();
+        String body = client.get()
+                .uri(wireMockUrl + "/ping")
+                .retrieve()
+                .body(String.class);
+
+        assertThat(body).isEqualTo("pong");
+    }
 }

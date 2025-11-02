@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @TestConfiguration
-public class SpringBootStarterTestConfiguration {
+public class AlphWebClientTestConfiguration {
 
     @Bean
     public WebClient alphWebClient(WebClient.Builder alphBaseWebClientBuilder) {

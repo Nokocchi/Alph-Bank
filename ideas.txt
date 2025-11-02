@@ -1,21 +1,19 @@
 Get back up to speed:
-- Mermaid diagrams in each README
-- Contract tests, to verify that the MonetaryAmount encoding works as expected
-- Set up integration tests with Wiremock, mocking BankingCore
-- Write code style document. 
-	- Unit testing only for complex standalone functions without dependencies. In rare cases repositories/etc. can be mocked, if necessary
-	- Integration tests are the main testing method and should cover most behavior
-	- Service structure, Reactive, where and how to convert between models (Static from, or to()?), naming of models in different layers
-	- Do contract tests even make sense in this local-only project without any pipelines/online repository to save the stubs to?
-- Testcontainers for RabbitMQ and Database?
+1: Testcontainers for RabbitMQ, successful test
+2: Integration tests with Wiremock in payment-service, mocking BankingCore
+3: Use contract stubs from payment-service
+- Mermaid diagrams, draw.io flowchart..? More complex services like payment-service/loan-application-service should maybe have component diagrams
+- Service structure diagram
+- Figure out how to use random port for tests. Seems that they are clashing..
+- Make contract tests for all endpoints
 - Replace Locale with country+language
-- Creating loans and payments should check that the account/customerIDs exist
 
 
 TODO:
 	- Others
 LoanApplication, add statuses like "denied" depending on credit check or manual inspection
 Put MonetaryAmount.getAmount => BigDecimal in starter or library
+- Creating loans and payments should check that the account/customerIDs exist
 
 	- Bugs
 Norwegian customer with danish locale cannot create account because of IBAN creation error - still shows account in UI
