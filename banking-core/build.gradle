@@ -46,12 +46,14 @@ dependencies {
 	implementation 'org.postgresql:r2dbc-postgresql'
 	implementation 'org.postgresql:postgresql'
 
+    // Messaging
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
 	// Alph Bank starters
 	implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.12-SNAPSHOT'
 
 	// Others
 	implementation 'org.iban4j:iban4j:3.2.10-RELEASE'
-	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
 	// Testing
     testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
@@ -62,9 +64,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:postgresql'
-    testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:r2dbc'
-	implementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner'
 	testImplementation 'org.wiremock.integrations:wiremock-spring-boot:3.10.0'
 }
 
