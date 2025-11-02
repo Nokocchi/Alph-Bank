@@ -10,13 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// Random Port auto-configures a WebTestClient that we can use. The random port ensures that we won't run into port bind conflicts when running multiple test classes
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class CustomerControllerIntegrationSpringConfigTest extends IntegrationTestBase {
 
     @Autowired
@@ -27,15 +29,19 @@ public class CustomerControllerIntegrationSpringConfigTest extends IntegrationTe
         repository.deleteAll().block();
     }
 
+    @Autowired
+    WebTestClient webClient;
+
     @Test
     public void testCreateCustomer() {
         CreateCustomerRequest request = new CreateCustomerRequest(Locale.of("sv", "SE"), "123456789", "John", "Doe", new Address("Street", "City", "Country"));
-        Customer customer = alphWebClient.post()
+        Customer customer = webClient.post()
                 .uri(uri -> uri.path("/customer").build())
                 .bodyValue(request)
-                .retrieve()
-                .bodyToMono(Customer.class)
-                .block();
+                .exchange()
+                .expectBody(Customer.class)
+                .returnResult()
+                .getResponseBody();
 
         assertThat(customer)
                 .extracting(Customer::getAddress)

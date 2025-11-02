@@ -24,6 +24,8 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+// Don't use @SpringBootTest as this starts a whole ApplicationContext and web server.
+// We are only testing a single class and mocking dependencies.
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = CustomerService.class)
 public class CustomerServiceTest {

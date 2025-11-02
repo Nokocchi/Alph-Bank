@@ -1,17 +1,21 @@
 package com.alphbank.core.integration;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.client.RestClient;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.wiremock.spring.EnableWireMock;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableWireMock
 public class WiremockExampleTest extends IntegrationTestBase {
+
+    @Autowired
+    WebTestClient webClient;
 
     @Value("${wiremock.server.baseUrl}")
     private String wireMockUrl;
@@ -23,11 +27,12 @@ public class WiremockExampleTest extends IntegrationTestBase {
     public void testIt() {
         stubFor(get("/ping").willReturn(ok("pong")));
 
-        RestClient client = RestClient.create();
-        String body = client.get()
+        String body = webClient.get()
                 .uri(wireMockUrl + "/ping")
-                .retrieve()
-                .body(String.class);
+                .exchange()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
 
         assertThat(body).isEqualTo("pong");
     }
