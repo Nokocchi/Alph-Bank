@@ -13,6 +13,7 @@ import com.alphbank.core.customer.service.repository.model.CustomerEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,6 +33,7 @@ public class CustomerService {
                 .flatMap(this::findAddressAndConvertToRestModel);
     }
 
+    @Transactional
     public Mono<Customer> createCustomer(CreateCustomerRequest createCustomerRequest) {
         CustomerEntity customerEntity = CustomerEntity.from(createCustomerRequest);
         return customerRepository.save(customerEntity)

@@ -6,7 +6,7 @@ Contract.make {
     priority 1
     request {
         method 'GET'
-        url '/customer/search'
+        urlPath '/customer/search'
         headers {
             contentType(applicationJson())
         }

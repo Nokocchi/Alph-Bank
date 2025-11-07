@@ -1,11 +1,10 @@
 Get back up to speed:
-1: Testcontainers for RabbitMQ, successful test
-2: Integration tests with Wiremock in payment-service, mocking BankingCore
-3: Use contract stubs from payment-service
+- Testcontainers for RabbitMQ, successful test
+- Generate models, webclients, controllers from spec? Or at least find a way to re-use models? Maybe publish core models to local maven?
+- Find a way to not hardcode the wiremock URL+port.. Maybe I can override the normal banking core URL in the application-test?
 - Mermaid diagrams, draw.io flowchart..? More complex services like payment-service/loan-application-service should maybe have component diagrams
 - Service structure diagram
-- Figure out how to use random port for tests. Seems that they are clashing..
-- Make contract tests for all endpoints
+- Make contract tests for all endpoints, with proper producer(), consumer()
 - Replace Locale with country+language
 
 

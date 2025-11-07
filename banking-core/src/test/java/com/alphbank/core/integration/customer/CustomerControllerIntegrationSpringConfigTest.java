@@ -5,6 +5,9 @@ import com.alphbank.core.customer.rest.model.CreateCustomerRequest;
 import com.alphbank.core.customer.rest.model.Customer;
 import com.alphbank.core.customer.service.repository.CustomerRepository;
 import com.alphbank.core.integration.IntegrationTestBase;
+import com.alphbank.core.payment.rest.model.CreatePaymentRequest;
+import com.alphbank.core.payment.rest.model.Payment;
+import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,4 +58,22 @@ public class CustomerControllerIntegrationSpringConfigTest extends IntegrationTe
             assertThat(req.getAddress().country()).isEqualTo("Country");
         });
     }
+
+    @Test
+    public void testCreatePayment() {
+        CreatePaymentRequest paymentRequest = new CreatePaymentRequest(UUID.randomUUID(), UUID.randomUUID(), "", Money.of(22, "SEK"), "", "", null);
+
+        Payment payment = webClient.post()
+                .uri(uri -> uri.path("/payment").build())
+                .bodyValue(paymentRequest)
+                .exchange()
+                .expectBody(Payment.class)
+                .returnResult()
+                .getResponseBody();
+
+        assertThat(payment)
+                .isNotNull();
+    }
+
+
 }

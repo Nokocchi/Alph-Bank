@@ -2,70 +2,71 @@ import org.springframework.cloud.contract.verifier.config.TestFramework
 import org.springframework.cloud.contract.verifier.config.TestMode
 
 plugins {
-	id 'java'
+    id 'java'
+    id 'maven-publish'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'io.freefair.lombok' version '9.0.0'
     id 'org.springframework.cloud.contract' version '4.3.0'
 }
 
-group = 'com.alphbank'
+group = 'com.alphbank.core'
 version = '0.0.1-SNAPSHOT'
 
 java {
+    withSourcesJar()
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
 repositories {
-	mavenLocal()
-	mavenCentral()
+    mavenLocal()
+    mavenCentral()
 }
 
 ext {
-	set('springCloudVersion', "2025.0.0")
+    set('springCloudVersion', "2025.0.0")
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 dependencies {
-	// Base
-	implementation 'org.springframework.boot:spring-boot-starter'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'io.projectreactor:reactor-core'
+    // Base
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'io.projectreactor:reactor-core'
 
-	// Database
-	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
-	implementation 'org.flywaydb:flyway-core:10.10.0'
-	implementation 'org.flywaydb:flyway-database-postgresql:10.10.0'
-	implementation 'org.postgresql:r2dbc-postgresql'
-	implementation 'org.postgresql:postgresql'
+    // Database
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.flywaydb:flyway-core:10.10.0'
+    implementation 'org.flywaydb:flyway-database-postgresql:10.10.0'
+    implementation 'org.postgresql:r2dbc-postgresql'
+    implementation 'org.postgresql:postgresql'
 
     // Messaging
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
-	// Alph Bank starters
-	implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.12-SNAPSHOT'
+    // Alph Bank starters
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.12-SNAPSHOT'
 
-	// Others
-	implementation 'org.iban4j:iban4j:3.2.10-RELEASE'
+    // Others
+    implementation 'org.iban4j:iban4j:3.2.10-RELEASE'
 
-	// Testing
+    // Testing
     testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
     testImplementation 'io.rest-assured:spring-web-test-client'
-	testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.assertj:assertj-core'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.testcontainers:r2dbc'
-	testImplementation 'org.wiremock.integrations:wiremock-spring-boot:3.10.0'
 }
 
 tasks.named('contractTest') {
@@ -76,12 +77,42 @@ contracts {
     testMode = TestMode.WEBTESTCLIENT
     testFramework = TestFramework.JUNIT5
     baseClassMappings {
-        baseClassMapping "customer": "com.alph.core.customer.CustomerBase"
+        baseClassMapping "customer": "com.alphbank.core.customer.CustomerBase"
+        baseClassMapping "payment": "com.alphbank.core.payment.PaymentBase"
     }
 }
 
+verifierStubsJar {
+    archiveClassifier.set('stubs')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact verifierStubsJar
+
+            groupId = project.group
+            artifactId = project.name
+            version = project.version
+        }
+    }
+    repositories {
+        // publishes to mavenLocal()
+        maven {
+            name = "local"
+            url = uri("${System.getProperty("user.home")}/.m2/repository")
+        }
+    }
+}
+
+// Ensure stubs jar is built and published
+tasks.publishToMavenLocal {
+    dependsOn verifierStubsJar
+}
+
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 
