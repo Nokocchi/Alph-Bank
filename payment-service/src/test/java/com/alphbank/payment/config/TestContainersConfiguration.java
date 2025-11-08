@@ -12,7 +12,7 @@ public class TestContainersConfiguration {
     @Bean
     public PostgreSQLContainer<?> postgres() {
         return new PostgreSQLContainer<>("postgres:14.0")
-                .withDatabaseName("core")
+                .withDatabaseName("payment")
                 .withUsername("alph")
                 .withPassword("admin");
     }

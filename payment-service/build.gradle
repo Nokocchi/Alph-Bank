@@ -1,21 +1,28 @@
+import org.springframework.cloud.contract.verifier.config.TestFramework
+import org.springframework.cloud.contract.verifier.config.TestMode
+
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.2.3'
-	id 'io.spring.dependency-management' version '1.1.4'
-	id "io.freefair.lombok" version "8.6"
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id "io.freefair.lombok" version "9.0.0"
     id 'org.springframework.cloud.contract' version '4.3.0'
+    id 'org.openapi.generator' version '7.17.0'
 }
 
 group = 'com.alphbank'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '18'
+    withSourcesJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 repositories {
-	mavenLocal()
-	mavenCentral()
+    mavenLocal()
+    mavenCentral()
 }
 
 ext {
@@ -28,30 +35,37 @@ dependencyManagement {
     }
 }
 
+configurations {
+    yamlConfig
+}
+
+def openApiOutputDir = "$buildDir/generated-sources/openapi"
+
 dependencies {
-	// Base
-	implementation 'org.springframework.boot:spring-boot-starter'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'io.projectreactor:reactor-core:3.6.0'
+    // Base
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'io.projectreactor:reactor-core:3.6.0'
 
-	// Database
-	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
-	implementation 'org.flywaydb:flyway-core:10.10.0'
-	implementation 'org.flywaydb:flyway-database-postgresql:10.10.0'
-	implementation 'org.postgresql:r2dbc-postgresql:1.0.4.RELEASE'
-	runtimeOnly 'org.postgresql:postgresql'
+    // Database
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.flywaydb:flyway-core:10.10.0'
+    implementation 'org.flywaydb:flyway-database-postgresql:10.10.0'
+    implementation 'org.postgresql:r2dbc-postgresql:1.0.4.RELEASE'
+    runtimeOnly 'org.postgresql:postgresql'
 
-	// RabbitMQ
-	implementation 'org.springframework.boot:spring-boot-starter-amqp:3.2.4'
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp:3.2.4'
 
-	// Alph Bank starters
-	implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.8-SNAPSHOT'
+    // Alph Bank starters
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.8-SNAPSHOT'
 
-	implementation 'io.projectreactor.addons:reactor-extra:3.5.1'
+    implementation 'io.projectreactor.addons:reactor-extra:3.5.1'
+    yamlConfig "com.alphbank.core:BankingCore:0.0.1-SNAPSHOT:openapi-spec@json"
 
-	// Testing
-	testImplementation 'io.projectreactor:reactor-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // Testing
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.cloud:spring-cloud-contract-stub-runner'
     testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
@@ -59,6 +73,43 @@ dependencies {
     testImplementation 'org.testcontainers:r2dbc'
 }
 
+tasks.register('copyYaml', Copy) {
+    from configurations.yamlConfig
+    into "$buildDir/openapi"
+}
+
+// Add the generated sources to your main compile classpath
+sourceSets {
+    main {
+        java {
+            srcDir("$openApiOutputDir/src/main/java")
+        }
+    }
+}
+
+contracts {
+    failOnNoContracts = false
+}
+
+openApiGenerate {
+    inputSpec.set(file("$buildDir/openapi/BankingCore-0.0.1-SNAPSHOT-openapi-spec.json").toURI().toString())
+    generatorName = "java"
+    library = "webclient"
+    configOptions = [
+            dateLibrary      : "java8",
+            useBeanValidation: "true",
+            reactive         : "true"
+    ]
+}
+
+tasks.openApiGenerate {
+    dependsOn tasks.copyYaml
+}
+
+tasks.compileJava {
+    dependsOn tasks.openApiGenerate
+}
+
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
