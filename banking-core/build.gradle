@@ -8,10 +8,11 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
     id 'io.freefair.lombok' version '9.0.0'
     id 'org.springframework.cloud.contract' version '4.3.0'
+    id 'org.openapi.generator' version '7.17.0'
 }
 
 group = 'com.alphbank.core'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.3-SNAPSHOT'
 
 java {
     withSourcesJar()
@@ -52,7 +53,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     // Alph Bank starters
-    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.12-SNAPSHOT'
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.13-SNAPSHOT'
 
     // Others
     implementation 'org.iban4j:iban4j:3.2.10-RELEASE'
@@ -105,6 +106,46 @@ publishing {
             mavenLocal()
         }
     }
+}
+
+openApiGenerate {
+    inputSpec = file("$projectDir/src/main/resources/openapi.yaml").toURI().toString()
+    outputDir = "$buildDir/generated/banking-core".toString()
+    modelPackage = "com.alphbank.core.rest.model"
+    generatorName = "spring"
+    modelNameSuffix = "DTO"
+    typeMappings = ["DateTime": "LocalDateTime"]
+    importMappings = ["LocalDateTime": "java.time.LocalDateTime"]
+    configOptions = [
+            booleanGetterPrefix   : "is",
+            annotationLibrary     : "swagger2",
+            dateLibrary           : "java8",
+            useResponseEntity     : "false",
+            reactive              : "true",
+            library               : "spring-boot",
+            useSpringBoot3        : "true",
+            useJakartaEe          : "true",
+            containerDefaultToNull: "true",
+            openApiNullable       : "false", // Otherwise it tries to use annotation that is not imported
+            generateBuilders      : "true"
+    ]
+}
+
+// Add the generated sources to the main compile classpath
+sourceSets {
+    main {
+        java {
+            srcDir("$buildDir/generated/banking-core/src/main/java")
+        }
+    }
+}
+
+tasks.sourcesJar {
+    dependsOn tasks.openApiGenerate
+}
+
+tasks.compileJava {
+    dependsOn tasks.openApiGenerate
 }
 
 // Ensure stubs jar is built and published

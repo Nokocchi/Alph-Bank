@@ -1,4 +1,4 @@
-package com.alphbank.payment.rest.model;
+package com.alphbank.payment.rest.model.request;
 
 import java.util.Locale;
 import java.util.UUID;

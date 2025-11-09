@@ -1,6 +1,6 @@
 package com.alphbank.core.payment.service.repository.model;
 
-import com.alphbank.core.payment.rest.model.CreatePaymentRequest;
+import com.alphbank.core.rest.model.CreatePaymentRequestDTO;
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;
@@ -53,16 +53,16 @@ public class PaymentEntity {
     private LocalDateTime executionDateTime;
 
 
-    public static PaymentEntity from(CreatePaymentRequest createPaymentRequest) {
-        LocalDateTime scheduledDateTimeNullable = createPaymentRequest.scheduledDateTime();
+    public static PaymentEntity from(CreatePaymentRequestDTO createPaymentRequest) {
+        LocalDateTime scheduledDateTimeNullable = createPaymentRequest.getScheduledDateTime();
         return PaymentEntity.builder()
-                .fromAccountId(createPaymentRequest.fromAccountId())
-                .fromCustomerId(createPaymentRequest.fromCustomerId())
-                .messageToSelf(createPaymentRequest.messageToSelf())
-                .messageToRecipient(createPaymentRequest.messageToRecipient())
-                .recipientIban(createPaymentRequest.recipientIban())
-                .monetaryValue(createPaymentRequest.amount().getNumber().numberValueExact(BigDecimal.class))
-                .currency(createPaymentRequest.amount().getCurrency().getCurrencyCode())
+                .fromAccountId(createPaymentRequest.getFromAccountId())
+                .fromCustomerId(createPaymentRequest.getFromCustomerId())
+                .messageToSelf(createPaymentRequest.getMessageToSelf())
+                .messageToRecipient(createPaymentRequest.getMessageToRecipient())
+                .recipientIban(createPaymentRequest.getRecipientIban())
+                .monetaryValue(createPaymentRequest.getAmount().getAmount())
+                .currency(createPaymentRequest.getAmount().getCurrency())
                 .scheduledDateTime(scheduledDateTimeNullable != null ? scheduledDateTimeNullable : LocalDateTime.now())
                 .build();
     }

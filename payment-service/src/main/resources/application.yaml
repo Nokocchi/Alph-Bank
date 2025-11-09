@@ -20,7 +20,7 @@ logging:
 alph:
   client:
     corepaymentservice:
-      uri: http://localhost:8081
+      uri: http://localhost:8080
     signing-service:
       uri: http://localhost:8085
       single-payment-document-to-sign-template: "I hereby authorize this payment of %s %s to the recipient IBAN number %s, with execution date and time %s"

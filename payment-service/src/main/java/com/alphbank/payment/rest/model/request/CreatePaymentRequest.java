@@ -1,4 +1,4 @@
-package com.alphbank.payment.rest.model;
+package com.alphbank.payment.rest.model.request;
 
 import javax.money.MonetaryAmount;
 import java.time.LocalDateTime;

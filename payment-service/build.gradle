@@ -27,7 +27,7 @@ repositories {
 
 ext {
     set('springCloudVersion', "2025.0.0")
-    set('bankingCoreAPIVersion', '0.0.1-SNAPSHOT')
+    set('bankingCoreAPIVersion', '0.0.3-SNAPSHOT')
 }
 
 dependencyManagement {
@@ -57,10 +57,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-amqp:3.2.4'
 
     // Alph Bank starters
-    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.8-SNAPSHOT'
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.13-SNAPSHOT'
 
     implementation 'io.projectreactor.addons:reactor-extra:3.5.1'
-    yamlApi "com.alphbank.core:BankingCore:${bankingCoreAPIVersion}:openapi-spec@json"
+    yamlApi "com.alphbank.core:BankingCore:${bankingCoreAPIVersion}:openapi-spec@yaml"
 
     // Testing
     testImplementation 'io.projectreactor:reactor-test'
@@ -83,24 +83,29 @@ contracts {
 }
 
 openApiGenerate {
-    inputSpec.set(file("$buildDir/openapi/BankingCore-${bankingCoreAPIVersion}-openapi-spec.json").toURI().toString())
+    inputSpec = file("$buildDir/openapi/BankingCore-${bankingCoreAPIVersion}-openapi-spec.yaml").toURI().toString()
     outputDir = "$buildDir/generated/banking-core".toString()
     apiPackage = "com.alphbank.core.client"
     modelPackage = "com.alphbank.core.client.model"
     generatorName = "java"
+    apiNameSuffix = "Client"
+    modelNameSuffix = "DTO"
+    typeMappings = ["DateTime": "LocalDateTime"]
+    importMappings = ["LocalDateTime": "java.time.LocalDateTime"]
     configOptions = [
-            booleanGetterPrefix        : "is",
-            dateLibrary                : "java8",
-            reactive                   : "true",
-            library                    : "webclient",
-            useSpringBoot3             : "true",
-            useJakartaEe               : "true",
-            containerDefaultToNull     : "true",
-            openApiNullable            : "false" // Otherwise it tries to use annotation that is not imported
+            booleanGetterPrefix   : "is",
+            dateLibrary           : "java8",
+            reactive              : "true",
+            library               : "webclient",
+            useSpringBoot3        : "true",
+            useJakartaEe          : "true",
+            containerDefaultToNull: "true",
+            openApiNullable       : "false", // Otherwise it tries to use annotation that is not imported
+            generateBuilders      : "true"
     ]
 }
 
-// Add the generated sources to your main compile classpath
+// Add the generated sources to the main compile classpath
 sourceSets {
     main {
         java {

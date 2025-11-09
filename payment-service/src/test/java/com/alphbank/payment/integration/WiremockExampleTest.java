@@ -1,6 +1,6 @@
 package com.alphbank.payment.integration;
 
-import com.alphbank.payment.rest.model.CreatePaymentRequest;
+import com.alphbank.payment.rest.model.request.CreatePaymentRequest;
 import com.alphbank.payment.rest.model.Payment;
 import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.Test;

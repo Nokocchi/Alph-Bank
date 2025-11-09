@@ -2,8 +2,8 @@ package com.alphbank.payment.rest;
 
 import com.alphbank.commons.impl.JsonLog;
 import com.alphbank.payment.rest.model.Basket;
-import com.alphbank.payment.rest.model.SetupSigningSessionRestRequest;
-import com.alphbank.payment.rest.model.SetupSigningSessionRestResponse;
+import com.alphbank.payment.rest.model.request.SetupSigningSessionRestRequest;
+import com.alphbank.payment.rest.model.response.SetupSigningSessionRestResponse;
 import com.alphbank.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

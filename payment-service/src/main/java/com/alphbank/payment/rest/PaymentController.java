@@ -1,7 +1,7 @@
 package com.alphbank.payment.rest;
 
 import com.alphbank.commons.impl.JsonLog;
-import com.alphbank.payment.rest.model.CreatePaymentRequest;
+import com.alphbank.payment.rest.model.request.CreatePaymentRequest;
 import com.alphbank.payment.rest.model.Payment;
 import com.alphbank.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;

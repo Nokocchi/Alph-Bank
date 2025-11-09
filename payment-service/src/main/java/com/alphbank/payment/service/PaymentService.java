@@ -1,10 +1,14 @@
 package com.alphbank.payment.service;
 
-import com.alphbank.payment.rest.model.*;
+import com.alphbank.core.client.CorePaymentClient;
+import com.alphbank.core.client.model.MonetaryAmountDTO;
+import com.alphbank.payment.rest.model.Basket;
+import com.alphbank.payment.rest.model.Payment;
+import com.alphbank.payment.rest.model.request.CreatePaymentRequest;
+import com.alphbank.payment.rest.model.request.SetupSigningSessionRestRequest;
+import com.alphbank.payment.rest.model.response.SetupSigningSessionRestResponse;
 import com.alphbank.payment.service.amqp.configuration.RabbitConfigurationProperties;
 import com.alphbank.payment.service.amqp.model.SigningStatus;
-import com.alphbank.payment.service.client.corepaymentservice.CorePaymentServiceClient;
-import com.alphbank.payment.service.client.corepaymentservice.model.CreateCorePaymentRequest;
 import com.alphbank.payment.service.client.signingservice.SigningServiceClient;
 import com.alphbank.payment.service.client.signingservice.configuration.SigningServiceClientConfigurationProperties;
 import com.alphbank.payment.service.client.signingservice.model.SetupSigningSessionRequest;
@@ -30,10 +34,10 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final BasketRepository basketRepository;
-    private final CorePaymentServiceClient corePaymentServiceClient;
     private final SigningServiceClient signingServiceClient;
     private final SigningServiceClientConfigurationProperties signingServiceProperties;
     private final RabbitConfigurationProperties rabbitProperties;
+    private final CorePaymentClient corePaymentClient;
 
     private final Set<BasketSigningStatus> editableBasketStatuses = Set.of(BasketSigningStatus.NOT_YET_STARTED, BasketSigningStatus.FAILED);
 
@@ -95,19 +99,24 @@ public class PaymentService {
     private Mono<Void> executeBasket(BasketEntity basketEntity) {
         return paymentRepository.findByBasketId(basketEntity.getBasketId())
                 .map(paymentEntity -> toCreateCorePaymentRequest(basketEntity, paymentEntity))
-                .flatMap(corePaymentServiceClient::sendPaymentToCore)
+                .flatMap(corePaymentClient::createPayment)
                 .then();
     }
 
-    private CreateCorePaymentRequest toCreateCorePaymentRequest(BasketEntity basketEntity, PaymentEntity paymentEntity){
-        return new CreateCorePaymentRequest(
-                basketEntity.getCustomerId(),
-                paymentEntity.getAccountId(),
-                paymentEntity.getRecipientIBAN(),
-                Money.of(paymentEntity.getAmount(), paymentEntity.getCurrency()),
-                paymentEntity.getMessageToSelf(),
-                paymentEntity.getMessageToRecipient(),
-                paymentEntity.getScheduledDateTime());
+    private com.alphbank.core.client.model.CreatePaymentRequestDTO toCreateCorePaymentRequest(BasketEntity basketEntity, PaymentEntity paymentEntity) {
+        return com.alphbank.core.client.model.CreatePaymentRequestDTO.builder()
+                .fromCustomerId(basketEntity.getCustomerId())
+                .fromAccountId(paymentEntity.getAccountId())
+                .recipientIban(paymentEntity.getRecipientIBAN())
+                .messageToSelf(paymentEntity.getMessageToSelf())
+                .messageToRecipient(paymentEntity.getMessageToRecipient())
+                .amount(MonetaryAmountDTO.
+                        builder()
+                        .amount(paymentEntity.getAmount())
+                        .currency(paymentEntity.getCurrency())
+                        .build())
+                .scheduledDateTime(paymentEntity.getScheduledDateTime())
+                .build();
     }
 
     private BasketSigningStatus fromSigningStatus(SigningStatus signingStatus) {

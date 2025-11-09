@@ -1,6 +1,6 @@
 package com.alphbank.payment.service.repository.model;
 
-import com.alphbank.payment.rest.model.CreatePaymentRequest;
+import com.alphbank.payment.rest.model.request.CreatePaymentRequest;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;

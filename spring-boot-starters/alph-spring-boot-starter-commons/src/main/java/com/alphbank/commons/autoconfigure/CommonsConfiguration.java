@@ -3,7 +3,6 @@ package com.alphbank.commons.autoconfigure;
 import com.alphbank.commons.impl.JsonLog;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.logging.LogLevel;
-import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,16 +12,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.zalando.jackson.datatype.money.MoneyModule;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.logging.AdvancedByteBufFormat;
-
-import javax.money.MonetaryAmount;
 
 @AutoConfiguration
 @EnableConfigurationProperties(CommonsProperties.class)
@@ -34,22 +28,18 @@ public class CommonsConfiguration {
         this.properties = properties;
     }
 
-    // Overwrites the representation of MonetaryAmount in Swagger so that it looks like a simple amount-currency tuple
-    static {
-        SpringDocUtils.getConfig().replaceWithClass(MonetaryAmount.class, org.springdoc.core.converters.models.MonetaryAmount.class);
-    }
-
     // Custom serializer/deserializer for the org.javamoney.moneta implementation of javax.MonetaryAmount as a simple (Amount, Currency) tuple
     // Declaring the Jackson module as a bean is enough to automatically add it to the ObjectMapper
+    // We don't need this in the DTO/rest/webclient layer due to the generated classes having their own implementation
+    // But we might want to log MonetaryAmounts with jsonLog in the business logic somewhere
     @Bean
     public MoneyModule moneyModule() {
         return new MoneyModule();
     }
 
     @Bean(name = "alphBaseWebClientBuilder")
-    WebClient.Builder alphBaseWebClientBuilder(ObjectMapper objectMapper) {
+    WebClient.Builder alphBaseWebClientBuilder() {
         WebClient.Builder webClientBuilder = WebClient.builder()
-                .codecs(configurer -> overrideDefaultCodecs(configurer.defaultCodecs(), objectMapper))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 
@@ -65,13 +55,9 @@ public class CommonsConfiguration {
         return webClientBuilder;
     }
 
-    // Spring Webclient uses its own ObjectMapper, which means that the one I have configured is not used.
-    // Which means that MonetaryAmount and date/time encoding is not done correctly in WebClient
-    // As a fix, I set the encoder and decoder to use my configured ObjectMapper
-    private void overrideDefaultCodecs(ClientCodecConfigurer.ClientDefaultCodecs defaultCodecs, ObjectMapper objectMapper) {
-        defaultCodecs.jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper));
-        defaultCodecs.jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper));
-        //defaultCodecs.serverSentEventDecoder(new Jackson2JsonDecoder(objectMapper));
+    @Bean(name = "alphWebClient")
+    WebClient alphWebClient(WebClient.Builder alphBaseWebClientBuilder) {
+        return alphBaseWebClientBuilder.build();
     }
 
     @ConditionalOnProperty(name = "alph-commons.wiretapEnabled", havingValue = "true")
@@ -85,7 +71,7 @@ public class CommonsConfiguration {
     }
 
     @Bean
-    JsonLog jsonLog(ObjectMapper objectMapper){
+    JsonLog jsonLog(ObjectMapper objectMapper) {
         return new JsonLog(objectMapper);
     }
 }
