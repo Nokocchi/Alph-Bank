@@ -27,6 +27,7 @@ repositories {
 
 ext {
     set('springCloudVersion', "2025.0.0")
+    set('bankingCoreAPIVersion', '0.0.1-SNAPSHOT')
 }
 
 dependencyManagement {
@@ -36,10 +37,8 @@ dependencyManagement {
 }
 
 configurations {
-    yamlConfig
+    yamlApi
 }
-
-def openApiOutputDir = "$buildDir/generated-sources/openapi"
 
 dependencies {
     // Base
@@ -61,7 +60,7 @@ dependencies {
     implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.8-SNAPSHOT'
 
     implementation 'io.projectreactor.addons:reactor-extra:3.5.1'
-    yamlConfig "com.alphbank.core:BankingCore:0.0.1-SNAPSHOT:openapi-spec@json"
+    yamlApi "com.alphbank.core:BankingCore:${bankingCoreAPIVersion}:openapi-spec@json"
 
     // Testing
     testImplementation 'io.projectreactor:reactor-test'
@@ -74,32 +73,44 @@ dependencies {
 }
 
 tasks.register('copyYaml', Copy) {
-    from configurations.yamlConfig
+    from configurations.yamlApi
     into "$buildDir/openapi"
 }
 
-// Add the generated sources to your main compile classpath
-sourceSets {
-    main {
-        java {
-            srcDir("$openApiOutputDir/src/main/java")
-        }
-    }
-}
 
 contracts {
     failOnNoContracts = false
 }
 
 openApiGenerate {
-    inputSpec.set(file("$buildDir/openapi/BankingCore-0.0.1-SNAPSHOT-openapi-spec.json").toURI().toString())
+    inputSpec.set(file("$buildDir/openapi/BankingCore-${bankingCoreAPIVersion}-openapi-spec.json").toURI().toString())
+    outputDir = "$buildDir/generated/banking-core".toString()
+    apiPackage = "com.alphbank.core.client"
+    modelPackage = "com.alphbank.core.client.model"
     generatorName = "java"
-    library = "webclient"
     configOptions = [
-            dateLibrary      : "java8",
-            useBeanValidation: "true",
-            reactive         : "true"
+            booleanGetterPrefix        : "is",
+            dateLibrary                : "java8",
+            reactive                   : "true",
+            library                    : "webclient",
+            useSpringBoot3             : "true",
+            useJakartaEe               : "true",
+            containerDefaultToNull     : "true",
+            openApiNullable            : "false" // Otherwise it tries to use annotation that is not imported
     ]
+}
+
+// Add the generated sources to your main compile classpath
+sourceSets {
+    main {
+        java {
+            srcDir("$buildDir/generated/banking-core/src/main/java")
+        }
+    }
+}
+
+tasks.sourcesJar {
+    dependsOn tasks.openApiGenerate
 }
 
 tasks.openApiGenerate {
