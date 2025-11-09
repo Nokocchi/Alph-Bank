@@ -4,12 +4,12 @@ Get back up to speed:
 - Add converter to alph commons for monetary amount? (Might require an interface in the starter?)
 - Document new servcice structure
 - Figure out if I need to pass Spring's Object Mapper to the generated ApiClient
-- Create OpenApi ApiClient bean in common starter with the right headers, and simply override basePath?
 - Find a way to not hardcode the wiremock URL+port.. Maybe I can override the normal banking core URL in the application-test?
 - Mermaid diagrams, draw.io flowchart..? More complex services like payment-service/loan-application-service should maybe have component diagrams
 - Service structure diagram
 - Make contract tests for all endpoints, with proper producer(), consumer()
 - Replace Locale with country+language
+- Finish BankingCore in terms of style and technical features, not business logic
 
 
 TODO:
