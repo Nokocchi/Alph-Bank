@@ -110,11 +110,7 @@ public class PaymentService {
                 .recipientIban(paymentEntity.getRecipientIBAN())
                 .messageToSelf(paymentEntity.getMessageToSelf())
                 .messageToRecipient(paymentEntity.getMessageToRecipient())
-                .amount(MonetaryAmountDTO.
-                        builder()
-                        .amount(paymentEntity.getAmount())
-                        .currency(paymentEntity.getCurrency())
-                        .build())
+                .amount(Money.of(paymentEntity.getAmount(), paymentEntity.getCurrency()))
                 .scheduledDateTime(paymentEntity.getScheduledDateTime())
                 .build();
     }

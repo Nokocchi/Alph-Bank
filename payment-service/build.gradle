@@ -57,7 +57,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-amqp:3.2.4'
 
     // Alph Bank starters
-    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.13-SNAPSHOT'
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.14-SNAPSHOT'
 
     implementation 'io.projectreactor.addons:reactor-extra:3.5.1'
     yamlApi "com.alphbank.core:BankingCore:${bankingCoreAPIVersion}:openapi-spec@yaml"
@@ -90,8 +90,14 @@ openApiGenerate {
     generatorName = "java"
     apiNameSuffix = "Client"
     modelNameSuffix = "DTO"
-    typeMappings = ["DateTime": "LocalDateTime"]
-    importMappings = ["LocalDateTime": "java.time.LocalDateTime"]
+    typeMappings = [
+            "DateTime"      : "LocalDateTime",
+            "MonetaryAmount": "javax.money.MonetaryAmount"
+    ]
+    importMappings = [
+            "LocalDateTime"    : "java.time.LocalDateTime",
+            "MonetaryAmount"   : "javax.money.MonetaryAmount",
+    ]
     configOptions = [
             booleanGetterPrefix   : "is",
             dateLibrary           : "java8",

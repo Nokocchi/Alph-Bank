@@ -1,9 +1,8 @@
 Get back up to speed:
 - Testcontainers for RabbitMQ, successful test
-- Consider removing the monetaryAmount converter since we don't use it anymore
 - Add converter to alph commons for monetary amount? (Might require an interface in the starter?)
 - Document new servcice structure
-- Figure out if I need to pass Spring's Object Mapper to the generated ApiClient
+- Figure out if I need to pass Spring's Object Mapper to the generated ApiClient (Seems that it uses its own new ObjectMapper())
 - Find a way to not hardcode the wiremock URL+port.. Maybe I can override the normal banking core URL in the application-test?
 - Mermaid diagrams, draw.io flowchart..? More complex services like payment-service/loan-application-service should maybe have component diagrams
 - Service structure diagram
@@ -24,8 +23,6 @@ Norwegian customer with danish locale cannot create account because of IBAN crea
 	- Swagger, API, types:
 Zod schema validation, or auto-generated types based on openapi spec? 
 OpenAPI spec
-	- Autogenerate controllers
-	- Autogenerate webclients (Java)
 	- Autogenerate webclients (Frontend?)
 Better swagger examples (like possible response codes)
 Swagger examples for all request body parameters
@@ -61,7 +58,7 @@ GovernmentReportingTransferService
 - Backoff strategy if Service unavailable
 
 Payment-service
-- Based on PSD2
+- Based on PSD2, maybe auto generate from berlin group spec
 - Has RabbitMQ listener for sign-callbacks
 - Instant, scheduled, recurring payments. Standing orders create payments, but are not payments themselves.
 - Stores payments, standing orders in postgres

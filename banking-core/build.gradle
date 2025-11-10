@@ -57,7 +57,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     // Alph Bank starters
-    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.13-SNAPSHOT'
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.14-SNAPSHOT'
 
     // Others
     implementation 'org.iban4j:iban4j:3.2.10-RELEASE'
@@ -118,8 +118,14 @@ openApiGenerate {
     modelPackage = "com.alphbank.core.rest.model"
     generatorName = "spring"
     modelNameSuffix = "DTO"
-    typeMappings = ["DateTime": "LocalDateTime"]
-    importMappings = ["LocalDateTime": "java.time.LocalDateTime"]
+    typeMappings = [
+            "DateTime"      : "LocalDateTime",
+            "MonetaryAmount": "javax.money.MonetaryAmount"
+    ]
+    importMappings = [
+            "LocalDateTime"    : "java.time.LocalDateTime",
+            "MonetaryAmount"   : "javax.money.MonetaryAmount",
+    ]
     configOptions = [
             booleanGetterPrefix   : "is",
             annotationLibrary     : "swagger2",
