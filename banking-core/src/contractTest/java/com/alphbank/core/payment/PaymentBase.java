@@ -9,7 +9,6 @@ import com.alphbank.core.rest.model.PaymentDTO;
 import io.restassured.module.webtestclient.RestAssuredWebTestClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
-import org.springframework.test.context.ContextConfiguration;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -18,7 +17,6 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = JsonLog.class)
 public class PaymentBase {
 
     PaymentService paymentService = Mockito.mock(PaymentService.class);

@@ -33,13 +33,6 @@ public class PaymentService {
     private final TaskScheduler taskScheduler;
     private final AccountService accountService;
 
-    // https://springdoc.org/faq.html
-    /*
-    static {
-        SpringDocUtils.getConfig().replaceWithClass(MonetaryAmount.class, org.springdoc.core.converters.models.MonetaryAmount.class);
-    }
-    */
-
     public Flux<PaymentSearchResultDTO> findAllPaymentsOptionalFilters(UUID fromAccountId, String recipientIban) {
         return findAllPaymentsByFromAccountId(fromAccountId)
                 .concatWith(findAllPaymentsByRecipientIban(recipientIban));
@@ -110,7 +103,10 @@ public class PaymentService {
                 .paymentId(paymentEntity.getPaymentId())
                 .fromCustomerId(paymentEntity.getFromCustomerId())
                 .fromAccountId(paymentEntity.getFromAccountId())
-                .amount(Money.of(paymentEntity.getMonetaryValue(), paymentEntity.getCurrency()))
+                .amount(MonetaryAmountDTO.builder()
+                        .amount(paymentEntity.getMonetaryValue())
+                        .currency(paymentEntity.getCurrency())
+                        .build())
                 .recipientIban(paymentEntity.getRecipientIban())
                 .recipientAccountId(paymentEntity.getRecipientAccountId())
                 .messageToSelf(paymentEntity.getMessageToSelf())
@@ -129,7 +125,10 @@ public class PaymentService {
                 .paymentId(paymentEntity.getPaymentId())
                 .fromCustomerId(paymentEntity.getFromCustomerId())
                 .fromAccountId(paymentEntity.getFromAccountId())
-                .amount(Money.of(amount, paymentEntity.getCurrency()))
+                .amount(MonetaryAmountDTO.builder()
+                        .amount(amount)
+                        .currency(paymentEntity.getCurrency())
+                        .build())
                 .recipientIban(paymentEntity.getRecipientIban())
                 .recipientAccountId(paymentEntity.getRecipientAccountId())
                 .message(message)

@@ -16,7 +16,6 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = JsonLog.class)
 public class CustomerBase {
 
     CustomerService customerService = Mockito.mock(CustomerService.class);

@@ -61,8 +61,8 @@ public class PaymentEntity {
                 .messageToSelf(createPaymentRequest.getMessageToSelf())
                 .messageToRecipient(createPaymentRequest.getMessageToRecipient())
                 .recipientIban(createPaymentRequest.getRecipientIban())
-                .monetaryValue(createPaymentRequest.getAmount().getNumber().numberValue(BigDecimal.class))
-                .currency(createPaymentRequest.getAmount().getCurrency().getCurrencyCode())
+                .monetaryValue(createPaymentRequest.getAmount().getAmount())
+                .currency(createPaymentRequest.getAmount().getCurrency())
                 .scheduledDateTime(scheduledDateTimeNullable != null ? scheduledDateTimeNullable : LocalDateTime.now())
                 .build();
     }

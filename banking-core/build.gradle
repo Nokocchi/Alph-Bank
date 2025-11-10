@@ -120,11 +120,9 @@ openApiGenerate {
     modelNameSuffix = "DTO"
     typeMappings = [
             "DateTime"      : "LocalDateTime",
-            "MonetaryAmount": "javax.money.MonetaryAmount"
     ]
     importMappings = [
             "LocalDateTime"    : "java.time.LocalDateTime",
-            "MonetaryAmount"   : "javax.money.MonetaryAmount",
     ]
     configOptions = [
             booleanGetterPrefix   : "is",
