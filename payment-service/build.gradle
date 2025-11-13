@@ -1,5 +1,6 @@
 import org.springframework.cloud.contract.verifier.config.TestFramework
 import org.springframework.cloud.contract.verifier.config.TestMode
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
     id 'java'
@@ -65,7 +66,7 @@ dependencies {
     // Testing
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.cloud:spring-cloud-contract-stub-runner'
+    testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner'
     testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:postgresql'
@@ -82,7 +83,7 @@ contracts {
     failOnNoContracts = false
 }
 
-openApiGenerate {
+tasks.register('openApiGenerateClients', GenerateTask) {
     inputSpec = file("$buildDir/openapi/BankingCore-${bankingCoreAPIVersion}-openapi-spec.yaml").toURI().toString()
     outputDir = "$buildDir/generated/banking-core".toString()
     apiPackage = "com.alphbank.core.client"
@@ -91,10 +92,10 @@ openApiGenerate {
     apiNameSuffix = "Client"
     modelNameSuffix = "DTO"
     typeMappings = [
-            "DateTime"      : "LocalDateTime",
+            "DateTime": "LocalDateTime",
     ]
     importMappings = [
-            "LocalDateTime"    : "java.time.LocalDateTime",
+            "LocalDateTime": "java.time.LocalDateTime",
     ]
     configOptions = [
             booleanGetterPrefix   : "is",
@@ -109,25 +110,58 @@ openApiGenerate {
     ]
 }
 
+tasks.register('openApiGenerateAPI', GenerateTask) {
+    inputSpec = file("$projectDir/src/main/resources/psd2-api_v1.3.15-2025-08-21.openapi.yaml").toURI().toString()
+    outputDir = "$buildDir/generated/psd2".toString()
+    modelPackage = "org.berlingroup.rest.model"
+    generatorName = "spring"
+    modelNameSuffix = "DTO"
+    openapiNormalizer = ["FILTER": "operationId:createSigningBasket|getSigningBasket|deleteSigningBasket|startSigningBasketAuthorisation|getSigningBasketScaStatus|initiatePayment|getPaymentInformation|cancelPayment|getPaymentInitiationStatus",]
+    typeMappings = [
+            "DateTime": "LocalDateTime",
+    ]
+    importMappings = [
+            "LocalDateTime": "java.time.LocalDateTime",
+    ]
+    configOptions = [
+            booleanGetterPrefix   : "is",
+            annotationLibrary     : "swagger2",
+            dateLibrary           : "java8",
+            useResponseEntity     : "false",
+            reactive              : "true",
+            library               : "spring-boot",
+            useSpringBoot3        : "true",
+            interfaceOnly         : "true",
+            useTags               : "true",
+            useJakartaEe          : "true",
+            containerDefaultToNull: "true",
+            openApiNullable       : "false", // Otherwise it tries to use annotation that is not imported
+            generateBuilders      : "true"
+    ]
+}
+
 // Add the generated sources to the main compile classpath
 sourceSets {
     main {
         java {
             srcDir("$buildDir/generated/banking-core/src/main/java")
+            srcDir("$buildDir/generated/psd2/src/main/java")
         }
     }
 }
 
 tasks.sourcesJar {
-    dependsOn tasks.openApiGenerate
+    dependsOn tasks.openApiGenerateClients
+    dependsOn tasks.openApiGenerateAPI
 }
 
-tasks.openApiGenerate {
+tasks.openApiGenerateClients {
     dependsOn tasks.copyYaml
 }
 
 tasks.compileJava {
-    dependsOn tasks.openApiGenerate
+    dependsOn tasks.openApiGenerateClients
+    dependsOn tasks.openApiGenerateAPI
 }
 
 tasks.named('test') {

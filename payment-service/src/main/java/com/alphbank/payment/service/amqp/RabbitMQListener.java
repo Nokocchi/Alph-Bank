@@ -16,6 +16,7 @@ public class RabbitMQListener {
     private final JsonLog jsonLog;
     private final PaymentService paymentService;
 
+    // TODO: Should not provide the whole signing session..
     @RabbitListener(queues = "${spring.rabbitmq.payment-signing-status-queue}")
     public void handleMessage(SigningSession signingSession) {
         log.info("Received signing session on RabbitMQ! {}", jsonLog.format(signingSession));

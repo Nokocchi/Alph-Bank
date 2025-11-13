@@ -1,0 +1,10 @@
+spring:
+  config:
+    activate:
+      on-profile: integration-test
+alph:
+  client:
+    corepaymentservice:
+      uri: http://localhost:${wiremock.server.port}
+    signing-service:
+      uri: http://localhost:${wiremock.server.port}

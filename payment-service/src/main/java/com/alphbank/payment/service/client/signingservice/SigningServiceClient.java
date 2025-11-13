@@ -23,7 +23,8 @@ public class SigningServiceClient {
                 .post()
                 .uri("/signing")
                 .bodyValue(request)
-                .exchangeToMono(clientResponse -> clientResponse.bodyToMono(SetupSigningSessionResponse.class));
+                .retrieve()
+                .bodyToMono(SetupSigningSessionResponse.class);
     }
 
 }

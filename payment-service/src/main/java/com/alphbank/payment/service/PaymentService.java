@@ -1,5 +1,6 @@
 package com.alphbank.payment.service;
 
+import com.alphbank.commons.impl.JsonLog;
 import com.alphbank.core.client.CorePaymentClient;
 import com.alphbank.core.client.model.MonetaryAmountDTO;
 import com.alphbank.payment.rest.model.Basket;
@@ -19,6 +20,7 @@ import com.alphbank.payment.service.repository.PaymentRepository;
 import com.alphbank.payment.service.repository.model.BasketEntity;
 import com.alphbank.payment.service.repository.model.PaymentEntity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.javamoney.moneta.Money;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -38,6 +41,7 @@ public class PaymentService {
     private final SigningServiceClientConfigurationProperties signingServiceProperties;
     private final RabbitConfigurationProperties rabbitProperties;
     private final CorePaymentClient corePaymentClient;
+    private final JsonLog jsonLog;
 
     private final Set<BasketSigningStatus> editableBasketStatuses = Set.of(BasketSigningStatus.NOT_YET_STARTED, BasketSigningStatus.FAILED);
 
@@ -96,6 +100,7 @@ public class PaymentService {
                 .flatMap(this::executeBasket);
     }
 
+    // TODO: maybe have an endpoint in the core that takes a list of payments, instead of sending one payment at a time?
     private Mono<Void> executeBasket(BasketEntity basketEntity) {
         return paymentRepository.findByBasketId(basketEntity.getBasketId())
                 .map(paymentEntity -> toCreateCorePaymentRequest(basketEntity, paymentEntity))
@@ -173,8 +178,8 @@ public class PaymentService {
     }
 
     private Mono<SetupSigningSessionRestResponse> persistSigningSessionData(SetupSigningSessionResponse signingSession, BasketEntity basketEntity) {
-        BasketEntity updatedLoanApplicationEntity = basketEntity.withSigningSessionId(signingSession.signingSessionId());
-        return basketRepository.save(updatedLoanApplicationEntity)
+        BasketEntity updatedBasketEntity = basketEntity.withSigningSessionId(signingSession.signingSessionId());
+        return basketRepository.save(updatedBasketEntity)
                 .thenReturn(new SetupSigningSessionRestResponse(signingSession.signingUrl()));
     }
 

@@ -1,5 +1,6 @@
-package com.alphbank.payment.integration;
+package com.alphbank.payment.client;
 
+import com.alphbank.payment.integration.IntegrationTestBase;
 import com.alphbank.payment.rest.model.request.CreatePaymentRequest;
 import com.alphbank.payment.rest.model.Payment;
 import org.javamoney.moneta.Money;
@@ -20,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         ids = "com.alphbank.core:BankingCore:+:stubs:8081",
         stubsMode = StubRunnerProperties.StubsMode.LOCAL
 )
-public class WiremockExampleTest extends IntegrationTestBase {
+public class CorePaymentStubsTest extends IntegrationTestBase {
 
     @Autowired
     WebTestClient webClient;

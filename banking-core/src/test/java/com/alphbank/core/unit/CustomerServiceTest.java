@@ -8,8 +8,11 @@ import com.alphbank.core.customer.service.repository.AddressRepository;
 import com.alphbank.core.customer.service.repository.CustomerRepository;
 import com.alphbank.core.customer.service.repository.model.AddressEntity;
 import com.alphbank.core.customer.service.repository.model.CustomerEntity;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ContextConfiguration;
@@ -24,20 +27,13 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-// Don't use @SpringBootTest as this starts a whole ApplicationContext and web server.
+// This is a unit test: Don't use @SpringBootTest as this starts a whole ApplicationContext and web server.
 // We are only testing a single class and mocking dependencies.
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = CustomerService.class)
 public class CustomerServiceTest {
 
-    @Autowired
-    CustomerService customerService;
-
-    @MockitoBean
-    CustomerRepository customerRepository;
-
-    @MockitoBean
-    AddressRepository addressRepository;
+    CustomerRepository customerRepository = Mockito.mock(CustomerRepository.class);
+    AddressRepository addressRepository = Mockito.mock(AddressRepository.class);
+    CustomerService customerService = new CustomerService(customerRepository, addressRepository);
 
     @Test
     public void testCustomerCreation() {

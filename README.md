@@ -73,9 +73,9 @@ This is a personal project, simulating an entire banking ecosystem, which is int
                     * /model
                         * **MyObjectDTO**.java
                         * /request
-                            * MyRequest.java
+                            * CreateThingRequestDTO.java
                         * /response
-                            * MyResponse.java
+                            * CreateThingResponseDTO.java
                     * /error
                         * /model
                             * MyCustomExceptionWhichResultsInAPIResponse.java
@@ -110,6 +110,7 @@ This is a personal project, simulating an entire banking ecosystem, which is int
     * /resources
         * /db.migration
             * V1_0_0__create_entity_table.sql
+        * openapi.yaml
         * application.yaml
         * application-local.yaml
 * /test
@@ -126,18 +127,11 @@ This is a personal project, simulating an entire banking ecosystem, which is int
             * /resources
                 * application-test.yaml
 
-
-
-To be determined:
-
-* All endpoints must be documented (Generate controllers from OpenAPI spec, or write them myself with OpenAPI/Swagger annotations?)
-* Where to convert between rest/service/entity/client models?
-
 ### Testing
 
 Testing is of course important, but this is a hobby project and a human only lives so long, so I have decided to only add tests to the Banking Core and the Payment Service.
-* **Integration tests:** The bulk of the testing must be done with Integration tests using @SpringBootTest and TestContainers for repositories and message queues. External APIs are manually mocked with Wiremock - not using stubs. In rare cases, if necessary, Mockito Spybeans can be used to verify calls to specific methods.
-* **Unit tests:** Complex logic, usually in standalone functions, must be tested in unit tests without a full Spring application context, autowiring only the class being tested. Mockito must be used to mock dependencies and verify calls to these or lack thereof. Additionally, there should be unit tests for client-implementations, using published stubs. This verifies that the request and response objects have the correct format.
+* **Integration tests:** The bulk of the testing must be done with Integration tests using @SpringBootTest, and TestContainers for repositories and message queues. External APIs are manually mocked with Wiremock - not using stubs. In rare cases, if necessary, Mockito Spybeans can be used to verify calls to specific methods.
+* **Unit tests:** Complex logic, usually in standalone functions, must be tested in unit tests without a Spring application context, using only the class being tested. Mockito must be used to mock dependencies and verify calls to these or lack thereof. Additionally, there should be unit tests for client-implementations, using published stubs. This verifies that the request and response objects have the correct format.
 * **Contract tests:** Must be implemented to ensure that API changes are non-breaking and backwards compatible. Must be implemented in Groovy, using Mockito to mock the calls from the Controller into the Service layer. 
 * **Wiremock:** Mocking must be done in Java, in the test method the mock is needed. Don't use JSON mappings. These can be quite difficult to understand in large test suites.
 

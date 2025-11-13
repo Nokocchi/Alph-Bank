@@ -57,7 +57,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     // Alph Bank starters
-    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.14-SNAPSHOT'
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.15-SNAPSHOT'
 
     // Others
     implementation 'org.iban4j:iban4j:3.2.10-RELEASE'
@@ -118,11 +118,12 @@ openApiGenerate {
     modelPackage = "com.alphbank.core.rest.model"
     generatorName = "spring"
     modelNameSuffix = "DTO"
+    openapiNormalizer = ["FILTER", "operationId:"]
     typeMappings = [
-            "DateTime"      : "LocalDateTime",
+            "DateTime": "LocalDateTime",
     ]
     importMappings = [
-            "LocalDateTime"    : "java.time.LocalDateTime",
+            "LocalDateTime": "java.time.LocalDateTime",
     ]
     configOptions = [
             booleanGetterPrefix   : "is",
@@ -132,6 +133,7 @@ openApiGenerate {
             reactive              : "true",
             library               : "spring-boot",
             useSpringBoot3        : "true",
+            interfaceOnly         : "true",
             useJakartaEe          : "true",
             containerDefaultToNull: "true",
             openApiNullable       : "false", // Otherwise it tries to use annotation that is not imported

@@ -5,9 +5,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-// Marking as @Configuration instead of @TestConfiguration because the database must be accessible for all Spring Context-related tests to pass
-// If I marked this as @TestConfiguration, I would need to import it everywhere.
-// I could maybe mark it as @TestConfiguration and just import it from some IntegrationTest parent class
 @TestConfiguration(proxyBeanMethods = false)
 public class TestContainersConfiguration {
 
