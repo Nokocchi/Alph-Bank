@@ -1,7 +1,7 @@
 package com.alphbank.payment.rest;
 
 import com.alphbank.commons.impl.JsonLog;
-import com.alphbank.payment.rest.model.Basket;
+import com.alphbank.payment.rest.model.response.BasketDTO;
 import com.alphbank.payment.rest.model.request.SetupSigningSessionRestRequest;
 import com.alphbank.payment.rest.model.response.SetupSigningSessionRestResponse;
 import com.alphbank.payment.service.PaymentService;
@@ -26,7 +26,7 @@ public class BasketController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<ResponseEntity<Basket>> findActiveBasketByCustomerId(@RequestParam(name = "customer-id") UUID customerId){
+    public Mono<ResponseEntity<BasketDTO>> findActiveBasketByCustomerId(@RequestParam(name = "customer-id") UUID customerId){
         log.info("Searching payment basket by fromCustomerId {}", customerId);
         return paymentBasketService.findActiveBasketByCustomerId(customerId)
                 .doOnNext(response -> log.info("Returning basket {}", jsonLog.format(response)))
@@ -54,12 +54,6 @@ public class BasketController {
                 .doOnNext(response -> log.info("Returning signing url {}", jsonLog.format(response)))
                 .doOnError(e -> log.error("Error setting up signing session for basket with basketId " + basketId, e))
                 .map(this::toResponseEntity);
-    }
-
-    private <T> ResponseEntity<T> toResponseEntity(T responseBody) {
-        return ResponseEntity.ok()
-                .header("Access-Control-Allow-Origin", "*")
-                .body(responseBody);
     }
 
 }

@@ -1,17 +1,25 @@
 Get back up to speed:
-- PaymentService full integration test, mocking BankingCore payments, signing service, and signing callback message
-	- Find a way to not hardcode the wiremock URL+port.. Maybe I can override the normal banking core URL in the application-test?
-	- Testcontainers for RabbitMQ, successful test
-- Consider re-introducing ResponseEntity so we can return 200 if already exists and 201 if created, etc.
-- Document new servcice structure
-- Can I use Rollback/transactional in tests to automatically clean up?
-- Mermaid diagrams, draw.io flowchart..? More complex services like payment-service/loan-application-service should maybe have component diagrams
-- Service structure diagram
-- Make contract tests for all endpoints, with proper producer(), consumer()
-- Replace Locale with country+language
-- Finish BankingCore in terms of style and technical features, not business logic
-- Try out loom/virtual threads in loan service?
+- Payment service
+	- Implement new endpoints
+	- Figure out if it's possible to provide routing key in request, using generated models
+	- Use transactional annotation
+	- Proper Swagger annotations on models
+	- Unit tests, integration tests, contract stub tests
+	- Don't hardcode wiremock port in integration tests
+	- Testcontainers for RabbitMQ
+	- Make contract tests for all endpoints, with proper producer(), consumer()
+- Banking core:
+	- Make contract tests for all endpoints, with proper producer(), consumer()
+	- Unit tests, integration tests
+	- Consider re-introducing ResponseEntity so we can return 200 if already exists and 201 if created, etc.
+	- Use consistent style. Builder, conversion methods, mapper classes, naming
 
+- General Service structure diagram (Either diagram or image of empty project?)
+- Mermaid diagram, both sequence and component. Draw.io flowcharts.
+- Update README with examples of good practices, banking/fintech knowledge
+- Replace Locale with country+language
+- Try out MVC + loom/virtual threads in loan service?
+- Can I use Rollback/transactional in tests to automatically clean up?
 
 TODO:
 	- Others

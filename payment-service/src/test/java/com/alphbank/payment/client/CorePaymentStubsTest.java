@@ -2,7 +2,7 @@ package com.alphbank.payment.client;
 
 import com.alphbank.payment.integration.IntegrationTestBase;
 import com.alphbank.payment.rest.model.request.CreatePaymentRequest;
-import com.alphbank.payment.rest.model.Payment;
+import com.alphbank.payment.rest.model.response.InternalPaymentDTO;
 import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +31,11 @@ public class CorePaymentStubsTest extends IntegrationTestBase {
         CreatePaymentRequest paymentRequest = new CreatePaymentRequest(UUID.fromString("509c0b04-b1f4-4b72-bac9-3e50e9fbcee4"), UUID.fromString("509c0b04-b1f4-4b72-bac9-3e50e9fbcee4"), "string", "string", "string", Money.of(22, "SEK"), LocalDateTime.parse("2015-08-04T10:11:30"));
 
 
-        Payment response = webClient.post()
+        InternalPaymentDTO response = webClient.post()
                 .uri( "http://localhost:8081/payment")
                 .bodyValue(paymentRequest)
                 .exchange()
-                .expectBody(Payment.class)
+                .expectBody(InternalPaymentDTO.class)
                 .returnResult()
                 .getResponseBody();
 

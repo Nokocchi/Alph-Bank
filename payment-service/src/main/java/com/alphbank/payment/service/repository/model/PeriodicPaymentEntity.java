@@ -1,6 +1,8 @@
 package com.alphbank.payment.service.repository.model;
 
 import com.alphbank.payment.service.model.Payment;
+import com.alphbank.payment.service.model.PeriodicPayment;
+import com.alphbank.payment.service.model.PeriodicPaymentFrequency;
 import lombok.Builder;
 import lombok.Data;
 import org.javamoney.moneta.Money;
@@ -9,13 +11,13 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Builder
 @Data
-@Table("payment")
-public class PaymentEntity {
+@Table("periodic_payment")
+public class PeriodicPaymentEntity {
 
     @Column("id")
     @Id
@@ -48,8 +50,14 @@ public class PaymentEntity {
     @Column("recipient_name")
     private String recipientName;
 
-    @Column("scheduled_date_time")
-    private LocalDateTime scheduledDateTime;
+    @Column("start_date")
+    private LocalDate startDate;
+
+    @Column("end_date")
+    private LocalDate endDate;
+
+    @Column("frequency")
+    private PeriodicPaymentFrequency frequency;
 
     @Column("request_id")
     private UUID requestId;
@@ -57,8 +65,12 @@ public class PaymentEntity {
     @Column("psu_ip_address")
     private String psuIPAddress;
 
-    public static PaymentEntity from(Payment payment) {
-        return PaymentEntity.builder()
+    //executionRule
+    //dayOfExecution
+    //monthsOfExecution
+
+    public static PeriodicPaymentEntity from(PeriodicPayment payment) {
+        return PeriodicPaymentEntity.builder()
                 .id(payment.id())
                 .basketId(payment.basketId())
                 .coreReference(payment.coreReference())
@@ -69,14 +81,16 @@ public class PaymentEntity {
                 .amount(payment.monetaryAmount().getNumber().numberValue(BigDecimal.class))
                 .currency(payment.monetaryAmount().getCurrency().getCurrencyCode())
                 .recipientName(payment.recipientName())
-                .scheduledDateTime(payment.scheduledDateTime())
+                .startDate(payment.startDate())
+                .endDate(payment.endDate())
+                .frequency(payment.frequency())
                 .requestId(payment.requestId())
                 .psuIPAddress(payment.psuIPAddress())
                 .build();
     }
 
-    public Payment toModel(){
-        return Payment.builder()
+    public PeriodicPayment toModel(){
+        return PeriodicPayment.builder()
                 .id(id)
                 .basketId(basketId)
                 .coreReference(coreReference)
@@ -86,9 +100,13 @@ public class PaymentEntity {
                 .messageToRecipient(messageToRecipient)
                 .monetaryAmount(Money.of(amount, currency))
                 .recipientName(recipientName)
-                .scheduledDateTime(scheduledDateTime)
+                .startDate(startDate)
+                .endDate(endDate)
+                .frequency(frequency)
                 .requestId(requestId)
                 .psuIPAddress(psuIPAddress)
                 .build();
     }
+
+
 }

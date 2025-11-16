@@ -2,7 +2,7 @@ package com.alphbank.payment.rest;
 
 import com.alphbank.commons.impl.JsonLog;
 import com.alphbank.payment.rest.model.request.CreatePaymentRequest;
-import com.alphbank.payment.rest.model.Payment;
+import com.alphbank.payment.rest.model.response.InternalPaymentDTO;
 import com.alphbank.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class PaymentController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<ResponseEntity<Payment>> createPayment(@RequestBody CreatePaymentRequest createPaymentRequest){
+    public Mono<ResponseEntity<InternalPaymentDTO>> createPayment(@RequestBody CreatePaymentRequest createPaymentRequest){
         log.info("Creating payment {}", jsonLog.format(createPaymentRequest));
         return paymentService.createPayment(createPaymentRequest)
                 .doOnNext(response -> log.info("Returning newly created payment {}", jsonLog.format(response)))

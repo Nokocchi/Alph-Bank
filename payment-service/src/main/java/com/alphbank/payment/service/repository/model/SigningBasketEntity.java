@@ -1,6 +1,7 @@
 package com.alphbank.payment.service.repository.model;
 
 import com.alphbank.payment.service.model.BasketSigningStatus;
+import com.alphbank.payment.service.model.SigningBasket;
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;
@@ -13,14 +14,11 @@ import java.util.UUID;
 @Builder
 @Data
 @Table("basket")
-public class BasketEntity {
+public class SigningBasketEntity {
 
     @Column("id")
     @Id
-    private UUID basketId;
-
-    @Column("customer_id")
-    private UUID customerId;
+    private UUID id;
 
     @With
     @Column("signing_session_id")
@@ -29,11 +27,17 @@ public class BasketEntity {
     @Builder.Default
     @With
     @Column("signing_status")
-    private String signingStatus = BasketSigningStatus.NOT_YET_STARTED.toString();
+    private BasketSigningStatus signingStatus = BasketSigningStatus.NOT_YET_STARTED;
 
-    public static BasketEntity from(UUID customerId) {
-        return BasketEntity.builder()
-                .customerId(customerId)
-                .build();
+    public static SigningBasketEntity from(SigningBasket basket) {
+        SigningBasketEntityBuilder builder = SigningBasketEntity.builder()
+                .id(basket.id())
+                .signingSessionId(basket.signingSessionId());
+
+        if (basket.signingStatus() != null) {
+            builder.signingStatus(basket.signingStatus());
+        }
+
+        return builder.build();
     }
 }

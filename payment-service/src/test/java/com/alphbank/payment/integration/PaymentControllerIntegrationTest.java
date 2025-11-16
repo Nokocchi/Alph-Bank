@@ -7,7 +7,7 @@ import com.alphbank.payment.rest.model.response.SetupSigningSessionRestResponse;
 import com.alphbank.payment.service.PaymentService;
 import com.alphbank.payment.service.repository.BasketRepository;
 import com.alphbank.payment.service.repository.PaymentRepository;
-import com.alphbank.payment.service.repository.model.BasketEntity;
+import com.alphbank.payment.service.repository.model.SigningBasketEntity;
 import com.alphbank.payment.service.repository.model.PaymentEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.javamoney.moneta.Money;
@@ -69,7 +69,7 @@ public class PaymentControllerIntegrationTest extends IntegrationTestBase {
         // If this is an integration test, maybe I shouldn't mess with the repositories directly..
         paymentRepository.findAll().collectList().doOnNext(l -> l.forEach(s -> log.info(jsonLog.format(s))));
 
-        BasketEntity basket = BasketEntity.from(basketId);
+        SigningBasketEntity basket = SigningBasketEntity.from(basketId);
         basketRepository.save(basket);
 
         SetupSigningSessionRestRequest basketRequest = new SetupSigningSessionRestRequest(basketId,

@@ -3,9 +3,10 @@ package com.alphbank.payment.service;
 import com.alphbank.commons.impl.JsonLog;
 import com.alphbank.core.client.CorePaymentClient;
 import com.alphbank.core.client.model.MonetaryAmountDTO;
-import com.alphbank.payment.rest.model.Basket;
-import com.alphbank.payment.rest.model.Payment;
-import com.alphbank.payment.rest.model.request.CreatePaymentRequest;
+import com.alphbank.core.client.model.PaymentDTO;
+import com.alphbank.payment.rest.error.model.PaymentNotFoundException;
+import com.alphbank.payment.rest.model.response.BasketDTO;
+import com.alphbank.payment.rest.model.response.InternalPaymentDTO;
 import com.alphbank.payment.rest.model.request.SetupSigningSessionRestRequest;
 import com.alphbank.payment.rest.model.response.SetupSigningSessionRestResponse;
 import com.alphbank.payment.service.amqp.configuration.RabbitConfigurationProperties;
@@ -15,9 +16,11 @@ import com.alphbank.payment.service.client.signingservice.configuration.SigningS
 import com.alphbank.payment.service.client.signingservice.model.SetupSigningSessionRequest;
 import com.alphbank.payment.service.client.signingservice.model.SetupSigningSessionResponse;
 import com.alphbank.payment.service.model.BasketSigningStatus;
+import com.alphbank.payment.service.model.Payment;
+import com.alphbank.payment.service.model.PaymentTransactionStatus;
 import com.alphbank.payment.service.repository.BasketRepository;
 import com.alphbank.payment.service.repository.PaymentRepository;
-import com.alphbank.payment.service.repository.model.BasketEntity;
+import com.alphbank.payment.service.repository.model.SigningBasketEntity;
 import com.alphbank.payment.service.repository.model.PaymentEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +30,6 @@ import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -38,57 +40,108 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final BasketRepository basketRepository;
     private final SigningServiceClient signingServiceClient;
-    private final SigningServiceClientConfigurationProperties signingServiceProperties;
-    private final RabbitConfigurationProperties rabbitProperties;
     private final CorePaymentClient corePaymentClient;
     private final JsonLog jsonLog;
 
-    private final Set<BasketSigningStatus> editableBasketStatuses = Set.of(BasketSigningStatus.NOT_YET_STARTED, BasketSigningStatus.FAILED);
+    // TODO: Get rid of these
+    private final SigningServiceClientConfigurationProperties signingServiceProperties;
+    private final RabbitConfigurationProperties rabbitProperties;
 
-    public Mono<Payment> createPayment(CreatePaymentRequest createPaymentRequest) {
-        UUID customerId = createPaymentRequest.fromCustomerId();
-        return findEditableBasket(customerId)
-                .switchIfEmpty(createBasket(customerId))
-                .map(basketEntity -> PaymentEntity.from(basketEntity.getBasketId(), createPaymentRequest))
+
+    public Mono<Payment> createPayment(Payment payment) {
+        log.info("Creating payment {}", jsonLog.format(payment));
+        return Mono.just(payment)
+                .map(PaymentEntity::from)
                 .flatMap(paymentRepository::save)
-                .map(this::convertPaymentToRestModel);
+                .map(PaymentEntity::toModel);
     }
 
-    private Mono<BasketEntity> findEditableBasket(UUID customerId) {
+    public Mono<Payment> findPaymentById(UUID paymentId){
+        log.info("Searching for payment with id {}", paymentId);
+        return Mono.just(paymentId)
+                .flatMap(paymentRepository::findById)
+                .doOnNext(payment -> log.info("Found payment with id {}", paymentId))
+                .map(PaymentEntity::toModel)
+                .flatMap(this::appendTransactionStatus)
+                .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)));
+    }
+
+    public Mono<Void> deletePayment(UUID paymentId) {
+        log.info("Deleting payment with id {}", paymentId);
+        return paymentRepository.findById(paymentId)
+                .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)))
+                .flatMap(this::getIdIfDeletable)
+                .flatMap(paymentRepository::deleteById)
+                .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)))
+                .then();
+    }
+
+    private Mono<UUID> getIdIfDeletable(PaymentEntity payment){
+        return canDeletePayment(payment)
+                .flatMap(canDelete -> canDelete ? Mono.just(payment.getId()) : Mono.empty());
+    }
+
+    // TODO: Not sure if this works
+    // Try to fetch the basket's editable flag and return that.
+    // If there is no basketId, or if a basket could not be found, we have an empty Mono, and we default to true.
+    private Mono<Boolean> canDeletePayment(PaymentEntity paymentEntity){
+        return Mono.justOrEmpty(paymentEntity.getBasketId())
+                .flatMap(basketRepository::findById)
+                .map(SigningBasketEntity::getSigningStatus)
+                .map(BasketSigningStatus::editable)
+                .defaultIfEmpty(true);
+    }
+
+    private Mono<Payment> appendTransactionStatus(Payment payment){
+        if(payment.basketId() == null){
+            return Mono.empty();
+        }
+
+        return basketRepository.findById(payment.basketId())
+                .map(SigningBasketEntity::getSigningStatus)
+                .flatMap(signingStatus -> getPaymentTransactionStatus(payment, signingStatus))
+                .map(payment::withTransactionStatus)
+                .thenReturn(payment);
+    }
+
+    private Mono<PaymentTransactionStatus> getPaymentTransactionStatus(Payment payment, BasketSigningStatus signingStatus) {
+        return switch (signingStatus) {
+            case NOT_YET_STARTED -> Mono.just(PaymentTransactionStatus.RECEIVED);
+            case SIGNING_SESSION_CREATED -> Mono.just(PaymentTransactionStatus.AUTHORIZATION_CREATED);
+            case SIGNING_IN_PROGRESS -> Mono.just(PaymentTransactionStatus.AUTHORIZATION_STARTED);
+            case FAILED -> Mono.just(PaymentTransactionStatus.AUTHORIZATION_FAILED);
+            // TODO: Use @Transactional to ensure that a payment is only set to COMPLETED when it has a coreReference
+            case COMPLETED -> corePaymentClient.getPayment(payment.coreReference())
+                    .map(PaymentDTO::getStatus)
+                    .map(PaymentTransactionStatus::fromCoreTransactionStatus);
+        };
+    }
+
+    private Mono<SigningBasketEntity> findEditableBasket(UUID customerId) {
         return basketRepository.findByCustomerId(customerId)
                 .filter(this::isEditable);
     }
 
-    private boolean isEditable(BasketEntity basketEntity) {
-        return editableBasketStatuses.contains(BasketSigningStatus.valueOf(basketEntity.getSigningStatus()));
-    }
-
-    private Mono<BasketEntity> createBasket(UUID customerId) {
-        BasketEntity basketEntity = BasketEntity.from(customerId);
+    private Mono<SigningBasketEntity> createBasket(UUID customerId) {
+        SigningBasketEntity basketEntity = SigningBasketEntity.from(customerId);
         return basketRepository.save(basketEntity);
     }
 
-    public Mono<Object> deletePayment(UUID paymentId) {
-        return paymentRepository.findById(paymentId)
-                .flatMap(paymentEntity -> basketRepository.findById(paymentEntity.getBasketId()))
-                .filter(this::isEditable)
-                .map(basketEntity -> paymentRepository.deleteById(paymentId))
-                .thenReturn(paymentId);
-    }
 
-    private Payment convertPaymentToRestModel(PaymentEntity paymentEntity) {
-        return new Payment(paymentEntity.getPaymentId(),
+
+    private InternalPaymentDTO convertPaymentToRestModel(PaymentEntity paymentEntity) {
+        return new InternalPaymentDTO(paymentEntity.getId(),
                 paymentEntity.getAccountId(),
                 paymentEntity.getBasketId(),
-                paymentEntity.getRecipientIBAN(),
+                paymentEntity.getRecipientIban(),
                 paymentEntity.getMessageToSelf(),
                 paymentEntity.getMessageToRecipient(),
                 Money.of(paymentEntity.getAmount(), paymentEntity.getCurrency()),
                 paymentEntity.getScheduledDateTime());
     }
 
-    private Basket convertBasketToRestModel(UUID basketId, List<Payment> payments) {
-        return new Basket(basketId, payments);
+    private BasketDTO convertBasketToRestModel(UUID basketId, List<InternalPaymentDTO> payments) {
+        return new BasketDTO(basketId, payments);
     }
 
     public Mono<Void> handleNewSigningStatus(UUID signingSessionId, SigningStatus signingStatus) {
@@ -101,18 +154,18 @@ public class PaymentService {
     }
 
     // TODO: maybe have an endpoint in the core that takes a list of payments, instead of sending one payment at a time?
-    private Mono<Void> executeBasket(BasketEntity basketEntity) {
-        return paymentRepository.findByBasketId(basketEntity.getBasketId())
+    private Mono<Void> executeBasket(SigningBasketEntity basketEntity) {
+        return paymentRepository.findByBasketId(basketEntity.getId())
                 .map(paymentEntity -> toCreateCorePaymentRequest(basketEntity, paymentEntity))
                 .flatMap(corePaymentClient::createPayment)
                 .then();
     }
 
-    private com.alphbank.core.client.model.CreatePaymentRequestDTO toCreateCorePaymentRequest(BasketEntity basketEntity, PaymentEntity paymentEntity) {
+    private com.alphbank.core.client.model.CreatePaymentRequestDTO toCreateCorePaymentRequest(SigningBasketEntity basketEntity, PaymentEntity paymentEntity) {
         return com.alphbank.core.client.model.CreatePaymentRequestDTO.builder()
                 .fromCustomerId(basketEntity.getCustomerId())
                 .fromAccountId(paymentEntity.getAccountId())
-                .recipientIban(paymentEntity.getRecipientIBAN())
+                .recipientIban(paymentEntity.getRecipientIban())
                 .messageToSelf(paymentEntity.getMessageToSelf())
                 .messageToRecipient(paymentEntity.getMessageToRecipient())
                 .amount(MonetaryAmountDTO.
@@ -133,15 +186,15 @@ public class PaymentService {
         };
     }
 
-    public Mono<Basket> findActiveBasketByCustomerId(UUID customerId) {
+    public Mono<BasketDTO> findActiveBasketByCustomerId(UUID customerId) {
         return basketRepository.findByCustomerId(customerId)
                 .filter(basket -> !BasketSigningStatus.COMPLETED.toString().equals(basket.getSigningStatus()))
-                .map(BasketEntity::getBasketId)
+                .map(SigningBasketEntity::getId)
                 .zipWhen(this::findPaymentsByBasketId)
                 .map(TupleUtils.function(this::convertBasketToRestModel));
     }
 
-    private Mono<List<Payment>> findPaymentsByBasketId(UUID basketId) {
+    private Mono<List<InternalPaymentDTO>> findPaymentsByBasketId(UUID basketId) {
         return paymentRepository.findByBasketId(basketId)
                 .map(this::convertPaymentToRestModel)
                 .collectList();
@@ -177,8 +230,8 @@ public class PaymentService {
         );
     }
 
-    private Mono<SetupSigningSessionRestResponse> persistSigningSessionData(SetupSigningSessionResponse signingSession, BasketEntity basketEntity) {
-        BasketEntity updatedBasketEntity = basketEntity.withSigningSessionId(signingSession.signingSessionId());
+    private Mono<SetupSigningSessionRestResponse> persistSigningSessionData(SetupSigningSessionResponse signingSession, SigningBasketEntity basketEntity) {
+        SigningBasketEntity updatedBasketEntity = basketEntity.withSigningSessionId(signingSession.signingSessionId());
         return basketRepository.save(updatedBasketEntity)
                 .thenReturn(new SetupSigningSessionRestResponse(signingSession.signingUrl()));
     }
@@ -187,7 +240,7 @@ public class PaymentService {
         return String.format(signingServiceProperties.getSinglePaymentDocumentToSignTemplate(),
                 paymentEntity.getAmount(),
                 paymentEntity.getCurrency(),
-                paymentEntity.getRecipientIBAN(),
+                paymentEntity.getRecipientIban(),
                 paymentEntity.getScheduledDateTime());
     }
 }
