@@ -1,6 +1,9 @@
 package com.alphbank.payment.rest;
 
+import com.alphbank.commons.impl.JsonLog;
 import com.alphbank.payment.service.PaymentService;
+import com.alphbank.payment.service.model.BasketSigningStatus;
+import com.alphbank.payment.service.model.SigningBasket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -11,17 +14,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 import java.net.URI;
 import java.util.UUID;
 
-@Tag(name = "Signing Baskets Service (SBS", description = "Based on NextGenPSD2 OpenAPI spec from Berlin Group")
+@Tag(name = "Signing Baskets Service (SBS)", description = "Based on NextGenPSD2 OpenAPI spec from Berlin Group")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/v1/signing-baskets")
 public class PSD2BasketController {
 
+    private final JsonLog jsonLog;
     private final PaymentService paymentService;
 
     @Operation(
@@ -35,12 +40,16 @@ public class PSD2BasketController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<SigningBasketResponse201DTO> createSigningBasket(
             @RequestParam("X-Request-ID") @Valid UUID xRequestID,
-            @RequestParam("PSU-IP-Address") String psUIPAddress,
-            @RequestParam("TPP-Redirect-URI") @Valid URI tpPRedirectURI,
-            @RequestParam("TPP-Nok-Redirect-URI") @Valid URI tpPNokRedirectURI,
-            @RequestBody Mono<@Valid SigningBasketDTO> signingBasketDTO) {
-        return Mono.empty();
-
+            @RequestParam("PSU-IP-Address") String psuIPAddress,
+            @RequestParam("TPP-Redirect-URI") @Valid URI tppRedirectURI,
+            @RequestParam("TPP-Nok-Redirect-URI") @Valid URI tppNokRedirectURI,
+            @RequestBody Mono<@Valid @UUIDNotNullPaymentIds SigningBasketDTO> signingBasketDTO) {
+        SigningBasket signingBasket = SigningBasket.from(psuIPAddress, tppRedirectURI, tppNokRedirectURI);
+        return signingBasketDTO
+                .doOnNext(request -> log.info("Creating PSD2 with requestId: {} and dto: {}", xRequestID, jsonLog.format(request)))
+                .flatMap(dto -> paymentService.createBasket(signingBasket, dto.getPaymentIds()))
+                .zipWhen(basket -> paymentService.getSigningBasketLinks(basket.id()))
+                .map(TupleUtils.function(SigningBasket::toPSD2InitiationDTO));
     }
 
     @Operation(
@@ -52,7 +61,8 @@ public class PSD2BasketController {
     public Mono<Void> deleteSigningBasket(
             @PathVariable @Valid UUID basketId,
             @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
-        return Mono.empty();
+        log.info("Delete PSD2 basket with id: {} and requestId: {}", basketId, xRequestID);
+        return paymentService.deleteBasket(basketId);
     }
 
 
@@ -62,7 +72,9 @@ public class PSD2BasketController {
     public Mono<SigningBasketResponse200DTO> getSigningBasket(
             @PathVariable @Valid UUID basketId,
             @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
-        return Mono.empty();
+        log.info("Get PSD2 basket with id: {} and requestId: {}", basketId, xRequestID);
+        return paymentService.getSigningBasket(basketId)
+                .map(SigningBasket::toPSD2InfoDTO);
     }
 
     @Operation(summary = "Gets the signing (authorization) status of the signing basket.")
@@ -72,7 +84,10 @@ public class PSD2BasketController {
             @PathVariable @Valid UUID basketId,
             @PathVariable String authorisationId,
             @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
-        return Mono.empty();
+        log.info("Get PSD2 basket authorization status with basket id: {} and requestId: {}", basketId, xRequestID);
+        return paymentService.getSigningBasketAuthorizationStatus(basketId)
+                .map(BasketSigningStatus::toPSD2ScaStatus)
+                .map(ScaStatusResponseDTO::new);
     }
 
     @Operation(
@@ -83,7 +98,14 @@ public class PSD2BasketController {
     @PostMapping(path = "/{basketId}/authorisations", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<StartScaprocessResponseDTO> startSigningBasketAuthorisation(
             @PathVariable @Valid UUID basketId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
-        return Mono.empty();
+            @RequestParam("X-Request-ID") @Valid UUID xRequestID,
+            @RequestHeader("PSU-Accept-Language") String languageCode
+    ) {
+        log.info("Start authorization of PSD2 basket with id: {}, requestId: {} and language code: {}", basketId, xRequestID, languageCode);
+        String nationalId = "123456789"; // Let's imagine that this endpoint takes a JWT bearer with the PSU's national ID
+        return paymentService.setupSigningSessionForBasket(basketId, languageCode, nationalId)
+                .zipWhen(basket -> paymentService.getSigningBasketLinks(basket.id()))
+                .map(TupleUtils.function(SigningBasket::toPSD2StartAuthorizationDTO));
+
     }
 }

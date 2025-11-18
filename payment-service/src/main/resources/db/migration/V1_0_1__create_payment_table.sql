@@ -10,7 +10,6 @@ CREATE TABLE payment (
     payment_currency VARCHAR(3) NOT NULL,
     recipient_name TEXT,
     scheduled_date_time TIMESTAMP WITHOUT TIME ZONE,
-    request_id UUID,
     psu_ip_address TEXT,
 
     PRIMARY KEY(id)

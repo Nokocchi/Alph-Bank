@@ -4,31 +4,36 @@ import com.alphbank.commons.impl.JsonLog;
 import com.alphbank.core.client.CorePaymentClient;
 import com.alphbank.core.client.model.MonetaryAmountDTO;
 import com.alphbank.core.client.model.PaymentDTO;
+import com.alphbank.payment.rest.error.model.BasketCreationException;
+import com.alphbank.payment.rest.error.model.BasketNotFoundException;
+import com.alphbank.payment.rest.error.model.CannotDeleteBasketWithAuthorizationException;
 import com.alphbank.payment.rest.error.model.PaymentNotFoundException;
 import com.alphbank.payment.rest.model.response.BasketDTO;
 import com.alphbank.payment.rest.model.response.InternalPaymentDTO;
-import com.alphbank.payment.rest.model.request.SetupSigningSessionRestRequest;
-import com.alphbank.payment.rest.model.response.SetupSigningSessionRestResponse;
 import com.alphbank.payment.service.amqp.configuration.RabbitConfigurationProperties;
 import com.alphbank.payment.service.amqp.model.SigningStatus;
 import com.alphbank.payment.service.client.signingservice.SigningServiceClient;
 import com.alphbank.payment.service.client.signingservice.configuration.SigningServiceClientConfigurationProperties;
 import com.alphbank.payment.service.client.signingservice.model.SetupSigningSessionRequest;
 import com.alphbank.payment.service.client.signingservice.model.SetupSigningSessionResponse;
-import com.alphbank.payment.service.model.BasketSigningStatus;
-import com.alphbank.payment.service.model.Payment;
-import com.alphbank.payment.service.model.PaymentTransactionStatus;
+import com.alphbank.payment.service.config.PaymentServiceConfigurationProperties;
+import com.alphbank.payment.service.model.*;
 import com.alphbank.payment.service.repository.BasketRepository;
 import com.alphbank.payment.service.repository.PaymentRepository;
-import com.alphbank.payment.service.repository.model.SigningBasketEntity;
+import com.alphbank.payment.service.repository.PeriodicPaymentRepository;
 import com.alphbank.payment.service.repository.model.PaymentEntity;
+import com.alphbank.payment.service.repository.model.PeriodicPaymentEntity;
+import com.alphbank.payment.service.repository.model.SigningBasketEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.javamoney.moneta.Money;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +43,7 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final PeriodicPaymentRepository periodicPaymentRepository;
     private final BasketRepository basketRepository;
     private final SigningServiceClient signingServiceClient;
     private final CorePaymentClient corePaymentClient;
@@ -46,28 +52,29 @@ public class PaymentService {
     // TODO: Get rid of these
     private final SigningServiceClientConfigurationProperties signingServiceProperties;
     private final RabbitConfigurationProperties rabbitProperties;
+    private final PaymentServiceConfigurationProperties paymentServiceProperties;
 
 
     public Mono<Payment> createPayment(Payment payment) {
-        log.info("Creating payment {}", jsonLog.format(payment));
+        log.info("Creating payment: {}", jsonLog.format(payment));
         return Mono.just(payment)
                 .map(PaymentEntity::from)
                 .flatMap(paymentRepository::save)
                 .map(PaymentEntity::toModel);
     }
 
-    public Mono<Payment> findPaymentById(UUID paymentId){
-        log.info("Searching for payment with id {}", paymentId);
+    public Mono<Payment> findPaymentById(UUID paymentId) {
+        log.info("Searching for payment with id: {}", paymentId);
         return Mono.just(paymentId)
                 .flatMap(paymentRepository::findById)
-                .doOnNext(payment -> log.info("Found payment with id {}", paymentId))
+                .doOnNext(payment -> log.info("Found payment with id: {}", paymentId))
                 .map(PaymentEntity::toModel)
                 .flatMap(this::appendTransactionStatus)
                 .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)));
     }
 
     public Mono<Void> deletePayment(UUID paymentId) {
-        log.info("Deleting payment with id {}", paymentId);
+        log.info("Deleting payment with id: {}", paymentId);
         return paymentRepository.findById(paymentId)
                 .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)))
                 .flatMap(this::getIdIfDeletable)
@@ -76,7 +83,7 @@ public class PaymentService {
                 .then();
     }
 
-    private Mono<UUID> getIdIfDeletable(PaymentEntity payment){
+    private Mono<UUID> getIdIfDeletable(PaymentEntity payment) {
         return canDeletePayment(payment)
                 .flatMap(canDelete -> canDelete ? Mono.just(payment.getId()) : Mono.empty());
     }
@@ -84,7 +91,7 @@ public class PaymentService {
     // TODO: Not sure if this works
     // Try to fetch the basket's editable flag and return that.
     // If there is no basketId, or if a basket could not be found, we have an empty Mono, and we default to true.
-    private Mono<Boolean> canDeletePayment(PaymentEntity paymentEntity){
+    private Mono<Boolean> canDeletePayment(PaymentEntity paymentEntity) {
         return Mono.justOrEmpty(paymentEntity.getBasketId())
                 .flatMap(basketRepository::findById)
                 .map(SigningBasketEntity::getSigningStatus)
@@ -92,8 +99,20 @@ public class PaymentService {
                 .defaultIfEmpty(true);
     }
 
-    private Mono<Payment> appendTransactionStatus(Payment payment){
-        if(payment.basketId() == null){
+    private Mono<Payment> appendTransactionStatus(Payment payment) {
+        if (payment.basketId() == null) {
+            return Mono.empty();
+        }
+
+        return basketRepository.findById(payment.basketId())
+                .map(SigningBasketEntity::getSigningStatus)
+                .flatMap(signingStatus -> getPaymentTransactionStatus(payment, signingStatus))
+                .map(payment::withTransactionStatus)
+                .thenReturn(payment);
+    }
+
+    private Mono<PeriodicPayment> appendTransactionStatus(PeriodicPayment payment) {
+        if (payment.basketId() == null) {
             return Mono.empty();
         }
 
@@ -117,16 +136,138 @@ public class PaymentService {
         };
     }
 
+    private Mono<PeriodicPaymentTransactionStatus> getPaymentTransactionStatus(PeriodicPayment payment, BasketSigningStatus signingStatus) {
+        return switch (signingStatus) {
+            case NOT_YET_STARTED -> Mono.just(PeriodicPaymentTransactionStatus.RECEIVED);
+            case SIGNING_SESSION_CREATED -> Mono.just(PeriodicPaymentTransactionStatus.AUTHORIZATION_CREATED);
+            case SIGNING_IN_PROGRESS -> Mono.just(PeriodicPaymentTransactionStatus.AUTHORIZATION_STARTED);
+            case FAILED -> Mono.just(PeriodicPaymentTransactionStatus.AUTHORIZATION_FAILED);
+            case COMPLETED -> Mono.just(PeriodicPaymentTransactionStatus.CORE_ACCEPTED);
+        };
+    }
+
+
+    public Mono<PeriodicPayment> createPeriodicPayment(PeriodicPayment periodicPayment) {
+        log.info("Creating periodic payment: {}", jsonLog.format(periodicPayment));
+        return Mono.just(periodicPayment)
+                .map(PeriodicPaymentEntity::from)
+                .flatMap(periodicPaymentRepository::save)
+                .map(PeriodicPaymentEntity::toModel);
+    }
+
+    public Mono<PeriodicPayment> findPeriodicPaymentById(UUID paymentId) {
+        log.info("Searching for periodic payment with id: {}", paymentId);
+        return Mono.just(paymentId)
+                .flatMap(periodicPaymentRepository::findById)
+                .doOnNext(payment -> log.info("Found periodic payment with id: {}", paymentId))
+                .map(PeriodicPaymentEntity::toModel)
+                .flatMap(this::appendTransactionStatus)
+                .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)));
+    }
+
+    @Transactional
+    public Mono<SigningBasket> createBasket(SigningBasket signingBasket, List<String> paymentIds) {
+        log.info("Creating signing basket: {}", signingBasket);
+
+        List<UUID> paymentUUIDs = paymentIds.stream().map(UUID::fromString).toList();
+
+        Mono<List<PaymentEntity>> payments = paymentRepository.findAllById(paymentUUIDs).collectList().cache();
+        Mono<List<PeriodicPaymentEntity>> periodicPayments = periodicPaymentRepository.findAllById(paymentUUIDs).collectList().cache();
+
+        Mono<Void> validatePaymentsCount = Flux.merge(payments.flatMapMany(Flux::fromIterable), periodicPayments.flatMapMany(Flux::fromIterable))
+                .count()
+                .flatMap(count -> count == paymentUUIDs.size() ? Mono.empty() : Mono.error(new BasketCreationException(paymentUUIDs.size(), count)));
+
+        return validatePaymentsCount.then(
+                Mono.just(signingBasket)
+                        .map(SigningBasketEntity::from)
+                        .flatMap(basketRepository::save)
+                        .flatMap(savedBasket ->
+                                Mono.zip(
+                                        Mono.just(savedBasket),
+                                        payments,
+                                        periodicPayments
+                                )
+                        )
+                        .map(TupleUtils.function(SigningBasket::from)));
+    }
+
+    public Mono<SigningBasketLinks> getSigningBasketLinks(UUID basketId) {
+        SigningBasketLinks links = SigningBasketLinks.builder()
+                .basketStatusURI(URI.create(paymentServiceProperties.getBasketStatusURITemplate().formatted(basketId)))
+                .basketAuthorizationURI(URI.create(paymentServiceProperties.getBasketAuthorizationURITemplate().formatted(basketId)))
+                .basketAuthorizationStatsURI(URI.create(paymentServiceProperties.getBasketAuthorizationStatusURITemplate().formatted(basketId)))
+                .build();
+        return Mono.just(links);
+    }
+
+    public Mono<Void> deleteBasket(UUID basketId) {
+        return basketRepository.findById(basketId)
+                .switchIfEmpty(Mono.error(new BasketNotFoundException(basketId)))
+                .filter(basket -> basket.getSigningStatus() == BasketSigningStatus.NOT_YET_STARTED)
+                .switchIfEmpty(Mono.error(new CannotDeleteBasketWithAuthorizationException(basketId)))
+                .then(Mono.defer(() -> paymentRepository.clearBasketIdOfPaymentsWithBasketId(basketId)))
+                .then(Mono.defer(() -> basketRepository.deleteById(basketId)));
+    }
+
+    public Mono<SigningBasket> getSigningBasket(UUID basketId) {
+        return basketRepository.findById(basketId)
+                .switchIfEmpty(Mono.error(new BasketNotFoundException(basketId)))
+                .flatMap(basketEntity -> Mono.zip(
+                        Mono.just(basketEntity),
+                        paymentRepository.findByBasketId(basketId).collectList(),
+                        periodicPaymentRepository.findByBasketId(basketId).collectList()
+                ))
+                .map(TupleUtils.function(SigningBasket::from));
+    }
+
+    public Mono<BasketSigningStatus> getSigningBasketAuthorizationStatus(UUID basketId) {
+        return basketRepository.findById(basketId)
+                .switchIfEmpty(Mono.error(new BasketNotFoundException(basketId)))
+                .map(SigningBasketEntity::getSigningStatus);
+    }
+
+    public Mono<SigningBasket> setupSigningSessionForBasket(UUID basketId, String languageCode, String nationalId) {
+        Mono<SigningBasketEntity> findBasketEntity = basketRepository.findById(basketId).cache();
+
+        return findBasketEntity
+                .zipWith(getSigningBasketDocument(basketId))
+                .map(TupleUtils.function((basketEntity, formattedDocument) -> createSetupSigningSessionRequest(formattedDocument, languageCode, nationalId, basketEntity.getOnSignSuccessRedirectUri(), basketEntity.getOnSignFailedRedirectUri())))
+                .flatMap(signingServiceClient::setupSigningSession)
+                .zipWith(findBasketEntity)
+                .flatMap(TupleUtils.function(this::persistSigningSessionData))
+                .then(Mono.defer(() -> getSigningBasket(basketId)));
+    }
+
+    private Mono<String> getSigningBasketDocument(UUID basketId) {
+        String singlePaymentDocumentTemplate = signingServiceProperties.getSinglePaymentDocumentToSignTemplate();
+        String periodicPaymentDocumentTemplate = signingServiceProperties.getGetPeriodicPaymentDocumentToSignTemplate();
+
+        Flux<String> singlePaymentDocuments = paymentRepository.findByBasketId(basketId)
+                .map(paymentEntity -> paymentEntity.asFormattedDocument(singlePaymentDocumentTemplate));
+
+        Flux<String> periodicPaymentDocuments = periodicPaymentRepository.findByBasketId(basketId)
+                .map(periodicPaymentEntity -> periodicPaymentEntity.asFormattedDocument(periodicPaymentDocumentTemplate));
+
+        return Flux.concat(singlePaymentDocuments, periodicPaymentDocuments)
+                .collectList()
+                .map(formattedDocumentList -> String.join("\n", formattedDocumentList));
+    }
+
+    private Mono<SigningBasketEntity> persistSigningSessionData(SetupSigningSessionResponse signingSession, SigningBasketEntity basketEntity) {
+        SigningBasketEntity updatedBasketEntity = basketEntity
+                .withSigningSessionId(signingSession.signingSessionId())
+                .withSigningURI(signingSession.signingUrl())
+                .withSigningStatus(BasketSigningStatus.SIGNING_SESSION_CREATED);
+        return basketRepository.save(updatedBasketEntity);
+    }
+
+    //---------------------------
+
     private Mono<SigningBasketEntity> findEditableBasket(UUID customerId) {
         return basketRepository.findByCustomerId(customerId)
                 .filter(this::isEditable);
     }
-
-    private Mono<SigningBasketEntity> createBasket(UUID customerId) {
-        SigningBasketEntity basketEntity = SigningBasketEntity.from(customerId);
-        return basketRepository.save(basketEntity);
-    }
-
 
 
     private InternalPaymentDTO convertPaymentToRestModel(PaymentEntity paymentEntity) {
@@ -200,47 +341,15 @@ public class PaymentService {
                 .collectList();
     }
 
-    public Mono<UUID> deleteBasket(UUID basketId) {
-        return paymentRepository.findByBasketId(basketId)
-                .flatMap(paymentRepository::delete)
-                .then(basketRepository.deleteById(basketId))
-                .thenReturn(basketId);
-    }
 
-    public Mono<SetupSigningSessionRestResponse> setupSigningSessionForBasket(UUID basketId, SetupSigningSessionRestRequest request) {
-        return paymentRepository.findByBasketId(basketId)
-                .map(this::asFormattedDocument)
-                .collectList()
-                .map(formattedDocumentList -> String.join("\n", formattedDocumentList))
-                .map(formattedDocument -> createSetupSigningSessionRequest(formattedDocument, request))
-                .flatMap(signingServiceClient::setupSigningSession)
-                .zipWith(basketRepository.findById(basketId))
-                .flatMap(TupleUtils.function(this::persistSigningSessionData));
-    }
-
-    private SetupSigningSessionRequest createSetupSigningSessionRequest(String formattedDocument, SetupSigningSessionRestRequest request) {
+    private SetupSigningSessionRequest createSetupSigningSessionRequest(String formattedDocument, String nationalId, String languageCode, URI onSuccessRedirectURI, URI onFailedRedirectURI) {
         return new SetupSigningSessionRequest(
-                request.customerId(),
-                request.nationalId(),
-                request.locale(),
+                nationalId,
+                languageCode,
                 rabbitProperties.getPaymentSigningStatusRoutingKey(),
                 formattedDocument,
-                request.onSigningSuccessRedirectUrl(),
-                request.onSigningFailedRedirectUrl()
+                onSuccessRedirectURI,
+                onFailedRedirectURI
         );
-    }
-
-    private Mono<SetupSigningSessionRestResponse> persistSigningSessionData(SetupSigningSessionResponse signingSession, SigningBasketEntity basketEntity) {
-        SigningBasketEntity updatedBasketEntity = basketEntity.withSigningSessionId(signingSession.signingSessionId());
-        return basketRepository.save(updatedBasketEntity)
-                .thenReturn(new SetupSigningSessionRestResponse(signingSession.signingUrl()));
-    }
-
-    private String asFormattedDocument(PaymentEntity paymentEntity) {
-        return String.format(signingServiceProperties.getSinglePaymentDocumentToSignTemplate(),
-                paymentEntity.getAmount(),
-                paymentEntity.getCurrency(),
-                paymentEntity.getRecipientIban(),
-                paymentEntity.getScheduledDateTime());
     }
 }

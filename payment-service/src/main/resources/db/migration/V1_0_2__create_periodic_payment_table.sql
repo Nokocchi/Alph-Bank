@@ -12,7 +12,6 @@ CREATE TABLE periodic_payment (
     start_date DATE WITHOUT TIME ZONE NOT NULL,
     end_date DATE WITHOUT TIME ZONE,
     frequency TEXT NOT NULL,
-    request_id UUID,
     psu_ip_address TEXT,
 
     PRIMARY KEY(id)

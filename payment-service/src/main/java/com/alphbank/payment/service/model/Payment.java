@@ -2,6 +2,7 @@ package com.alphbank.payment.service.model;
 
 import com.alphbank.payment.rest.model.request.CreatePaymentRequest;
 import com.alphbank.payment.service.amqp.model.SigningStatus;
+import com.alphbank.payment.service.repository.model.PaymentEntity;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,13 +57,13 @@ public class Payment {
         return Payment.builder()
                 .fromAccountIban(dto.getDebtorAccount().getIban())
                 .recipientIban(dto.getCreditorAccount().getIban())
+                .messageToSelf((String) dto.getRemittanceInformationUnstructured())
+                .messageToRecipient((String) dto.getRemittanceInformationUnstructured())
                 .monetaryAmount(Money.of(
                         new BigDecimal(dto.getInstructedAmount().getAmount()),
                         dto.getInstructedAmount().getCurrency()
                 ))
                 .recipientName((String) dto.getCreditorName())
-                .messageToSelf((String) dto.getRemittanceInformationUnstructured())
-                .messageToRecipient((String) dto.getRemittanceInformationUnstructured())
                 .psuIPAddress(psuIPAddress)
                 .requestId(requestId)
                 .build();
@@ -111,6 +112,5 @@ public class Payment {
                 .transactionStatus(transactionStatus.toPSD2TransactionStatus())
                 .build();
     }
-
 
 }

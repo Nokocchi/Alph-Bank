@@ -23,7 +23,13 @@ alph:
       uri: http://localhost:8080
     signing-service:
       uri: http://localhost:8085
-      single-payment-document-to-sign-template: "I hereby authorize this payment of %s %s to the recipient IBAN number %s, with execution date and time %s"
+      single-payment-document-to-sign-template: "I hereby authorize this payment of %s %s to the recipient IBAN number %s, with execution date and time %s."
+      periodic-payment-document-to-sign-template: "I hereby authorize this periodic payment of %s %s to the recipient IBAN number %s, with start date %s, end date %s and frequency s%."
+    payment-service:
+      psd2:
+        basket-status-uri-template: http://localhost:${server.port}/v1/signing-baskets/%s
+        basket-authorization-status-uri-template: http://localhost:${server.port}/v1/signing-baskets/%s/authorisations/%s
+        basket-authorization-uri-template: http://localhost:${server.port}/v1/signing-baskets/%s/authorisations
 
 alph-commons:
   wiretapEnabled: true

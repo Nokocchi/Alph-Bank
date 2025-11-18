@@ -59,9 +59,6 @@ public class PeriodicPaymentEntity {
     @Column("frequency")
     private PeriodicPaymentFrequency frequency;
 
-    @Column("request_id")
-    private UUID requestId;
-
     @Column("psu_ip_address")
     private String psuIPAddress;
 
@@ -84,7 +81,6 @@ public class PeriodicPaymentEntity {
                 .startDate(payment.startDate())
                 .endDate(payment.endDate())
                 .frequency(payment.frequency())
-                .requestId(payment.requestId())
                 .psuIPAddress(payment.psuIPAddress())
                 .build();
     }
@@ -103,10 +99,12 @@ public class PeriodicPaymentEntity {
                 .startDate(startDate)
                 .endDate(endDate)
                 .frequency(frequency)
-                .requestId(requestId)
                 .psuIPAddress(psuIPAddress)
                 .build();
     }
 
+    public String asFormattedDocument(String documentTemplate) {
+        return documentTemplate.formatted(amount, currency, recipientIban, startDate, endDate, frequency);
+    }
 
 }

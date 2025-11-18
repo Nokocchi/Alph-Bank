@@ -11,6 +11,5 @@ public class SigningServiceClientConfigurationProperties {
 
     private String uri;
     private String singlePaymentDocumentToSignTemplate;
-
-
+    private String getPeriodicPaymentDocumentToSignTemplate;
 }

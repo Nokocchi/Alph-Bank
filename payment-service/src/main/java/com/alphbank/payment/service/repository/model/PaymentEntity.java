@@ -51,9 +51,6 @@ public class PaymentEntity {
     @Column("scheduled_date_time")
     private LocalDateTime scheduledDateTime;
 
-    @Column("request_id")
-    private UUID requestId;
-
     @Column("psu_ip_address")
     private String psuIPAddress;
 
@@ -70,7 +67,6 @@ public class PaymentEntity {
                 .currency(payment.monetaryAmount().getCurrency().getCurrencyCode())
                 .recipientName(payment.recipientName())
                 .scheduledDateTime(payment.scheduledDateTime())
-                .requestId(payment.requestId())
                 .psuIPAddress(payment.psuIPAddress())
                 .build();
     }
@@ -87,8 +83,11 @@ public class PaymentEntity {
                 .monetaryAmount(Money.of(amount, currency))
                 .recipientName(recipientName)
                 .scheduledDateTime(scheduledDateTime)
-                .requestId(requestId)
                 .psuIPAddress(psuIPAddress)
                 .build();
+    }
+
+    public String asFormattedDocument(String documentTemplate) {
+        return documentTemplate.formatted(amount, currency, recipientIban, scheduledDateTime);
     }
 }
