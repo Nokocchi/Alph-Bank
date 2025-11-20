@@ -1,7 +1,6 @@
 package com.alphbank.payment.rest;
 
 import com.alphbank.commons.impl.JsonLog;
-import com.alphbank.payment.rest.validation.ValidPaymentInitiation;
 import com.alphbank.payment.service.PaymentService;
 import com.alphbank.payment.service.model.Payment;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,9 +33,9 @@ public class PSD2PaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/sepa-credit-transfers", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<PaymentInitiationRequestResponse201DTO> initiatePayment(
-            @RequestParam("X-Request-ID") UUID xRequestID,
-            @RequestParam("PSU-IP-Address") String psuIPAddress,
-            @RequestBody Mono<@Valid @ValidPaymentInitiation PaymentInitiationJsonDTO> initiatePaymentRequestDTO) {
+            @RequestHeader("X-Request-ID") UUID xRequestID,
+            @RequestHeader("PSU-IP-Address") String psuIPAddress,
+            @RequestBody @Valid Mono<PaymentInitiationJsonDTO> initiatePaymentRequestDTO) {
         return initiatePaymentRequestDTO
                 .doOnNext(payment -> log.info("Creating PSD2 payment with requestId: {} and dto: {}", xRequestID, jsonLog.format(payment)))
                 .map(dto -> Payment.fromDTO(dto, psuIPAddress, xRequestID))
@@ -50,7 +49,7 @@ public class PSD2PaymentController {
     @GetMapping("/sepa-credit-transfers/{payment-id}")
     public Mono<PaymentInitiationWithStatusResponseDTO> getPaymentInformation(
             @RequestParam("paymentId") @Valid UUID paymentId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID) {
         log.info("Get PSD2 payment with id: {} and requestId: {}", paymentId, xRequestID);
         return paymentService.findPaymentById(paymentId)
                 .map(Payment::toPSD2InfoDTO);
@@ -66,7 +65,7 @@ public class PSD2PaymentController {
     @DeleteMapping("/sepa-credit-transfers/{payment-id}")
     public Mono<PaymentInitiationCancelResponse202DTO> cancelPayment(
             @RequestParam("paymentId") @Valid UUID paymentId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID) {
         log.info("Cancelling PSD2 payment with id: {} and requestId: {}", paymentId, xRequestID);
         return paymentService.deletePayment(paymentId)
                 .thenReturn(PaymentInitiationCancelResponse202DTO.builder()
@@ -79,7 +78,7 @@ public class PSD2PaymentController {
     @GetMapping("/sepa-credit-transfers/{payment-id}/status")
     public Mono<PaymentInitiationStatusResponse200JsonDTO> getPaymentInitiationStatus(
             @RequestParam("paymentId") @Valid UUID paymentId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID) {
         log.info("Get transaction status for PSD2 payment with id: {} and requestId: {}", paymentId, xRequestID);
         return paymentService.findPaymentById(paymentId)
                 .map(Payment::toPSD2StatusDTO);

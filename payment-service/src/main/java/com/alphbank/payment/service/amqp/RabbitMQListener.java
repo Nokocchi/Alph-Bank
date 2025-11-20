@@ -20,7 +20,7 @@ public class RabbitMQListener {
     @RabbitListener(queues = "${spring.rabbitmq.payment-signing-status-queue}")
     public void handleMessage(SigningSession signingSession) {
         log.info("Received signing session on RabbitMQ! {}", jsonLog.format(signingSession));
-        paymentService.handleNewSigningStatus(signingSession.getSigningSessionId(), signingSession.getSigningStatus())
-                .subscribe();
+        //paymentService.handleNewSigningStatus(signingSession.getSigningSessionId(), signingSession.getSigningStatus())
+          //      .subscribe();
     }
 }

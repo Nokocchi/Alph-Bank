@@ -9,8 +9,8 @@ CREATE TABLE periodic_payment (
     payment_amount NUMERIC(19,6) NOT NULL,
     payment_currency VARCHAR(3) NOT NULL,
     recipient_name TEXT,
-    start_date DATE WITHOUT TIME ZONE NOT NULL,
-    end_date DATE WITHOUT TIME ZONE,
+    start_date DATE NOT NULL,
+    end_date DATE,
     frequency TEXT NOT NULL,
     psu_ip_address TEXT,
 

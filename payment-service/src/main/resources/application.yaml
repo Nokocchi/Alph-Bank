@@ -4,11 +4,17 @@ server:
 logging:
   level:
     com:
+      fasterxml:
+        jackson:
+          databind: DEBUG
       alphbank:
         paymentservice: DEBUG
     org:
       springframework:
         web: DEBUG
+        http:
+          codec:
+            json: DEBUG
     reactor:
       netty:
         http:

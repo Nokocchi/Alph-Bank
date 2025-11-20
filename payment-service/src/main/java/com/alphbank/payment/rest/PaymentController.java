@@ -27,10 +27,11 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ResponseEntity<InternalPaymentDTO>> createPayment(@RequestBody CreatePaymentRequest createPaymentRequest){
         log.info("Creating payment {}", jsonLog.format(createPaymentRequest));
-        return paymentService.createPayment(createPaymentRequest)
+        return Mono.empty();
+        /*return paymentService.createPayment(createPaymentRequest)
                 .doOnNext(response -> log.info("Returning newly created payment {}", jsonLog.format(response)))
                 .doOnError(e -> log.error("Error creating payment", e))
-                .map(this::toResponseEntity);
+                .map(this::toResponseEntity);*/
     }
 
     @DeleteMapping("/{id}")

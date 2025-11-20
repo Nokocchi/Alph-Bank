@@ -13,6 +13,7 @@ import org.berlingroup.rest.model.*;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Builder
 @Setter
@@ -65,6 +66,7 @@ public class SigningBasket {
     public SigningBasketResponse201DTO toPSD2InitiationDTO(SigningBasketLinks links) {
         return SigningBasketResponse201DTO.builder()
                 .basketId(id.toString())
+                .transactionStatus(signingStatus.toPSD2TransactionStatus())
                 .links(LinksSigningBasketDTO.builder()
                         .scaRedirect(HrefTypeDTO.builder()
                                 .href(links.basketAuthorizationURI().toString())
@@ -80,9 +82,14 @@ public class SigningBasket {
     }
 
     public SigningBasketResponse200DTO toPSD2InfoDTO() {
-        List<String> paymentIds = payments.stream().map(payment -> payment.id().toString()).toList();
+        List<String> allPaymentIds =
+                Stream.concat(
+                        payments.stream().map(p -> p.id().toString()),
+                        periodicPayments.stream().map(p -> p.id().toString())
+                ).toList();
+
         return SigningBasketResponse200DTO.builder()
-                .payments(paymentIds)
+                .payments(allPaymentIds)
                 .transactionStatus(signingStatus.toPSD2TransactionStatus())
                 .build();
     }

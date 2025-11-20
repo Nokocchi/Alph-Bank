@@ -2,16 +2,11 @@ package com.alphbank.payment.service;
 
 import com.alphbank.commons.impl.JsonLog;
 import com.alphbank.core.client.CorePaymentClient;
-import com.alphbank.core.client.model.MonetaryAmountDTO;
-import com.alphbank.core.client.model.PaymentDTO;
 import com.alphbank.payment.rest.error.model.BasketCreationException;
 import com.alphbank.payment.rest.error.model.BasketNotFoundException;
 import com.alphbank.payment.rest.error.model.CannotDeleteBasketWithAuthorizationException;
 import com.alphbank.payment.rest.error.model.PaymentNotFoundException;
-import com.alphbank.payment.rest.model.response.BasketDTO;
-import com.alphbank.payment.rest.model.response.InternalPaymentDTO;
 import com.alphbank.payment.service.amqp.configuration.RabbitConfigurationProperties;
-import com.alphbank.payment.service.amqp.model.SigningStatus;
 import com.alphbank.payment.service.client.signingservice.SigningServiceClient;
 import com.alphbank.payment.service.client.signingservice.configuration.SigningServiceClientConfigurationProperties;
 import com.alphbank.payment.service.client.signingservice.model.SetupSigningSessionRequest;
@@ -26,7 +21,6 @@ import com.alphbank.payment.service.repository.model.PeriodicPaymentEntity;
 import com.alphbank.payment.service.repository.model.SigningBasketEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.javamoney.moneta.Money;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -35,6 +29,7 @@ import reactor.function.TupleUtils;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Slf4j
@@ -67,10 +62,11 @@ public class PaymentService {
         log.info("Searching for payment with id: {}", paymentId);
         return Mono.just(paymentId)
                 .flatMap(paymentRepository::findById)
+                .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)))
                 .doOnNext(payment -> log.info("Found payment with id: {}", paymentId))
                 .map(PaymentEntity::toModel)
-                .flatMap(this::appendTransactionStatus)
-                .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)));
+                .flatMap(this::appendTransactionStatus);
+
     }
 
     public Mono<Void> deletePayment(UUID paymentId) {
@@ -101,7 +97,7 @@ public class PaymentService {
 
     private Mono<Payment> appendTransactionStatus(Payment payment) {
         if (payment.basketId() == null) {
-            return Mono.empty();
+            return Mono.just(payment);
         }
 
         return basketRepository.findById(payment.basketId())
@@ -113,7 +109,7 @@ public class PaymentService {
 
     private Mono<PeriodicPayment> appendTransactionStatus(PeriodicPayment payment) {
         if (payment.basketId() == null) {
-            return Mono.empty();
+            return Mono.just(payment);
         }
 
         return basketRepository.findById(payment.basketId())
@@ -130,9 +126,10 @@ public class PaymentService {
             case SIGNING_IN_PROGRESS -> Mono.just(PaymentTransactionStatus.AUTHORIZATION_STARTED);
             case FAILED -> Mono.just(PaymentTransactionStatus.AUTHORIZATION_FAILED);
             // TODO: Use @Transactional to ensure that a payment is only set to COMPLETED when it has a coreReference
-            case COMPLETED -> corePaymentClient.getPayment(payment.coreReference())
-                    .map(PaymentDTO::getStatus)
-                    .map(PaymentTransactionStatus::fromCoreTransactionStatus);
+            //case COMPLETED -> corePaymentClient.getPayment(payment.coreReference())
+            //        .map(PaymentDTO::getStatus)
+            //        .map(PaymentTransactionStatus::fromCoreTransactionStatus);
+            case COMPLETED -> Mono.just(PaymentTransactionStatus.CORE_PAYMENT_FAILED); // TODO: Delete
         };
     }
 
@@ -159,10 +156,11 @@ public class PaymentService {
         log.info("Searching for periodic payment with id: {}", paymentId);
         return Mono.just(paymentId)
                 .flatMap(periodicPaymentRepository::findById)
+                .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)))
                 .doOnNext(payment -> log.info("Found periodic payment with id: {}", paymentId))
                 .map(PeriodicPaymentEntity::toModel)
-                .flatMap(this::appendTransactionStatus)
-                .switchIfEmpty(Mono.error(new PaymentNotFoundException(paymentId)));
+                .flatMap(this::appendTransactionStatus);
+
     }
 
     @Transactional
@@ -171,10 +169,10 @@ public class PaymentService {
 
         List<UUID> paymentUUIDs = paymentIds.stream().map(UUID::fromString).toList();
 
-        Mono<List<PaymentEntity>> payments = paymentRepository.findAllById(paymentUUIDs).collectList().cache();
-        Mono<List<PeriodicPaymentEntity>> periodicPayments = periodicPaymentRepository.findAllById(paymentUUIDs).collectList().cache();
+        Flux<PaymentEntity> payments = paymentRepository.findAllById(paymentUUIDs).cache();
+        Flux<PeriodicPaymentEntity> periodicPayments = periodicPaymentRepository.findAllById(paymentUUIDs).cache();
 
-        Mono<Void> validatePaymentsCount = Flux.merge(payments.flatMapMany(Flux::fromIterable), periodicPayments.flatMapMany(Flux::fromIterable))
+        Mono<Void> validatePaymentsCount = Flux.merge(payments, periodicPayments)
                 .count()
                 .flatMap(count -> count == paymentUUIDs.size() ? Mono.empty() : Mono.error(new BasketCreationException(paymentUUIDs.size(), count)));
 
@@ -182,21 +180,37 @@ public class PaymentService {
                 Mono.just(signingBasket)
                         .map(SigningBasketEntity::from)
                         .flatMap(basketRepository::save)
+                        .flatMap(basket -> setBasketIdOnPayments(basket, payments, periodicPayments))
                         .flatMap(savedBasket ->
                                 Mono.zip(
                                         Mono.just(savedBasket),
-                                        payments,
-                                        periodicPayments
+                                        payments.collectList(),
+                                        periodicPayments.collectList()
                                 )
                         )
                         .map(TupleUtils.function(SigningBasket::from)));
+    }
+
+    private Mono<SigningBasketEntity> setBasketIdOnPayments(SigningBasketEntity basket, Flux<PaymentEntity> payments, Flux<PeriodicPaymentEntity> periodicPayments) {
+        Mono<Integer> updatePayments = payments
+                .map(PaymentEntity::getId)
+                .collectList()
+                .flatMap(paymentIds -> paymentIds.isEmpty() ? Mono.empty() : paymentRepository.updateBasketIdForPayments(basket.getId(), paymentIds));
+
+        Mono<Integer> updatePeriodicPayments = periodicPayments
+                .map(PeriodicPaymentEntity::getId)
+                .collectList()
+                .flatMap(paymentIds -> paymentIds.isEmpty() ? Mono.empty() : periodicPaymentRepository.updateBasketIdForPayments(basket.getId(), paymentIds));
+
+        return Mono.when(updatePayments, updatePeriodicPayments)
+                .thenReturn(basket);
     }
 
     public Mono<SigningBasketLinks> getSigningBasketLinks(UUID basketId) {
         SigningBasketLinks links = SigningBasketLinks.builder()
                 .basketStatusURI(URI.create(paymentServiceProperties.getBasketStatusURITemplate().formatted(basketId)))
                 .basketAuthorizationURI(URI.create(paymentServiceProperties.getBasketAuthorizationURITemplate().formatted(basketId)))
-                .basketAuthorizationStatsURI(URI.create(paymentServiceProperties.getBasketAuthorizationStatusURITemplate().formatted(basketId)))
+                .basketAuthorizationStatsURI(URI.create(paymentServiceProperties.getBasketAuthorizationStatusURITemplate().formatted(basketId, basketId)))
                 .build();
         return Mono.just(links);
     }
@@ -207,6 +221,7 @@ public class PaymentService {
                 .filter(basket -> basket.getSigningStatus() == BasketSigningStatus.NOT_YET_STARTED)
                 .switchIfEmpty(Mono.error(new CannotDeleteBasketWithAuthorizationException(basketId)))
                 .then(Mono.defer(() -> paymentRepository.clearBasketIdOfPaymentsWithBasketId(basketId)))
+                .then(Mono.defer(() -> periodicPaymentRepository.clearBasketIdOfPaymentsWithBasketId(basketId)))
                 .then(Mono.defer(() -> basketRepository.deleteById(basketId)));
     }
 
@@ -264,6 +279,19 @@ public class PaymentService {
 
     //---------------------------
 
+    private SetupSigningSessionRequest createSetupSigningSessionRequest(String formattedDocument, String nationalId, String languageCode, URI onSuccessRedirectURI, URI onFailedRedirectURI) {
+        return new SetupSigningSessionRequest(
+                UUID.randomUUID(),
+                nationalId,
+                Locale.of("sv", "SE"),
+                rabbitProperties.getPaymentSigningStatusRoutingKey(),
+                formattedDocument,
+                onSuccessRedirectURI.toString(),
+                onFailedRedirectURI.toString()
+        );
+    }
+
+    /*
     private Mono<SigningBasketEntity> findEditableBasket(UUID customerId) {
         return basketRepository.findByCustomerId(customerId)
                 .filter(this::isEditable);
@@ -341,7 +369,6 @@ public class PaymentService {
                 .collectList();
     }
 
-
     private SetupSigningSessionRequest createSetupSigningSessionRequest(String formattedDocument, String nationalId, String languageCode, URI onSuccessRedirectURI, URI onFailedRedirectURI) {
         return new SetupSigningSessionRequest(
                 nationalId,
@@ -352,4 +379,5 @@ public class PaymentService {
                 onFailedRedirectURI
         );
     }
+  */
 }

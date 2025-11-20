@@ -10,7 +10,5 @@ import java.util.UUID;
 @Repository
 public interface BasketRepository extends R2dbcRepository<SigningBasketEntity, UUID> {
 
-    Mono<SigningBasketEntity> findByCustomerId(UUID customerId);
-
     Mono<SigningBasketEntity> findBySigningSessionId(UUID signingSessionId);
 }

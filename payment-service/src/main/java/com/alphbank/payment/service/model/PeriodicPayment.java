@@ -12,6 +12,7 @@ import org.javamoney.moneta.Money;
 import javax.money.MonetaryAmount;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 @Builder
@@ -90,7 +91,9 @@ public class PeriodicPayment {
                 .instructedAmount(AmountDTO.builder()
                         .amount(monetaryAmount.getNumber().numberValue(BigDecimal.class).toPlainString())
                         .build())
-                .transactionStatus(transactionStatus.toPSD2TransactionStatus())
+                .transactionStatus(Optional.ofNullable(transactionStatus)
+                        .map(PeriodicPaymentTransactionStatus::toPSD2TransactionStatus)
+                        .orElse(null))
                 .creditorName(recipientName)
                 .startDate(startDate)
                 .endDate(endDate)

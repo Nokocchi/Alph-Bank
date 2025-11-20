@@ -1,9 +1,8 @@
 package com.alphbank.payment.rest;
 
 import com.alphbank.commons.impl.JsonLog;
-import com.alphbank.payment.rest.validation.ValidPaymentInitiation;
+import com.alphbank.payment.rest.validation.ValidPeriodicPaymentInitiation;
 import com.alphbank.payment.service.PaymentService;
-import com.alphbank.payment.service.model.Payment;
 import com.alphbank.payment.service.model.PeriodicPayment;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,10 +34,10 @@ public class PSD2PeriodicPaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/sepa-credit-transfers", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<PaymentInitiationRequestResponse201DTO> initiatePeriodicPayment(
-            @RequestParam("X-Request-ID") UUID xRequestID,
-            @RequestParam("PSU-IP-Address") String psuIPAddress,
-            @RequestBody Mono<@Valid @ValidPaymentInitiation PeriodicPaymentInitiationJsonDTO> initiatePaymentRequestDTO) {
-        return initiatePaymentRequestDTO
+            @RequestHeader("X-Request-ID") UUID xRequestID,
+            @RequestHeader("PSU-IP-Address") String psuIPAddress,
+            @RequestBody @Valid @ValidPeriodicPaymentInitiation PeriodicPaymentInitiationJsonDTO initiatePaymentRequestDTO) {
+        return Mono.just(initiatePaymentRequestDTO)
                 .doOnNext(payment -> log.info("Creating PSD2 periodic payment with requestId: {} and dto: {}", xRequestID, jsonLog.format(payment)))
                 .map(dto -> PeriodicPayment.fromDTO(dto, psuIPAddress))
                 .flatMap(paymentService::createPeriodicPayment)
@@ -49,8 +48,8 @@ public class PSD2PeriodicPaymentController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/sepa-credit-transfers/{payment-id}")
     public Mono<PeriodicPaymentInitiationWithStatusResponseDTO> getPeriodicPaymentInformation(
-            @RequestParam("paymentId") @Valid UUID paymentId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
+            @PathVariable("payment-id") @Valid UUID paymentId,
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID) {
         log.info("Get PSD2 periodic payment with id: {} and requestId: {}", paymentId, xRequestID);
         return paymentService.findPeriodicPaymentById(paymentId)
                 .map(PeriodicPayment::toPSD2InfoDTO);
@@ -64,7 +63,7 @@ public class PSD2PeriodicPaymentController {
     @DeleteMapping("/sepa-credit-transfers/{payment-id}")
     public Mono<PaymentInitiationCancelResponse202DTO> cancelPeriodicPayment(
             @RequestParam("paymentId") @Valid UUID paymentId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID) {
         log.info("Cancelling PSD2 periodic payment with id: {} and requestId: {}", paymentId, xRequestID);
         return paymentService.deletePayment(paymentId)
                 .thenReturn(PaymentInitiationCancelResponse202DTO.builder()
@@ -77,7 +76,7 @@ public class PSD2PeriodicPaymentController {
     @GetMapping("/sepa-credit-transfers/{payment-id}/status")
     public Mono<PaymentInitiationStatusResponse200JsonDTO> getPeriodicPaymentInitiationStatus(
             @RequestParam("paymentId") @Valid UUID paymentId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID) {
         log.info("Get transaction status for PSD2 periodic payment with id: {} and requestId: {}", paymentId, xRequestID);
         return paymentService.findPeriodicPaymentById(paymentId)
                 .map(PeriodicPayment::toPSD2StatusDTO);

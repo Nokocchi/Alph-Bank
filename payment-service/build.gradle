@@ -46,6 +46,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'io.projectreactor:reactor-core:3.6.0'
+    //implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Database
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
@@ -58,7 +59,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-amqp:3.2.4'
 
     // Alph Bank starters
-    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.14-SNAPSHOT'
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.18-SNAPSHOT'
 
     implementation 'io.projectreactor.addons:reactor-extra:3.5.1'
     yamlApi "com.alphbank.core:BankingCore:${bankingCoreAPIVersion}:openapi-spec@yaml"

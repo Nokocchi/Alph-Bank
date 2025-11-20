@@ -1,6 +1,7 @@
 package com.alphbank.payment.rest;
 
 import com.alphbank.commons.impl.JsonLog;
+import com.alphbank.payment.rest.validation.UUIDNotNullPaymentIds;
 import com.alphbank.payment.service.PaymentService;
 import com.alphbank.payment.service.model.BasketSigningStatus;
 import com.alphbank.payment.service.model.SigningBasket;
@@ -39,14 +40,14 @@ public class PSD2BasketController {
     )
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<SigningBasketResponse201DTO> createSigningBasket(
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID,
-            @RequestParam("PSU-IP-Address") String psuIPAddress,
-            @RequestParam("TPP-Redirect-URI") @Valid URI tppRedirectURI,
-            @RequestParam("TPP-Nok-Redirect-URI") @Valid URI tppNokRedirectURI,
-            @RequestBody Mono<@Valid @UUIDNotNullPaymentIds SigningBasketDTO> signingBasketDTO) {
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID,
+            @RequestHeader("PSU-IP-Address") String psuIPAddress,
+            @RequestHeader("TPP-Redirect-URI") @Valid URI tppRedirectURI,
+            @RequestHeader("TPP-Nok-Redirect-URI") @Valid URI tppNokRedirectURI,
+            @RequestBody @Valid @UUIDNotNullPaymentIds SigningBasketDTO signingBasketDTO) {
         SigningBasket signingBasket = SigningBasket.from(psuIPAddress, tppRedirectURI, tppNokRedirectURI);
-        return signingBasketDTO
-                .doOnNext(request -> log.info("Creating PSD2 with requestId: {} and dto: {}", xRequestID, jsonLog.format(request)))
+        return Mono.just(signingBasketDTO)
+                .doOnNext(request -> log.info("Creating PSD2 signing basket with requestId: {} and dto: {}", xRequestID, jsonLog.format(request)))
                 .flatMap(dto -> paymentService.createBasket(signingBasket, dto.getPaymentIds()))
                 .zipWhen(basket -> paymentService.getSigningBasketLinks(basket.id()))
                 .map(TupleUtils.function(SigningBasket::toPSD2InitiationDTO));
@@ -60,7 +61,7 @@ public class PSD2BasketController {
     @DeleteMapping(path = "/{basketId}")
     public Mono<Void> deleteSigningBasket(
             @PathVariable @Valid UUID basketId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID) {
         log.info("Delete PSD2 basket with id: {} and requestId: {}", basketId, xRequestID);
         return paymentService.deleteBasket(basketId);
     }
@@ -71,7 +72,7 @@ public class PSD2BasketController {
     @GetMapping(path = "/{basketId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<SigningBasketResponse200DTO> getSigningBasket(
             @PathVariable @Valid UUID basketId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID) {
         log.info("Get PSD2 basket with id: {} and requestId: {}", basketId, xRequestID);
         return paymentService.getSigningBasket(basketId)
                 .map(SigningBasket::toPSD2InfoDTO);
@@ -83,7 +84,7 @@ public class PSD2BasketController {
     public Mono<ScaStatusResponseDTO> getSigningBasketScaStatus(
             @PathVariable @Valid UUID basketId,
             @PathVariable String authorisationId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID) {
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID) {
         log.info("Get PSD2 basket authorization status with basket id: {} and requestId: {}", basketId, xRequestID);
         return paymentService.getSigningBasketAuthorizationStatus(basketId)
                 .map(BasketSigningStatus::toPSD2ScaStatus)
@@ -98,7 +99,7 @@ public class PSD2BasketController {
     @PostMapping(path = "/{basketId}/authorisations", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<StartScaprocessResponseDTO> startSigningBasketAuthorisation(
             @PathVariable @Valid UUID basketId,
-            @RequestParam("X-Request-ID") @Valid UUID xRequestID,
+            @RequestHeader("X-Request-ID") @Valid UUID xRequestID,
             @RequestHeader("PSU-Accept-Language") String languageCode
     ) {
         log.info("Start authorization of PSD2 basket with id: {}, requestId: {} and language code: {}", basketId, xRequestID, languageCode);

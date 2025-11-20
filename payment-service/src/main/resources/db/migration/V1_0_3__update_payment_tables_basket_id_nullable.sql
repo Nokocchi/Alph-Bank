@@ -1,0 +1,5 @@
+ALTER TABLE payment
+ALTER COLUMN basket_id DROP NOT NULL;
+
+ALTER TABLE periodic_payment
+ALTER COLUMN basket_id DROP NOT NULL;

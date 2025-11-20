@@ -15,6 +15,7 @@ import org.javamoney.moneta.Money;
 import javax.money.MonetaryAmount;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Builder
@@ -103,7 +104,9 @@ public class Payment {
                         .build())
                 .creditorName(recipientName)
                 .remittanceInformationUnstructured(messageToRecipient)
-                .transactionStatus(transactionStatus.toPSD2TransactionStatus())
+                .transactionStatus(Optional.ofNullable(transactionStatus)
+                        .map(PaymentTransactionStatus::toPSD2TransactionStatus)
+                        .orElse(null))
                 .build();
     }
 
