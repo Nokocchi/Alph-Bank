@@ -11,8 +11,6 @@ Get back up to speed:
 	- Consider re-introducing ResponseEntity so we can return 200 if already exists and 201 if created, etc.
 	- Use consistent style. Builder, conversion methods, mapper classes, naming
 
-- 
-- General Service structure diagram (Either diagram or image of empty project?)
 - Mermaid diagram, both sequence and component. Draw.io flowcharts.
 - Update README with examples of good practices, banking/fintech knowledge
 - Replace Locale with country+language
@@ -22,7 +20,6 @@ Get back up to speed:
 TODO:
 	- Others
 LoanApplication, add statuses like "denied" depending on credit check or manual inspection
-Put MonetaryAmount.getAmount => BigDecimal in starter or library
 - Creating loans and payments should check that the account/customerIDs exist
 
 	- Bugs
@@ -66,7 +63,6 @@ GovernmentReportingTransferService
 - Backoff strategy if Service unavailable
 
 Payment-service
-- Based on PSD2, maybe auto generate from berlin group spec
 - Has RabbitMQ listener for sign-callbacks
 - Instant, scheduled, recurring payments. Standing orders create payments, but are not payments themselves.
 - Stores payments, standing orders in postgres
