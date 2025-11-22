@@ -38,6 +38,7 @@ public class PSD2BasketController {
                     Once an authorization has begun, payments can no longer be cancelled or moved to another basket.
                     """
     )
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<SigningBasketResponse201DTO> createSigningBasket(
             @RequestHeader("X-Request-ID") @Valid UUID xRequestID,

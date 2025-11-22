@@ -1,0 +1,93 @@
+src
+├── contractTest
+│   ├── java
+│   │   └── com/example
+│   │       └── domainA     #skip if only one domain
+│   │           ├── controllerA
+│   │           │   └── ControllerABase.java
+│   │           └── ContractBase.java
+│   └── resources
+│       └── contracts
+│           └── domainA     #skip if only one domain
+│               └── endpointA
+│                   ├── create_entity_ok.groovy
+│                   └── create_entity_bad_request.groovy
+│
+├── main
+│   ├── java
+│   │   └── com/example
+│   │       └── domainA     #skip if only one domain
+│   │           ├── rest
+│   │           │   ├── model
+│   │           │   │   ├── MyObjectDTO.java
+│   │           │   │   ├── request
+│   │           │   │   │   └── CreateThingRequestDTO.java
+│   │           │   │   └── response
+│   │           │   │       └── CreateThingResponseDTO.java
+│   │           │   ├── error
+│   │           │   │   ├── model
+│   │           │   │   │   └── MyCustomExceptionWhichResultsInAPIResponse.java
+│   │           │   │   └── ExceptionHandler.java
+│   │           │   ├── config
+│   │           │   │   └── SecurityConfig.java
+│   │           │   └── MyController.java
+│   │           └── service
+│   │               ├── model
+│   │               │   └── MyObject.java
+│   │               ├── error
+│   │               │   └── model
+│   │               │       └── MyBusinessLogicExceptionWhichIsNotHandledByExceptionHandler.java
+│   │               ├── repository
+│   │               │   ├── impl
+│   │               │   │   └── MyObjectCustomRepositoryImpl.java
+│   │               │   ├── model
+│   │               │   │   └── MyObjectEntity.java
+│   │               │   └── MyObjectRepository.java
+│   │               ├── config
+│   │               │   └── ThisServiceConfigurationProperties
+│   │               ├── client
+│   │               │   └── externalServiceA
+│   │               │       ├── model
+│   │               │       │   ├── request
+│   │               │       │   │   └── ExternalServiceARequest.java
+│   │               │       │   ├── response
+│   │               │       │   │   └── ExternalServiceAResponse.java
+│   │               │       │   └── ExternalServiceAMyObject.java
+│   │               │       ├── config
+│   │               │       │   └── ExternalServiceAWebClientConfiguration.java
+│   │               │       └── ExternalServiceAWebClient.java
+│   │               ├── amqp
+│   │               │   ├── config
+│   │               │   │   └── RabbitMQConfiguration.java
+│   │               │   └── RabbitMQService.java
+│   │               └── MyService.java
+│   └── resources
+│       ├── db.migration
+│       │   └── V1_0_0__create_entity_table.sql
+│       ├── openapi.yaml    # The openapi spec of the API of this service
+│       ├── application.yaml
+│       └── application-local.yaml
+│
+└── test
+    └── com/example
+        └── domainA     #skip if only one domain
+            ├── integration
+            │   ├── config
+            │   │   └── TestContainerConfig.java
+            │   ├── IntegrationBase.java
+            │   └── controllerA
+            │       ├── ControllerABase.java
+            │       ├── EndpointAIntegrationTest.java
+            │       └── EndpointBIntegrationTest.java
+            ├── unit
+            │   └── service
+            │       ├── repository
+            │       │   └── MyObjectRepositoryUnitTest.java
+            │       ├── amqp
+            │       │   └── RabbitMQServiceUnitTest.java
+            │       ├── client
+            │       │   └── ExternalServiceAClientStubsUnitTest.java
+            │       └── myservice
+            │           └── CreateMyObjectUnitTest.java
+            └── resources
+                └── application-test.yaml

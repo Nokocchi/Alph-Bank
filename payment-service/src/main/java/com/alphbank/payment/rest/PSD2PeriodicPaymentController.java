@@ -35,7 +35,7 @@ public class PSD2PeriodicPaymentController {
     @PostMapping(value = "/sepa-credit-transfers", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<PaymentInitiationRequestResponse201DTO> initiatePeriodicPayment(
             @RequestHeader("X-Request-ID") UUID xRequestID,
-            @RequestHeader("PSU-IP-Address") String psuIPAddress,
+            @RequestHeader("PSU-IP-Address") String psuIPAddress, //TODO: Mono<@Valid @ValidPeriodicPaymentInitiation PeriodicPaymentInitiationJsonDTO>...? Or outside of Mono? Or not at all?
             @RequestBody @Valid @ValidPeriodicPaymentInitiation PeriodicPaymentInitiationJsonDTO initiatePaymentRequestDTO) {
         return Mono.just(initiatePaymentRequestDTO)
                 .doOnNext(payment -> log.info("Creating PSD2 periodic payment with requestId: {} and dto: {}", xRequestID, jsonLog.format(payment)))

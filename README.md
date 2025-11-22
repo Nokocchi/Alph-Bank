@@ -5,6 +5,8 @@ If you feel like you don't quite have enough money, then just create your own ba
 
 This is a personal project, simulating an entire banking ecosystem, which is intended to showcase my knowledge and experience in Java backend development and Fintech. 
 
+**NB:** *No intellectual property of current or previous employers has been used in this project.*
+
 ## Features
 
 * Core banking functionality
@@ -27,6 +29,8 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 
 ## Documentation:
 
+
+### Backend services
 [Banking Core](/banking-core)
 
 [Frontend](/svelte-frontend)
@@ -39,109 +43,13 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 
 [Document signing](/signing-service/)
 
+### Misc.
+
+[Backend Service Structure](/backendservicestructure.txt)
+
+[Alph Bank Styleguide](/Styleguide.md)
+
 [Bruno Collection](/bruno-collection/)
-
-## Architecture & code guidelines:
-
-### Backend service architecture
-
-* Java, SpringBoot, Webflux (Project Reactor)
-* Custom Spring Boot Starters for common behavior
-* APIs must be JSON-based and REST-like (Without HATEOAS :) )
-* If multiple database-writes are done in a single transaction, it must be marked with @Transactional, and rollbacks must be covered by tests
-* If a function needs to perform a database-write and also publish a message on a message queue in the same transaction, then the database-write must be done first, and the function must be marked as @Transactional. Rollbacks must be covered by tests.
-* Each service is structured like this. Model naming is shown in bold.
-* /contractTest
-    * /java
-        * /com/example
-            * /contracts (?)
-            * /domainA  (skip if only one domain)
-                * /controllerA
-                    * ControllerABase.java
-            * ContractBase.java
-    * /resources
-        * /contracts
-            * /domainA  (skip if only one domain)
-                * /controllerA
-                    * create_entity_ok.groovy
-                    * create_entity_bad_request.groovy
-* /main
-    * /java
-        * /com/example
-            * /domainA (skip if only one domain)
-                * /rest
-                    * /model
-                        * **MyObjectDTO**.java
-                        * /request
-                            * CreateThingRequestDTO.java
-                        * /response
-                            * CreateThingResponseDTO.java
-                    * /error
-                        * /model
-                            * MyCustomExceptionWhichResultsInAPIResponse.java
-                        * ExceptionHandler.java
-                    * MyController.java
-                * /service
-                    * /model
-                        * **MyObject**.java
-                    * /error
-                        * /model
-                            * MyBusinessLogicExceptionWhichIsNotHandledByExceptionHandler.java
-                    * /repository
-                        * /model
-                            * **MyObjectEntity**.java
-                        * MyObjectRepository.java
-                    * /client
-                        * /externalServiceA
-                            * /model
-                                * /request
-                                    * ExternalServiceARequest.java
-                                * /response
-                                    * ExternalServiceAResponse.java
-                                * **ExternalServiceAMyObject**.java
-                            * /config
-                                * ExternalServiceAWebClientConfiguration.java
-                            * ExternalServiceAWebClient.java
-                    * /amqp
-                        * /config
-                            * RabbitMQConfiguration.java
-                        * RabbitMQService.java
-                    * MyService.java
-    * /resources
-        * /db.migration
-            * V1_0_0__create_entity_table.sql
-        * openapi.yaml
-        * application.yaml
-        * application-local.yaml
-* /test
-    * /com/example
-        * /domainA (skip if only one domain)
-            * /integration
-                * IntegrationBase.java
-                * /controllerA
-                    * ControllerABase.java
-                    * EndpointAIntegrationTest.java
-                    * EndpointBIntegrationTest.java
-            * /unit
-                * ComplexFunctionUnitTest.java
-            * /resources
-                * application-test.yaml
-
-### Testing
-
-Testing is of course important, but this is a hobby project and a human only lives so long, so I have decided to only add tests to the Banking Core and the Payment Service.
-* **Integration tests:** The bulk of the testing must be done with Integration tests using @SpringBootTest, and TestContainers for repositories and message queues. External APIs are manually mocked with Wiremock - not using stubs. In rare cases, if necessary, Mockito Spybeans can be used to verify calls to specific methods.
-* **Unit tests:** Complex logic, usually in standalone functions, must be tested in unit tests without a Spring application context, using only the class being tested. Mockito must be used to mock dependencies and verify calls to these or lack thereof. Additionally, there should be unit tests for client-implementations, using published stubs. This verifies that the request and response objects have the correct format.
-* **Contract tests:** Must be implemented to ensure that API changes are non-breaking and backwards compatible. Must be implemented in Groovy, using Mockito to mock the calls from the Controller into the Service layer. 
-* **Wiremock:** Mocking must be done in Java, in the test method the mock is needed. Don't use JSON mappings. These can be quite difficult to understand in large test suites.
-
-### Frontend
-
-* Written in SvelteKit and Typescript
-* Must use file-system-(and slug)-based routing
-* Must use Zod for validating requests and responses
-* Must use Superforms for forms
-* Must use Typescript types/interfaces for all internal typing
 
 ### Observability
 * TODO: Elasticsearch as a central location for logs generated by all services?

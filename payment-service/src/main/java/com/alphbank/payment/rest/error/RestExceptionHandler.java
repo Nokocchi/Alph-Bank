@@ -19,7 +19,7 @@ public class RestExceptionHandler extends AlphExceptionHandler {
 
     @ExceptionHandler(BasketCreationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleConstraintViolationException(BasketCreationException ex) {
+    public ErrorResponse handleBasketCreationException(BasketCreationException ex) {
         return createError(HttpStatus.BAD_REQUEST, "Basket issues");
     }
 

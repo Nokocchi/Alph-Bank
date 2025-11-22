@@ -8,7 +8,9 @@ import com.alphbank.core.rest.model.MonetaryAmountDTO;
 import com.alphbank.core.rest.model.PaymentDTO;
 import io.restassured.module.webtestclient.RestAssuredWebTestClient;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -17,10 +19,14 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class PaymentBase {
 
-    PaymentService paymentService = Mockito.mock(PaymentService.class);
-    JsonLog jsonLog = Mockito.mock(JsonLog.class);
+    @Mock
+    PaymentService paymentService;
+
+    @Mock
+    JsonLog jsonLog;
 
     @BeforeEach
     void beforeEach() {

@@ -256,7 +256,7 @@ public class PaymentService {
 
     private Mono<String> getSigningBasketDocument(UUID basketId) {
         String singlePaymentDocumentTemplate = signingServiceProperties.getSinglePaymentDocumentToSignTemplate();
-        String periodicPaymentDocumentTemplate = signingServiceProperties.getGetPeriodicPaymentDocumentToSignTemplate();
+        String periodicPaymentDocumentTemplate = signingServiceProperties.getPeriodicPaymentDocumentToSignTemplate();
 
         Flux<String> singlePaymentDocuments = paymentRepository.findByBasketId(basketId)
                 .map(paymentEntity -> paymentEntity.asFormattedDocument(singlePaymentDocumentTemplate));

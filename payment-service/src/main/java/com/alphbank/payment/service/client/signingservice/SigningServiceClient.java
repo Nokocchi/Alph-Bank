@@ -14,12 +14,12 @@ import reactor.core.publisher.Mono;
 @Service
 public class SigningServiceClient {
 
-    private final WebClient signingServiceWebClient;
+    private final WebClient signingServiceWebClient2;
     private final JsonLog jsonLog;
 
     public Mono<SetupSigningSessionResponse> setupSigningSession(SetupSigningSessionRequest request){
         log.info("Sending SetupSigningSessionRequest to signing-service {}", jsonLog.format(request));
-        return signingServiceWebClient
+        return signingServiceWebClient2
                 .post()
                 .uri("/signing")
                 .bodyValue(request)

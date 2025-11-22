@@ -9,7 +9,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class TestContainersConfiguration {
 
     // This test container is defined as a bean, so it will be re-used across the full test suite
-    // It can be created by class by defining it as a static field, but then I get "address alreayd in use"-exception.
+    // It can be created by class by defining it as a static field, but then I get "address already in use"-exception.
     // It's also possible to mark each test class with @DirtiesContext to force Spring to re-create this bean
     // Another alternative is to use Junit's annotations like @Container and @TestContainers and handle the lifecycle myself
     // But then I also need to write a big ugly DynamicPropertyValues() method each time, with r2dbc AND flyway config values..

@@ -12,7 +12,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,13 +30,17 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-// This is a unit test: Don't use @SpringBootTest as this starts a whole ApplicationContext and web server.
-// We are only testing a single class and mocking dependencies.
+@ExtendWith(MockitoExtension.class)
 public class CustomerServiceTest {
 
-    CustomerRepository customerRepository = Mockito.mock(CustomerRepository.class);
-    AddressRepository addressRepository = Mockito.mock(AddressRepository.class);
-    CustomerService customerService = new CustomerService(customerRepository, addressRepository);
+    @Mock
+    CustomerRepository customerRepository;
+
+    @Mock
+    AddressRepository addressRepository;
+
+    @InjectMocks
+    CustomerService customerService;
 
     @Test
     public void testCustomerCreation() {

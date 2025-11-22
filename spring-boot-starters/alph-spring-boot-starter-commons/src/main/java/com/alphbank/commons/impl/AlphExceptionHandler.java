@@ -7,6 +7,7 @@ import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.server.MissingRequestValueException;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,12 @@ public abstract class AlphExceptionHandler {
                 .toList();
 
         return new FieldErrorResponse(ex.getStatusCode().value(), errorList);
+    }
+
+    @ExceptionHandler(MissingRequestValueException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMissingRequestValueException(MissingRequestValueException ex){
+        return createError(HttpStatus.BAD_REQUEST, ex.getReason());
     }
 
     private record FieldErrorResponse(int errorCode, List<FieldErrorEntry> errors) {

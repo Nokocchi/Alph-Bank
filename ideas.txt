@@ -1,11 +1,8 @@
 Get back up to speed:
 - Payment service
 	- Implement new endpoints
-	- Figure out if it's possible to provide routing key in request, using generated models
-	- Use transactional annotation
 	- Proper Swagger annotations on models
 	- Unit tests, integration tests, contract stub tests
-	- Don't hardcode wiremock port in integration tests
 	- Testcontainers for RabbitMQ
 	- Make contract tests for all endpoints, with proper producer(), consumer()
 - Banking core:
@@ -14,6 +11,7 @@ Get back up to speed:
 	- Consider re-introducing ResponseEntity so we can return 200 if already exists and 201 if created, etc.
 	- Use consistent style. Builder, conversion methods, mapper classes, naming
 
+- 
 - General Service structure diagram (Either diagram or image of empty project?)
 - Mermaid diagram, both sequence and component. Draw.io flowcharts.
 - Update README with examples of good practices, banking/fintech knowledge

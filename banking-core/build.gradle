@@ -118,7 +118,6 @@ openApiGenerate {
     modelPackage = "com.alphbank.core.rest.model"
     generatorName = "spring"
     modelNameSuffix = "DTO"
-    openapiNormalizer = ["FILTER", "operationId:"]
     typeMappings = [
             "DateTime": "LocalDateTime",
     ]
