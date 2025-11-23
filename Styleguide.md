@@ -66,7 +66,7 @@ integration tests that send a request to your service, you immediately run into 
 1. Integration tests require setting up an entire Spring Application Context, web server, loading all the beans and dependencies, etc.,
 and this is very slow and resource intensive compared to a simple unit test. Add too many integration tests, and your test
 suite will quickly take several minutes. 
-2. Loading the entire applciation context means that you have a **lot** of dependencies.
+2. Loading the entire application context means that you have a **lot** of dependencies.
 3. You cannot prepare data in your database
 by calling repository.save() directly from your test. The test and the request run in separate threads, and the changes in
 the repository made from the test code are not committed before the request is handled. This can maybe be avoided with @Sql annotation,

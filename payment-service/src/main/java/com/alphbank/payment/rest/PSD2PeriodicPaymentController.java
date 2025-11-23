@@ -1,7 +1,6 @@
 package com.alphbank.payment.rest;
 
 import com.alphbank.commons.impl.JsonLog;
-import com.alphbank.payment.rest.validation.ValidPeriodicPaymentInitiation;
 import com.alphbank.payment.service.PaymentService;
 import com.alphbank.payment.service.model.PeriodicPayment;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,9 +34,9 @@ public class PSD2PeriodicPaymentController {
     @PostMapping(value = "/sepa-credit-transfers", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<PaymentInitiationRequestResponse201DTO> initiatePeriodicPayment(
             @RequestHeader("X-Request-ID") UUID xRequestID,
-            @RequestHeader("PSU-IP-Address") String psuIPAddress, //TODO: Mono<@Valid @ValidPeriodicPaymentInitiation PeriodicPaymentInitiationJsonDTO>...? Or outside of Mono? Or not at all?
-            @RequestBody @Valid @ValidPeriodicPaymentInitiation PeriodicPaymentInitiationJsonDTO initiatePaymentRequestDTO) {
-        return Mono.just(initiatePaymentRequestDTO)
+            @RequestHeader("PSU-IP-Address") String psuIPAddress,
+            @RequestBody @Valid Mono<PeriodicPaymentInitiationJsonDTO> initiatePaymentRequestDTO) {
+        return initiatePaymentRequestDTO
                 .doOnNext(payment -> log.info("Creating PSD2 periodic payment with requestId: {} and dto: {}", xRequestID, jsonLog.format(payment)))
                 .map(dto -> PeriodicPayment.fromDTO(dto, psuIPAddress))
                 .flatMap(paymentService::createPeriodicPayment)

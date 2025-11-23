@@ -25,6 +25,16 @@ public class PaymentController implements PaymentApi {
     private final PaymentService paymentService;
     private final JsonLog jsonLog;
 
+    @Override
+    public Mono<PaymentDTO> createPayment(Mono<CreatePaymentRequestDTO> createPaymentRequestDTO, ServerWebExchange exchange) {
+        return createPaymentRequestDTO.doOnNext(request -> {
+                    log.info("Creating payment with request body {}", jsonLog.format(request));
+                })
+                .flatMap(paymentService::createPayment)
+                .doOnNext(response -> log.info("Returning newly created payment {}", jsonLog.format(response)))
+                .doOnError(e -> log.error("Error creating payment", e));
+    }
+
     // TODO: Should probably just take an accountId or customerId and use accountService to find recipientIban to avoid wrong use of this endpoint
     // TODO: Filter out duplicates..
     @Override
@@ -37,15 +47,7 @@ public class PaymentController implements PaymentApi {
                 .doOnError(e -> log.error("Error searching payments", e));
     }
 
-    @Override
-    public Mono<PaymentDTO> createPayment(Mono<CreatePaymentRequestDTO> createPaymentRequestDTO, ServerWebExchange exchange) {
-        return createPaymentRequestDTO.doOnNext(request -> {
-                    log.info("Creating payment with request body {}", jsonLog.format(request));
-                })
-                .flatMap(paymentService::createPayment)
-                .doOnNext(response -> log.info("Returning newly created payment {}", jsonLog.format(response)))
-                .doOnError(e -> log.error("Error creating payment", e));
-    }
+
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

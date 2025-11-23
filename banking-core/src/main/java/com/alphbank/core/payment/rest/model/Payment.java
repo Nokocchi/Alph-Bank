@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.money.MonetaryAmount;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.UUID;
 
 @Data
@@ -20,6 +21,5 @@ public class Payment {
     private String messageToSelf;
     private String messageToRecipient;
     private LocalDateTime executedDateTime;
-    private LocalDateTime scheduledDateTime;
 
 }
