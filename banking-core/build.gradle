@@ -128,7 +128,7 @@ openApiGenerate {
             booleanGetterPrefix   : "is",
             annotationLibrary     : "swagger2",
             dateLibrary           : "java8",
-            useResponseEntity     : "false",
+            useResponseEntity     : "true",
             reactive              : "true",
             library               : "spring-boot",
             useSpringBoot3        : "true",
