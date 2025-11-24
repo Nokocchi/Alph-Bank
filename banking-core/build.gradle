@@ -57,9 +57,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     // Alph Bank starters
-    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.15-SNAPSHOT'
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.24-SNAPSHOT'
 
     // Others
+    implementation 'io.projectreactor.addons:reactor-extra:3.5.1'
     implementation 'org.iban4j:iban4j:3.2.10-RELEASE'
 
     // Testing
@@ -125,18 +126,19 @@ openApiGenerate {
             "LocalDateTime": "java.time.LocalDateTime",
     ]
     configOptions = [
-            booleanGetterPrefix   : "is",
-            annotationLibrary     : "swagger2",
-            dateLibrary           : "java8",
-            useResponseEntity     : "true",
-            reactive              : "true",
-            library               : "spring-boot",
-            useSpringBoot3        : "true",
-            interfaceOnly         : "true",
-            useJakartaEe          : "true",
-            containerDefaultToNull: "true",
-            openApiNullable       : "false", // Otherwise it tries to use annotation that is not imported
-            generateBuilders      : "true"
+            booleanGetterPrefix       : "is",
+            annotationLibrary         : "swagger2",
+            dateLibrary               : "java8",
+            useResponseEntity         : "true",
+            reactive                  : "true",
+            library                   : "spring-boot",
+            useSpringBoot3            : "true",
+            useSpringBuiltInValidation: "true",
+            interfaceOnly             : "true",
+            useJakartaEe              : "true",
+            containerDefaultToNull    : "true",
+            openApiNullable           : "false", // Otherwise it tries to use annotation that is not imported
+            generateBuilders          : "true"
     ]
 }
 

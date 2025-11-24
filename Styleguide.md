@@ -47,6 +47,39 @@ Only the interface for your API should be generated, not the controller implemen
   * **Query parameters:** Use snake_case, noun
   * Example: http://localhost:8080/payments/{payment-id}/card-transactions?transaction_type=OUTGOING
 
+### Model conversion
+We should follow three core principles:
+1. The business logic in the service layer should not know about or depend on implementation details of the controller or repository layers.
+This means that we should theoretically be able to swap out the API implementation or database implementation without touching the service layer (or at least the business logic).
+2. There should not be any model conversion methods in the service layer. Instead, put the model conversion methods
+   in the models themselves.
+3. The service layer methods take service layer models as input, and return service layer models as output
+
+Unfortunately, things are not that simple in a Webflux project using R2DBC and generated models:
+* There are no officially supported reactive ORMs for Spring Webflux r2dbc.
+  This means that we must build service-layer models ourselves, and these often consist of data from multiple database tables
+* The generated REST-layer DTOs cannot be changed, so model conversion methods cannot be put there.
+* The client models are generated as well
+
+For these reasons, the conclusion is that the model conversion **methods** must be placed here:
+
+* DTO <-> Service layer
+  * Must happen in the service layer model
+* Entity -> Service layer
+  * Must happen in the entity model if possible
+  * If multiple entities are needed, then do the conversion in the service layer model
+* Service layer -> Entity
+  * In the entity model
+* Service layer <-> Client
+  * A dedicated mapper class for this client.
+
+And they must be called from:
+
+* DTO <-> Service layer
+  * In the controller.
+* Service layer <-> Entity
+  * In the service layer.
+
 ### Concurrency and error handling
 * Malformed request bodies, missing headers and missing query parameters must result in a 400 Bad Request with a clear error message. 
 * If any business logic requires a 4xx response, you must throw an exception, catch it in a Rest Error Handler, and return a standardized error object.

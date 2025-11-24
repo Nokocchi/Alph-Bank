@@ -1,6 +1,8 @@
 package com.alphbank.core.payment.rest.model;
 
+import com.alphbank.core.rest.model.PaymentDTO;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.money.MonetaryAmount;
@@ -8,8 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
-@Data
-@AllArgsConstructor
+@Builder
 public class Payment {
 
     private UUID paymentId;
@@ -21,5 +22,11 @@ public class Payment {
     private String messageToSelf;
     private String messageToRecipient;
     private LocalDateTime executedDateTime;
+
+    public PaymentDTO toDTO(){
+        return PaymentDTO.builder()
+                // TODO
+                .build();
+    }
 
 }

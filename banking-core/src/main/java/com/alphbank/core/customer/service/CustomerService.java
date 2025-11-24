@@ -1,24 +1,23 @@
 package com.alphbank.core.customer.service;
 
-import com.alphbank.core.customer.rest.model.Address;
-import com.alphbank.core.customer.rest.model.CreateCustomerRequest;
-import com.alphbank.core.customer.rest.model.Customer;
-import com.alphbank.core.customer.rest.model.UpdateCustomerRequest;
-import com.alphbank.core.customer.service.error.CustomerNotFoundException;
-import com.alphbank.core.customer.service.error.DuplicateCustomerException;
+import com.alphbank.core.customer.rest.error.model.AddressNotFoundException;
+import com.alphbank.core.customer.rest.error.model.CustomerNotFoundException;
+import com.alphbank.core.customer.rest.error.model.DuplicateCustomerException;
+import com.alphbank.core.customer.service.model.Address;
+import com.alphbank.core.customer.service.model.Customer;
 import com.alphbank.core.customer.service.repository.AddressRepository;
 import com.alphbank.core.customer.service.repository.CustomerRepository;
 import com.alphbank.core.customer.service.repository.model.AddressEntity;
 import com.alphbank.core.customer.service.repository.model.CustomerEntity;
+import com.alphbank.core.rest.model.UpdateCustomerRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
-import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -30,17 +29,18 @@ public class CustomerService {
 
     public Flux<Customer> findAllCustomers() {
         return customerRepository.findAll()
-                .flatMap(this::findAddressAndConvertToRestModel);
+                .map(CustomerEntity::toModel);
     }
 
     @Transactional
-    public Mono<Customer> createCustomer(CreateCustomerRequest createCustomerRequest) {
-        CustomerEntity customerEntity = CustomerEntity.from(createCustomerRequest);
-        return customerRepository.save(customerEntity)
+    public Mono<Customer> createCustomer(Customer customer) {
+        return Mono.just(customer)
+                .map(CustomerEntity::from)
+                .flatMap(customerRepository::save)
                 .onErrorMap(DuplicateKeyException.class,
-                        e -> new DuplicateCustomerException(createCustomerRequest.nationalId(), createCustomerRequest.locale().getCountry(), e))
-                .flatMap(persistedCustomerEntity -> createAddress(persistedCustomerEntity.getCustomerId(), createCustomerRequest.address()))
-                .map(addressEntity -> convertToRestModel(customerEntity, addressEntity));
+                        e -> new DuplicateCustomerException(customer.getNationalId(), customer.getLocale().getCountry(), e))
+                .zipWhen(savedCustomerEntity -> createAddress(savedCustomerEntity.getId(), customer.getAddress()))
+                .map(TupleUtils.function(Customer::from));
     }
 
     private Mono<AddressEntity> createAddress(UUID customerId, Address address) {
@@ -50,88 +50,32 @@ public class CustomerService {
 
     public Mono<Customer> getCustomer(UUID customerId) {
         return customerRepository.findById(customerId)
-                .switchIfEmpty(Mono.error(new CustomerNotFoundException()))
-                .flatMap(this::findAddressAndConvertToRestModel);
+                .switchIfEmpty(Mono.error(new CustomerNotFoundException(customerId)))
+                .zipWhen(customerEntity -> addressRepository.findByCustomerId(customerEntity.getId()))
+                .map(TupleUtils.function(Customer::from));
     }
 
     public Mono<Void> deleteCustomer(UUID customerId) {
         return customerRepository.deleteById(customerId);
     }
 
-    private Mono<Customer> findAddressAndConvertToRestModel(CustomerEntity customerEntity) {
-        return addressRepository.findByCustomerId(customerEntity.getCustomerId())
-                .map(addressEntity -> convertToRestModel(customerEntity, addressEntity))
-                .switchIfEmpty(Mono.just(convertToRestModel(customerEntity)));
+    public Mono<Customer> updateCustomer(UUID customerId, UpdateCustomerRequestDTO updateCustomerRequest) {
+        return setDataOnCustomer(customerId, updateCustomerRequest)
+                .zipWith(setAddressDataOnCustomer(customerId, updateCustomerRequest))
+                .map(TupleUtils.function(Customer::from));
     }
 
-    private Customer convertToRestModel(CustomerEntity customerEntity, AddressEntity addressEntity) {
-        Customer customer = convertToRestModel(customerEntity);
-        customer.setAddress(convertToRestModel(addressEntity));
-        return customer;
-    }
-
-    private Customer convertToRestModel(CustomerEntity customerEntity) {
-        return new Customer(customerEntity.getCustomerId(),
-                null,
-                customerEntity.getPhoneNumber(),
-                customerEntity.getNationalId(),
-                customerEntity.getFirstName(),
-                customerEntity.getLastName(),
-                new Locale(customerEntity.getLanguage(), customerEntity.getCountry()));
-    }
-
-    private Address convertToRestModel(AddressEntity addressEntity) {
-        return new Address(addressEntity.getStreetAddress(),
-                addressEntity.getCity(),
-                addressEntity.getCountry());
-    }
-
-    public Mono<Customer> updateCustomer(UUID customerId, UpdateCustomerRequest updateCustomerRequest) {
+    private Mono<CustomerEntity> setDataOnCustomer(UUID customerId, UpdateCustomerRequestDTO updateCustomerRequestDTO) {
         return customerRepository.findById(customerId)
-                .switchIfEmpty(Mono.error(new CustomerNotFoundException()))
-                .map(entity -> updateEntity(entity, updateCustomerRequest))
-                .flatMap(customerRepository::save)
-                .zipWith(updateAndPersistAddress(customerId, updateCustomerRequest.address()))
-                .map(tuple2 -> convertToRestModel(tuple2.getT1(), tuple2.getT2()));
+                .switchIfEmpty(Mono.error(new CustomerNotFoundException(customerId)))
+                .map(entity -> entity.applyUpdate(updateCustomerRequestDTO))
+                .flatMap(customerRepository::save);
     }
 
-    private Mono<AddressEntity> updateAndPersistAddress(UUID customerId, Address newAddress) {
-        return Mono.just(newAddress)
-                .filter(Objects::nonNull)
-                .flatMap(newAddressNotNull -> addressRepository.findByCustomerId(customerId))
-                .map(entity -> updateAddressEntity(entity, newAddress))
+    private Mono<AddressEntity> setAddressDataOnCustomer(UUID customerId, UpdateCustomerRequestDTO updateCustomerRequestDTO) {
+        return addressRepository.findByCustomerId(customerId)
+                .switchIfEmpty(Mono.error(new AddressNotFoundException(customerId)))
+                .map(entity -> entity.applyUpdate(updateCustomerRequestDTO))
                 .flatMap(addressRepository::save);
-    }
-
-    private AddressEntity updateAddressEntity(AddressEntity addressEntity, Address newAddress) {
-        if (newAddress.streetAddress() != null) {
-            addressEntity.setStreetAddress(newAddress.streetAddress());
-        }
-
-        if (newAddress.city() != null) {
-            addressEntity.setCity(newAddress.city());
-        }
-
-        if (newAddress.country() != null) {
-            addressEntity.setCountry(newAddress.country());
-        }
-
-        return addressEntity;
-    }
-
-    private CustomerEntity updateEntity(CustomerEntity entity, UpdateCustomerRequest newCustomerData) {
-        if (newCustomerData.phoneNumber() != null) {
-            entity.setPhoneNumber(newCustomerData.phoneNumber());
-        }
-
-        if (newCustomerData.firstName() != null) {
-            entity.setFirstName(newCustomerData.firstName());
-        }
-
-        if (newCustomerData.lastName() != null) {
-            entity.setLastName(newCustomerData.lastName());
-        }
-
-        return entity;
     }
 }

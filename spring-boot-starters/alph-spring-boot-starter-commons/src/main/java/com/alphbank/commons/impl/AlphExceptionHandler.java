@@ -93,7 +93,8 @@ public abstract class AlphExceptionHandler {
     }
 
     // If an enum has an invalid value, or in the case of certain validations like @DateTimeFormat, a generic ServerWebInputException is thrown
-    // TODO: How do I ensure this only gets run as a backup? WebExchangeBindException and MissingRequestValueException should be tried first
+    // Spring should prioritize the handlers for the more specific subclass exceptions like WebExchangeBindException and MissingRequestValueException
+    // before trying this one.
     @ExceptionHandler(ServerWebInputException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handle(ServerWebInputException ex){

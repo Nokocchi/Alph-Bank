@@ -1,4 +1,4 @@
-package com.alphbank.core.customer.service.error;
+package com.alphbank.core.customer.rest.error.model;
 
 public class DuplicateCustomerException extends RuntimeException {
 

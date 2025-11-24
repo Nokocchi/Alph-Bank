@@ -8,12 +8,11 @@ Get back up to speed:
 - Banking core:
 	- Make contract tests for all endpoints, with proper producer(), consumer()
 	- Unit tests, integration tests
-	- Consider re-introducing ResponseEntity so we can return 200 if already exists and 201 if created, etc.
 	- Use consistent style. Builder, conversion methods, mapper classes, naming
 
+- Make the openapi spec refer to fielderror on 4xx, and have a typemap in the generator
 - Mermaid diagram, both sequence and component. Draw.io flowcharts.
 - Update README with examples of good practices, banking/fintech knowledge
-- Replace Locale with country+language
 - Try out MVC + loom/virtual threads in loan service?
 - Can I use Rollback/transactional in tests to automatically clean up?
 

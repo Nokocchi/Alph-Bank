@@ -3,6 +3,7 @@ package com.alphbank.core.payment.service;
 import com.alphbank.commons.impl.Utils;
 import com.alphbank.core.account.service.AccountService;
 import com.alphbank.core.account.service.model.AccountTransferRequest;
+import com.alphbank.core.payment.rest.model.Payment;
 import com.alphbank.core.payment.rest.model.PaymentSearchResult;
 import com.alphbank.core.payment.service.error.PaymentNotFoundException;
 import com.alphbank.core.payment.service.repository.PaymentRepository;
@@ -35,25 +36,26 @@ public class PaymentService {
     private final TaskScheduler taskScheduler;
     private final AccountService accountService;
 
-    public Flux<PaymentSearchResultDTO> findAllPaymentsOptionalFilters(UUID fromAccountId, String recipientIban) {
+    public Flux<Payment> findAllPaymentsOptionalFilters(UUID fromAccountId, String recipientIban) {
         return findAllPaymentsByFromAccountId(fromAccountId)
                 .concatWith(findAllPaymentsByRecipientIban(recipientIban));
     }
 
-    private Flux<PaymentSearchResultDTO> findAllPaymentsByFromAccountId(UUID fromAccountId) {
+    private Flux<Payment> findAllPaymentsByFromAccountId(UUID fromAccountId) {
         if (fromAccountId == null) {
             return Flux.empty();
         }
         return paymentRepository.findAllPaymentsByFromAccountId(fromAccountId)
-                .map(paymentEntity -> convertToSearchResponse(paymentEntity, false));
+                .map(PaymentEntity::toModel);
     }
 
-    private Flux<PaymentSearchResultDTO> findAllPaymentsByRecipientIban(String recipientIban) {
+    // TODO: Check if the transaction is incoming or outgoing and adjust the sign accordingly
+    private Flux<Payment> findAllPaymentsByRecipientIban(String recipientIban) {
         if (recipientIban == null) {
             return Flux.empty();
         }
         return paymentRepository.findAllPaymentsByRecipientIban(recipientIban)
-                .map(paymentEntity -> convertToSearchResponse(paymentEntity, true));
+                .map(PaymentEntity::toModel);
     }
 
     @Transactional

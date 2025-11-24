@@ -3,86 +3,25 @@ info:
   title: OpenAPI definition
   version: v0
 servers:
-- url: http://localhost:8080
-  description: Generated server url
+  - url: http://localhost:8080
+    description: Generated server url
 tags:
-- name: CoreAccount
-  description: Description
-- name: CoreLoan
-  description: Description
-- name: CorePayment
-  description: Description
-- name: CoreCustomer
-  description: Description
+  - name: CoreCustomer
+    description: Endpoints related to customers
+  - name: CoreAccount
+    description: Endpoints related to accounts
+  - name: CorePayment
+    description: Endpoints related to payments
+  - name: CoreLoan
+    description: Endpoints related to loans
+
 paths:
-  /payment:
-    post:
-      tags:
-      - CorePayment
-      operationId: createPayment
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreatePaymentRequest"
-        required: true
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Payment"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-  /loan:
-    post:
-      tags:
-      - CoreLoan
-      operationId: createLoan
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateLoanRequest"
-        required: true
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Loan"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
   /customer:
     post:
       tags:
-      - CoreCustomer
+        - CoreCustomer
+      summary: Create a customer in Alph bank
+      description: TODO
       operationId: createCustomer
       requestBody:
         content:
@@ -97,24 +36,146 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Customer"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
         "409":
           description: Conflict
           content:
             application/json:
               schema:
-                type: string
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+  /customer/{customer-id}:
+    get:
+      tags:
+        - CoreCustomer
+      summary: Get a customer by their customerId.
+      description: TODO
+      operationId: getCustomer
+      parameters:
+        - name: customer-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+    delete:
+      tags:
+        - CoreCustomer
+      summary: Delete a customer by their customerId.
+      description: TODO
+      operationId: deleteCustomer
+      parameters:
+        - name: customer-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+    patch:
+      tags:
+        - CoreCustomer
+      summary: Update a specific customer's information.
+      description: TODO
+      operationId: updateCustomer
+      parameters:
+        - name: customer-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCustomerRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+  /customer/search:
+    get:
+      tags:
+        - CoreCustomer
+      summary: Fetch all customers.
+      description: TODO
+      operationId: searchCustomers
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+
   /account:
     post:
       tags:
-      - CoreAccount
+        - CoreAccount
+      summary: Create an account on a specific customer.
+      description: TODO
       operationId: createAccount
       requestBody:
         content:
@@ -143,359 +204,20 @@ paths:
                 type: string
         "400":
           description: Bad Request
-  /customer/{id}:
+  /account/{account-id}:
     get:
       tags:
-      - CoreCustomer
-      operationId: getCustomer
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Customer"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-    delete:
-      tags:
-      - CoreCustomer
-      operationId: deleteCustomer
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "204":
-          description: No Content
-          content:
-            application/json:
-              schema:
-                type: string
-                format: uuid
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-    patch:
-      tags:
-      - CoreCustomer
-      operationId: updateCustomer
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateCustomerRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Customer"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-  /payment/{id}:
-    get:
-      tags:
-      - CorePayment
-      operationId: getPayment
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Payment"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-    delete:
-      tags:
-      - CorePayment
-      operationId: deletePayment
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "204":
-          description: No Content
-          content:
-            application/json:
-              schema:
-                type: string
-                format: uuid
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-  /payment/search:
-    get:
-      tags:
-      - CorePayment
-      operationId: searchPayments
-      parameters:
-      - name: from-account-id
-        in: query
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: recipient-iban
-        in: query
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentSearchRestResponse"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-  /loan/{id}:
-    get:
-      tags:
-      - CoreLoan
-      operationId: getLoan
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Loan"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-    delete:
-      tags:
-      - CoreLoan
-      operationId: deleteLoan
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "204":
-          description: No Content
-          content:
-            application/json:
-              schema:
-                type: string
-                format: uuid
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-  /loan/search:
-    get:
-      tags:
-      - CoreLoan
-      operationId: searchLoans
-      parameters:
-      - name: customerId
-        in: query
-        required: false
-        schema:
-          type: string
-          format: uuid
-      - name: accountId
-        in: query
-        required: false
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SearchLoansResponse"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-  /customer/search:
-    get:
-      tags:
-      - CoreCustomer
-      summary: Search all customers
-      description: Returns a list of customers
-      operationId: searchCustomers
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CustomerSearchResponse"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-  /account/{id}:
-    get:
-      tags:
-      - CoreAccount
+        - CoreAccount
+      summary: Get an account by its accountId.
+      description: TODO
       operationId: getAccount
       parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
+        - name: account-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: OK
@@ -519,15 +241,17 @@ paths:
           description: Bad Request
     delete:
       tags:
-      - CoreAccount
+        - CoreAccount
+      summary: Delete an account by its accountId.
+      description: TODO
       operationId: deleteAccount
       parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
+        - name: account-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         "204":
           description: No Content
@@ -553,14 +277,16 @@ paths:
   /account/search:
     get:
       tags:
-      - CoreAccount
+        - CoreAccount
+      summary: Get all accounts by customerId.
+      description: TODO
       operationId: searchAccounts
       parameters:
-      - name: customer-id
-        in: query
-        required: true
-        schema:
-          type: string
+        - name: customer-id
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -568,6 +294,270 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AccountSearchResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+
+  /payments:
+    post:
+      tags:
+        - CorePayment
+      summary: Create a payment. The execution of the payment will depend on the scheduledDateTime field.
+      description: TODO
+      operationId: createPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+  /payments/{payment-id}:
+    get:
+      tags:
+        - CorePayment
+      summary: Get a payment by its paymentId.
+      description: TODO
+      operationId: getPayment
+      parameters:
+        - name: payment-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+    delete:
+      tags:
+        - CorePayment
+      summary: Delete a payment by its paymentId.
+      description: TODO
+      operationId: deletePayment
+      parameters:
+        - name: payment-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+  /payments/search:
+    get:
+      tags:
+        - CorePayment
+      summary: Search payments by various fields.
+      description: TODO
+      operationId: searchPayments
+      parameters:
+        - name: from-account-id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: recipient-iban
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payment"
+        "400":
+          description: Bad Request
+
+  /loans:
+    post:
+      tags:
+        - CoreLoan
+      summary: TODO
+      description: TODO
+      operationId: createLoan
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLoanRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+  /loan/{loan-id}:
+    get:
+      tags:
+        - CoreLoan
+      summary: Get a loan by its loanId.
+      description: TODO
+      operationId: getLoan
+      parameters:
+        - name: loan-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+    delete:
+      tags:
+        - CoreLoan
+      summary: Delete a loan by its loanId.
+      description: TODO
+      operationId: deleteLoan
+      parameters:
+        - name: loan-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+  /loan/search:
+    get:
+      tags:
+        - CoreLoan
+      summary: Search loans by various fields.
+      description: TODO
+      operationId: searchLoans
+      parameters:
+        - name: customerId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: accountId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchLoansResponse"
         "404":
           description: Not Found
           content:
@@ -609,10 +599,12 @@ components:
       properties:
         amount:
           type: number
-          example: 99.96
+          examples:
+            - 99.96
         currency:
           type: string
-          example: USD
+          examples:
+            - USD
     Payment:
       type: object
       properties:
@@ -682,24 +674,53 @@ components:
           format: date-time
     Address:
       type: object
+      required:
+        - streetAddress
+        - city
+        - country
       properties:
         streetAddress:
           type: string
+          examples:
+            - Main Street 4
         city:
           type: string
+          examples:
+            - Stockholm
         country:
           type: string
+          examples:
+            - Sweden
     CreateCustomerRequest:
       type: object
+      required:
+        - language
+        - countryCode
+        - nationalId
+        - firstName
+        - lastName
+        - address
       properties:
-        locale:
+        language:
           type: string
+          examples:
+            - sv
+        countryCode:
+          type: string
+          examples:
+            - SE
         nationalId:
           type: string
+          examples:
+            - 200510312390
         firstName:
           type: string
+          examples:
+            - John
         lastName:
           type: string
+          examples:
+            - Doe
         address:
           $ref: "#/components/schemas/Address"
     Customer:
@@ -710,32 +731,45 @@ components:
           format: uuid
         address:
           $ref: "#/components/schemas/Address"
-        phoneNumber:
+        language:
           type: string
+          examples:
+            - sv
+        countryCode:
+          type: string
+          examples:
+            - SE
         nationalId:
           type: string
+          examples:
+            - 200510312390
         firstName:
           type: string
+          examples:
+            - John
         lastName:
           type: string
-        locale:
-          type: string
+          examples:
+            - Doe
     CreateAccountRequest:
       type: object
       properties:
         customerId:
           type: string
           format: uuid
-          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+          examples:
+            - 3fa85f64-5717-4562-b3fc-2c963f66afa6
         locale:
           type: string
-          example: sv_SE
+          examples:
+            - sv_SE
         accountName:
           type: string
-          example: Savings account
+          examples:
+            - Savings account
       required:
-      - customerId
-      - locale
+        - customerId
+        - locale
     Account:
       type: object
       properties:
@@ -811,3 +845,34 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Account"
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+          examples:
+            - 4xx
+        errorMessage:
+          type: string
+    FieldErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+          examples:
+            - 404
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldErrorEntry"
+    FieldErrorEntry:
+      type: object
+      properties:
+        errorCode:
+          fieldName: string
+          examples:
+            - field.nestedField
+        errors:
+          type: array
+          items:
+            type: string

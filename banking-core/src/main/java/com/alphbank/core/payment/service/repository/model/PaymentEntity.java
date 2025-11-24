@@ -1,5 +1,6 @@
 package com.alphbank.core.payment.service.repository.model;
 
+import com.alphbank.core.payment.rest.model.Payment;
 import com.alphbank.core.rest.model.CreatePaymentRequestDTO;
 import lombok.Builder;
 import lombok.Data;
@@ -64,6 +65,12 @@ public class PaymentEntity {
                 .monetaryValue(createPaymentRequest.getAmount().getAmount())
                 .currency(createPaymentRequest.getAmount().getCurrency())
                 .scheduledDateTime(scheduledDateTimeNullable != null ? scheduledDateTimeNullable : LocalDateTime.now())
+                .build();
+    }
+
+    public Payment toModel() {
+        return Payment.builder()
+                // TODO
                 .build();
     }
 }
