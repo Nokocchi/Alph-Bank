@@ -1,4 +1,4 @@
-package com.alphbank.core.loan.service.error;
+package com.alphbank.core.loan.rest.error.model;
 
 public class LoanNotFoundException extends RuntimeException {
 

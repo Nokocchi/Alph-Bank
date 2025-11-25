@@ -1,6 +1,6 @@
-package com.alphbank.core.payment.rest;
+package com.alphbank.core.payment.rest.error;
 
-import com.alphbank.core.payment.service.error.PaymentNotFoundException;
+import com.alphbank.core.payment.rest.error.model.PaymentNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

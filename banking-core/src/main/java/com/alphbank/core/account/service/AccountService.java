@@ -1,6 +1,6 @@
 package com.alphbank.core.account.service;
 
-import com.alphbank.core.account.service.error.AccountNotFoundException;
+import com.alphbank.core.account.rest.error.model.AccountNotFoundException;
 import com.alphbank.core.account.service.model.Account;
 import com.alphbank.core.account.service.model.AccountTransferRequest;
 import com.alphbank.core.account.service.model.LoanPayoutRequest;

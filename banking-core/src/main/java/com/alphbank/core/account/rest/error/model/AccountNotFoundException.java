@@ -1,4 +1,4 @@
-package com.alphbank.core.account.service.error;
+package com.alphbank.core.account.rest.error.model;
 
 import java.util.UUID;
 

@@ -1,11 +1,10 @@
 package com.alphbank.core.payment.service;
 
-import com.alphbank.commons.impl.Utils;
 import com.alphbank.core.account.service.AccountService;
 import com.alphbank.core.account.service.model.AccountTransferRequest;
 import com.alphbank.core.payment.rest.model.Payment;
 import com.alphbank.core.payment.rest.model.PaymentSearchResult;
-import com.alphbank.core.payment.service.error.PaymentNotFoundException;
+import com.alphbank.core.payment.rest.error.model.PaymentNotFoundException;
 import com.alphbank.core.payment.service.repository.PaymentRepository;
 import com.alphbank.core.payment.service.repository.model.PaymentEntity;
 import com.alphbank.core.rest.model.CreatePaymentRequestDTO;
@@ -20,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.money.MonetaryAmount;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;

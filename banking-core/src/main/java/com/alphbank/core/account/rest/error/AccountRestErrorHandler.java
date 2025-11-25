@@ -1,7 +1,7 @@
-package com.alphbank.core.account.rest;
+package com.alphbank.core.account.rest.error;
 
 import com.alphbank.commons.impl.AlphExceptionHandler;
-import com.alphbank.core.account.service.error.AccountNotFoundException;
+import com.alphbank.core.account.rest.error.model.AccountNotFoundException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
