@@ -37,9 +37,9 @@ public class CustomerController implements CustomerApi {
                 .map(Customer::from)
                 .flatMap(customerService::createCustomer)
                 .map(Customer::toDTO)
-                .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .doOnNext(response -> log.info("Returning created customer: {}", jsonLog.format(response)))
-                .doOnError(e -> log.error("Error creating customer", e));
+                .doOnError(e -> log.error("Error creating customer", e))
+                .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto));
     }
 
     @Override

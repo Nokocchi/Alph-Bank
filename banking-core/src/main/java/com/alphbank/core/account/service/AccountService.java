@@ -1,14 +1,14 @@
 package com.alphbank.core.account.service;
 
-import com.alphbank.core.account.rest.model.Account;
-import com.alphbank.core.account.rest.model.CreateAccountRequest;
 import com.alphbank.core.account.service.error.AccountNotFoundException;
+import com.alphbank.core.account.service.model.Account;
 import com.alphbank.core.account.service.model.AccountTransferRequest;
 import com.alphbank.core.account.service.model.LoanPayoutRequest;
 import com.alphbank.core.account.service.repository.AccountRepository;
 import com.alphbank.core.account.service.repository.model.AccountEntity;
+import com.alphbank.core.customer.rest.error.model.CustomerNotFoundException;
+import com.alphbank.core.customer.service.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
-import org.javamoney.moneta.Money;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 import javax.money.MonetaryAmount;
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -23,33 +24,34 @@ import java.util.UUID;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final CustomerRepository customerRepository;
+
+    public Mono<Account> createAccount(Account account) {
+        return customerRepository.findById(account.getCustomerId())
+                .switchIfEmpty(Mono.error(new CustomerNotFoundException(account.getCustomerId())))
+                .map(customerEntity -> Locale.of(customerEntity.getLanguage(), customerEntity.getCountry()))
+                .map(locale -> AccountEntity.from(account, locale))
+                .flatMap(accountRepository::save)
+                .map(AccountEntity::toModel);
+    }
 
     public Flux<Account> getAllAccountsByCustomerId(String customerId) {
         return accountRepository.findAllByCustomerId(customerId)
-                .map(this::convertToRestModel);
-    }
-
-    public Mono<Account> createAccount(CreateAccountRequest createAccountRequest) {
-        AccountEntity accountEntity = AccountEntity.from(createAccountRequest);
-        return accountRepository.save(accountEntity)
-                .map(this::convertToRestModel);
+                .map(AccountEntity::toModel);
     }
 
     public Mono<Account> getAccount(UUID id) {
         return accountRepository.findById(id)
                 .switchIfEmpty(Mono.error(new AccountNotFoundException(id)))
-                .map(this::convertToRestModel);
+                .map(AccountEntity::toModel);
     }
 
     public Mono<Void> deleteAccount(UUID id) {
         return accountRepository.deleteById(id);
     }
 
-    private Account convertToRestModel(AccountEntity accountEntity) {
-        Money balance = Money.of(accountEntity.getBalance(), accountEntity.getCurrencyCode());
-        return new Account(accountEntity.getAccountId(), accountEntity.getAccountName(), balance, accountEntity.getIban());
-    }
 
+    // TODO:
     @Transactional
     public Mono<Void> transferBetweenAccounts(AccountTransferRequest accountTransferRequest) {
         MonetaryAmount amount = accountTransferRequest.amount();
