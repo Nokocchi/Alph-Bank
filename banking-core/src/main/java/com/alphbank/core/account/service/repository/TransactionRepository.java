@@ -14,10 +14,10 @@ import java.util.UUID;
 public interface TransactionRepository extends R2dbcRepository<TransactionEntity, UUID> {
 
     @Query("""
-                SELECT t.newBalance
-                FROM Transaction t
-                WHERE t.accountId = :accountId
-                ORDER BY t.executionDate DESC
+                SELECT t.new_balance
+                FROM transaction_ t
+                WHERE t.account_id = :accountId
+                ORDER BY t.execution_date_time DESC
                 LIMIT 1
             """)
     Mono<BigDecimal> getNewBalanceByAccountIdOrderByExecutionDateTimeDesc(UUID accountId);

@@ -5,14 +5,13 @@ import com.alphbank.core.payment.service.repository.model.PaymentEntity;
 import com.alphbank.core.rest.model.CreatePaymentRequestDTO;
 import com.alphbank.core.rest.model.MonetaryAmountDTO;
 import com.alphbank.core.rest.model.PaymentDTO;
-import com.alphbank.core.rest.model.PaymentSearchResultDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.With;
 import org.javamoney.moneta.Money;
 
 import javax.money.MonetaryAmount;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -25,10 +24,16 @@ public class Payment {
     @NotNull
     private UUID fromAccountId;
 
+    @NotNull
     private MonetaryAmount amount;
 
+    @With
     private UUID recipientAccountId;
 
+    @NotNull
+    private String recipientName;
+
+    @NotNull
     private String recipientIban;
 
     private String messageToSelf;
@@ -39,7 +44,7 @@ public class Payment {
 
     private LocalDateTime scheduledDateTime;
 
-    public PaymentDTO toDTO(){
+    public PaymentDTO toDTO() {
         return PaymentDTO.builder()
                 .id(id)
                 .fromAccountId(fromAccountId)
@@ -60,14 +65,13 @@ public class Payment {
                 .fromAccountId(createPaymentRequestDTO.getFromAccountId())
                 .amount(Money.of(createPaymentRequestDTO.getAmount().getAmount(), createPaymentRequestDTO.getAmount().getCurrency()))
                 .recipientIban(createPaymentRequestDTO.getRecipientIban())
-                .recipientAccountId(createPaymentRequestDTO.getRecipientAccountId())
+                .recipientName(createPaymentRequestDTO.getRecipientName())
                 .messageToSelf(createPaymentRequestDTO.getMessageToSelf())
                 .messageToRecipient(createPaymentRequestDTO.getMessageToRecipient())
                 .scheduledDateTime(createPaymentRequestDTO.getScheduledDateTime())
                 .build();
     }
 
-    // TODO: I probably need some more fields here, like from/to IBAN, but I will do that later.
     public static Payment fromEntity(PaymentEntity paymentEntity) {
         return Payment.builder()
                 .id(paymentEntity.getId())

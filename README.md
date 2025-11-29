@@ -11,8 +11,9 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 
 * Core banking functionality
 * Payments to and from other customers using both internal and PSD2 inspired APIs
-* Scheduled payments
+* Instant & scheduled single payments
 * Recurring payments
+* Double entry bookkeeping of account transactions
 * Simulated compliance-based nightly batch uploads to government entities
 * Personal Loan applications with fixed-rate interest
 * Simulated signing flow for authorizing payments and applying for loans, utilizing asynchronous callbacks when customer has signed
@@ -26,11 +27,11 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 * Proper/safe authentication and authorization
 * No proper deployment that can be tested. Local testing only
 * Mostly intended to show backend skills and banking knowledge, so the front-end is quite barebones and does not use or provide good accessibility, best practices, nice user experiences across devices and browsers etc.
-* Handling of concurrency and race conditions. 
-* Double bookkeeping of account transactions, general ledgers and subledgers, etc.
+* Handling of concurrency and race conditions.
 * (Simulated) GDPR compliance
 * Database audit logs / versioning of data
 * Communication with other banks. We can assume that all transactions happen on accounts in Alph Bank
+* Credit cards. 
 
 ## How to run
 

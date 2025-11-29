@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.api.CustomerApi;
+import org.openapitools.api.CustomersApi;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,7 +26,7 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
-public class CustomerController implements CustomerApi {
+public class CustomerController implements CustomersApi {
 
     private final CustomerService customerService;
     private final JsonLog jsonLog;

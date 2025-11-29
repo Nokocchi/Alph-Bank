@@ -8,6 +8,7 @@ import com.alphbank.core.rest.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.api.AccountApi;
+import org.openapitools.api.AccountsApi;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,7 +23,7 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
-public class AccountController implements AccountApi {
+public class AccountController implements AccountsApi {
 
     private final AccountService accountService;
     private final JsonLog jsonLog;

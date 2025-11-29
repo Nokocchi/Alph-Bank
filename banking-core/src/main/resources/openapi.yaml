@@ -16,7 +16,7 @@ tags:
     description: Endpoints related to loans
 
 paths:
-  /customer:
+  /customers:
     post:
       tags:
         - CoreCustomer
@@ -48,7 +48,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FieldErrorResponse"
-  /customer/{customer-id}:
+  /customers/{customer-id}:
     get:
       tags:
         - CoreCustomer
@@ -141,7 +141,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FieldErrorResponse"
-  /customer/search:
+  /customers/search:
     get:
       tags:
         - CoreCustomer
@@ -164,7 +164,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/FieldErrorResponse"
 
-  /account:
+  /accounts:
     post:
       tags:
         - CoreAccount
@@ -196,7 +196,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FieldErrorResponse"
-  /account/{account-id}:
+  /accounts/{account-id}:
     get:
       tags:
         - CoreAccount
@@ -251,7 +251,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FieldErrorResponse"
-  /account/search:
+  /accounts/search:
     get:
       tags:
         - CoreAccount
@@ -286,7 +286,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FieldErrorResponse"
-  /account/{account-id}/transactions:
+  /accounts/{account-id}/transactions:
     get:
       tags:
         - CoreAccount
@@ -326,8 +326,8 @@ paths:
     post:
       tags:
         - CorePayment
-      summary: Create a payment. The execution of the payment will depend on the scheduledDateTime field.
-      description: TODO
+      summary: Create a payment.
+      description: The execution of the payment will depend on the scheduledDateTime field.
       operationId: createPayment
       requestBody:
         content:
@@ -432,6 +432,122 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Payment"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+  /periodic-payments:
+    post:
+      tags:
+        - CorePayment
+      summary: Create a periodic payment.
+      description: This is not a payment in itself, but the created entity will spawn scheduled payments to be executed at the desired frequency.
+      operationId: createPeriodicPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePeriodicPaymentRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PeriodicPayment"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+  /periodic-payments/{periodic-payment-id}:
+    get:
+      tags:
+        - CorePayment
+      summary: Get a periodic payment by its periodicPaymentId.
+      description: TODO
+      operationId: getPeriodicPayment
+      parameters:
+        - name: periodic-payment-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PeriodicPayment"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+    delete:
+      tags:
+        - CorePayment
+      summary: Delete a periodic payment by its periodicPaymentId.
+      description: TODO
+      operationId: deletePeriodicPayment
+      parameters:
+        - name: periodic-payment-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+  /periodic-payments/search:
+    get:
+      tags:
+        - CorePayment
+      summary: Search all active periodic payments by customerId.
+      description: TODO
+      operationId: searchPeriodicPayments
+      parameters:
+        - name: customer-id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PeriodicPayment"
         "400":
           description: Bad Request
           content:
@@ -588,14 +704,17 @@ components:
   schemas:
     CreatePaymentRequest:
       type: object
+      required:
+        - fromAccountId
+        - recipientIban
+        - amount
       properties:
         fromAccountId:
           type: string
           format: uuid
-        recipientAccountId:
-          type: string
-          format: uuid
         recipientIban:
+          type: string
+        recipientName:
           type: string
         amount:
           $ref: "#/components/schemas/MonetaryAmount"
@@ -606,6 +725,35 @@ components:
         scheduledDateTime:
           type: string
           format: date-time
+    CreatePeriodicPaymentRequest:
+      type: object
+      required:
+        - fromAccountId
+        - recipientIban
+        - amount
+        - frequency
+      properties:
+        fromAccountId:
+          type: string
+          format: uuid
+        recipientIban:
+          type: string
+        recipientName:
+          type: string
+        amount:
+          $ref: "#/components/schemas/MonetaryAmount"
+        messageToSelf:
+          type: string
+        messageToRecipient:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        frequency:
+          $ref: "#/components/schemas/PeriodicPaymentFreuqency"
     MonetaryAmount:
       type: object
       properties:
@@ -626,8 +774,29 @@ components:
         fromAccountId:
           type: string
           format: uuid
-        fromAccountIban:
+        amount:
+          $ref: "#/components/schemas/MonetaryAmount"
+        recipientIban:
           type: string
+        messageToSelf:
+          type: string
+        messageToRecipient:
+          type: string
+        executedDateTime:
+          type: string
+          format: date-time
+        scheduledDateTime:
+          type: string
+          format: date-time
+    PeriodicPayment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fromAccountId:
+          type: string
+          format: uuid
         amount:
           $ref: "#/components/schemas/MonetaryAmount"
         recipientIban:
@@ -728,6 +897,13 @@ components:
             - Doe
         address:
           $ref: "#/components/schemas/Address"
+    PeriodicPaymentFreuqency:
+      type: string
+      enum:
+        - EVERY_10_SECONDS
+        - DAILY
+        - MONTHLY
+        - ANNUAL
     Customer:
       type: object
       properties:

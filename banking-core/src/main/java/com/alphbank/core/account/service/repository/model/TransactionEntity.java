@@ -2,6 +2,7 @@ package com.alphbank.core.account.service.repository.model;
 
 import com.alphbank.core.account.service.model.Transaction;
 import com.alphbank.core.account.service.model.TransactionCreatedByType;
+import com.alphbank.core.payment.service.repository.model.PaymentEntity;
 import lombok.Builder;
 import lombok.Data;
 import org.javamoney.moneta.Money;
@@ -25,10 +26,10 @@ public class TransactionEntity {
     @Column("account_id")
     private UUID accountId;
 
-    @Column("currency_code")
+    @Column("currency")
     private String currencyCode;
 
-    @Column("monetary_value")
+    @Column("amount")
     private BigDecimal amount;
 
     @Column("new_balance")
@@ -55,5 +56,14 @@ public class TransactionEntity {
                 .message(message)
                 .executedDateTime(executionDateTime)
                 .build();
+    }
+
+    public static TransactionEntityBuilder createBuilder(PaymentEntity paymentEntity){
+        return TransactionEntity.builder()
+                .createdFromId(paymentEntity.getId())
+                .createdFromType(TransactionCreatedByType.PAYMENT)
+                .executionDateTime(LocalDateTime.now())
+                .amount(paymentEntity.getMonetaryValue())
+                .currencyCode(paymentEntity.getCurrency());
     }
 }

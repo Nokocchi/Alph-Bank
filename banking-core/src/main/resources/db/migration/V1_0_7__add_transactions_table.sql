@@ -5,7 +5,7 @@ CREATE TABLE transaction_ (
     amount NUMERIC(19,6) NOT NULL,
     new_balance NUMERIC(19,6) NOT NULL,
     message TEXT,
-    execution_date_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,,
+    execution_date_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     created_from_type TEXT NOT NULL,
     created_from_id UUID NOT NULL,
 
