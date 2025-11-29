@@ -1,6 +1,5 @@
 package com.alphbank.core.loan.service.repository.model;
 
-import com.alphbank.core.loan.rest.model.CreateLoanRequest;
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;
@@ -43,6 +42,7 @@ public class LoanEntity {
     @Column("payout_date_time")
     private LocalDateTime payoutDateTime;
 
+    /*
     public static LoanEntity from(CreateLoanRequest createLoanRequest) {
         return LoanEntity.builder()
                 .accountId(createLoanRequest.accountId())
@@ -52,5 +52,5 @@ public class LoanEntity {
                 .fixedRateInterestAPR(createLoanRequest.fixedRateInterestAPR())
                 .loanPeriodMonths(createLoanRequest.loanTermMonths())
                 .build();
-    }
+    }*/
 }

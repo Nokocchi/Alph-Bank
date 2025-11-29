@@ -2,8 +2,6 @@ package com.alphbank.core.loan.service;
 
 import com.alphbank.core.account.service.AccountService;
 import com.alphbank.core.account.service.model.LoanPayoutRequest;
-import com.alphbank.core.loan.rest.model.CreateLoanRequest;
-import com.alphbank.core.loan.rest.model.Loan;
 import com.alphbank.core.loan.service.amqp.RabbitMQService;
 import com.alphbank.core.loan.rest.error.model.InvalidLoanSearchException;
 import com.alphbank.core.loan.rest.error.model.LoanNotFoundException;
@@ -31,6 +29,7 @@ public class LoanService {
     private final RabbitMQService rabbitMQService;
     private final AccountService accountService;
 
+    /*
     public Flux<Loan> findAllLoansByCustomerIdOrAccountId(UUID customerId, UUID accountId) {
         if (customerId == null && accountId == null) {
             throw new InvalidLoanSearchException("Both customerId and accountId are null.");
@@ -95,4 +94,6 @@ public class LoanService {
                 loanEntity.getLoanPeriodMonths(),
                 loanEntity.getPayoutDateTime());
     }
+
+     */
 }

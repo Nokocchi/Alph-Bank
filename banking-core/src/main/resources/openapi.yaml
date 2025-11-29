@@ -97,12 +97,6 @@ paths:
       responses:
         "204":
           description: No Content
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: Bad Request
           content:
@@ -251,12 +245,6 @@ paths:
       responses:
         "204":
           description: No Content
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: Bad Request
           content:
@@ -276,6 +264,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         "200":
           description: OK
@@ -297,6 +286,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FieldErrorResponse"
+  /account/{account-id}/transactions:
+    get:
+      tags:
+        - CoreAccount
+      summary: Get all transactions on an account.
+      description: TODO - Paginated?
+      operationId: getTransactionsList
+      parameters:
+        - name: account-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /payments:
     post:
@@ -318,20 +342,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Payment"
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: string
         "409":
           description: Conflict
           content:
             application/json:
               schema:
-                type: string
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
   /payments/{payment-id}:
     get:
       tags:
@@ -358,9 +380,13 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
     delete:
       tags:
         - CorePayment
@@ -377,33 +403,26 @@ paths:
       responses:
         "204":
           description: No Content
-        "404":
-          description: Not Found
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
-                type: string
-        "400":
-          description: Bad Request
+                $ref: "#/components/schemas/FieldErrorResponse"
   /payments/search:
     get:
       tags:
         - CorePayment
-      summary: Search payments by various fields.
+      summary: Search all pending payments by customerId.
       description: TODO
       operationId: searchPayments
       parameters:
-        - name: from-account-id
+        - name: customer-id
           in: query
           required: true
           schema:
             type: string
             format: uuid
-        - name: recipient-iban
-          in: query
-          required: true
-          schema:
-            type: string
       responses:
         "200":
           description: OK
@@ -415,6 +434,10 @@ paths:
                   $ref: "#/components/schemas/Payment"
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorResponse"
 
   /loans:
     post:
@@ -566,10 +589,10 @@ components:
     CreatePaymentRequest:
       type: object
       properties:
-        fromCustomerId:
+        fromAccountId:
           type: string
           format: uuid
-        fromAccountId:
+        recipientAccountId:
           type: string
           format: uuid
         recipientIban:
@@ -597,22 +620,18 @@ components:
     Payment:
       type: object
       properties:
-        paymentId:
-          type: string
-          format: uuid
-        fromCustomerId:
+        id:
           type: string
           format: uuid
         fromAccountId:
           type: string
           format: uuid
+        fromAccountIban:
+          type: string
         amount:
           $ref: "#/components/schemas/MonetaryAmount"
         recipientIban:
           type: string
-        recipientAccountId:
-          type: string
-          format: uuid
         messageToSelf:
           type: string
         messageToRecipient:
@@ -626,9 +645,6 @@ components:
     CreateLoanRequest:
       type: object
       properties:
-        customerId:
-          type: string
-          format: uuid
         accountId:
           type: string
           format: uuid
@@ -778,37 +794,6 @@ components:
           type: string
         lastName:
           type: string
-    PaymentSearchRestResponse:
-      type: object
-      properties:
-        payments:
-          type: array
-          items:
-            $ref: "#/components/schemas/PaymentSearchResult"
-    PaymentSearchResult:
-      type: object
-      properties:
-        paymentId:
-          type: string
-          format: uuid
-        fromCustomerId:
-          type: string
-          format: uuid
-        fromAccountId:
-          type: string
-          format: uuid
-        amount:
-          $ref: "#/components/schemas/MonetaryAmount"
-        recipientIban:
-          type: string
-        recipientAccountId:
-          type: string
-          format: uuid
-        message:
-          type: string
-        visibleOnAccountDateTime:
-          type: string
-          format: date-time
     SearchLoansResponse:
       type: object
       properties:
@@ -816,6 +801,23 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Loan"
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        currencyCode:
+          type: string
+        amount:
+          $ref: "#/components/schemas/MonetaryAmount"
+        newBalance:
+          $ref: "#/components/schemas/MonetaryAmount"
+        message:
+          type: string
+        executedDateTime:
+          type: string
+          format: date-time
     ErrorResponse:
       type: object
       properties:

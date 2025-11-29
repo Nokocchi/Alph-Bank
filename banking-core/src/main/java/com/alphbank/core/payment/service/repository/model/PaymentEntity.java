@@ -1,7 +1,7 @@
 package com.alphbank.core.payment.service.repository.model;
 
-import com.alphbank.core.payment.rest.model.Payment;
-import com.alphbank.core.rest.model.CreatePaymentRequestDTO;
+import com.alphbank.commons.impl.Utils;
+import com.alphbank.core.payment.service.model.Payment;
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;
@@ -20,10 +20,10 @@ public class PaymentEntity {
 
     @Column("id")
     @Id
-    private UUID paymentId;
+    private UUID id;
 
-    @Column("from_customer_id")
-    private UUID fromCustomerId;
+    @Column("periodic_payment_id")
+    private UUID periodicPaymentId;
 
     @Column("from_account_id")
     private UUID fromAccountId;
@@ -54,23 +54,17 @@ public class PaymentEntity {
     private LocalDateTime executionDateTime;
 
 
-    public static PaymentEntity from(CreatePaymentRequestDTO createPaymentRequest) {
-        LocalDateTime scheduledDateTimeNullable = createPaymentRequest.getScheduledDateTime();
+    public static PaymentEntity from(Payment payment) {
         return PaymentEntity.builder()
-                .fromAccountId(createPaymentRequest.getFromAccountId())
-                .fromCustomerId(createPaymentRequest.getFromCustomerId())
-                .messageToSelf(createPaymentRequest.getMessageToSelf())
-                .messageToRecipient(createPaymentRequest.getMessageToRecipient())
-                .recipientIban(createPaymentRequest.getRecipientIban())
-                .monetaryValue(createPaymentRequest.getAmount().getAmount())
-                .currency(createPaymentRequest.getAmount().getCurrency())
-                .scheduledDateTime(scheduledDateTimeNullable != null ? scheduledDateTimeNullable : LocalDateTime.now())
+                .fromAccountId(payment.getFromAccountId())
+                .messageToSelf(payment.getMessageToSelf())
+                .messageToRecipient(payment.getMessageToRecipient())
+                .recipientIban(payment.getRecipientIban())
+                .monetaryValue(Utils.getAmount(payment.getAmount()))
+                .currency(Utils.getCurrencyCode(payment.getAmount()))
+                .scheduledDateTime(payment.getScheduledDateTime())
                 .build();
     }
 
-    public Payment toModel() {
-        return Payment.builder()
-                // TODO
-                .build();
-    }
+
 }

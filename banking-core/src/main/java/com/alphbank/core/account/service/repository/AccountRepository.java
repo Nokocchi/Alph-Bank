@@ -13,5 +13,5 @@ public interface AccountRepository extends R2dbcRepository<AccountEntity, UUID> 
 
     Mono<AccountEntity> findByIban(String recipientIban);
 
-    Flux<AccountEntity> findAllByCustomerId(String customerId);
+    Flux<AccountEntity> findAllByCustomerId(UUID customerId);
 }

@@ -10,9 +10,5 @@ import java.util.UUID;
 @Repository
 public interface PaymentRepository extends R2dbcRepository<PaymentEntity, UUID> {
 
-    Flux<PaymentEntity> findAllPaymentsByFromCustomerId(UUID customerId);
-
-    Flux<PaymentEntity> findAllPaymentsByRecipientIban(String recipientIban);
-
     Flux<PaymentEntity> findAllPaymentsByFromAccountId(UUID accountId);
 }

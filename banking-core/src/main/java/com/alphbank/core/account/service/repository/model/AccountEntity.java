@@ -36,9 +36,9 @@ public class AccountEntity {
     @Column("currency_code")
     private String currencyCode;
 
-    @Column("balance")
+    @Column("initial_balance")
     @Builder.Default
-    private BigDecimal balance = BigDecimal.ZERO;
+    private BigDecimal initialBalance = BigDecimal.ZERO;
 
     @Column("iban")
     private String iban;
@@ -56,16 +56,6 @@ public class AccountEntity {
                         .build()
                         .toString())
                 .currencyCode(Currency.getInstance(locale).getCurrencyCode())
-                .build();
-    }
-
-    public Account toModel() {
-        return Account.builder()
-                .id(id)
-                .customerId(customerId)
-                .accountName(accountName)
-                .balance(Money.of(balance, currencyCode))
-                .iban(iban)
                 .build();
     }
 }

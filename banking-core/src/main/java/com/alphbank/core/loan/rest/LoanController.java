@@ -1,18 +1,13 @@
 package com.alphbank.core.loan.rest;
 
 import com.alphbank.commons.impl.JsonLog;
-import com.alphbank.core.loan.rest.model.CreateLoanRequest;
-import com.alphbank.core.loan.rest.model.Loan;
-import com.alphbank.core.loan.rest.model.SearchLoansResponse;
 import com.alphbank.core.loan.service.LoanService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
-
-import java.util.UUID;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @CrossOrigin(origins = "*")
@@ -24,7 +19,7 @@ public class LoanController {
 
     private final LoanService loanService;
     private final JsonLog jsonLog;
-
+/*
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public Mono<SearchLoansResponse> searchLoans(
@@ -66,6 +61,6 @@ public class LoanController {
                 .getLoan(loanId)
                 .doOnNext(response -> log.info("Returning loan {}", jsonLog.format(response)))
                 .doOnError(e -> log.error("Error getting loan with id " + loanId, e));
-    }
+    }*/
 
 }

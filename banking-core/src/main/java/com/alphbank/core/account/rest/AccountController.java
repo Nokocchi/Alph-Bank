@@ -3,11 +3,8 @@ package com.alphbank.core.account.rest;
 import com.alphbank.commons.impl.JsonLog;
 import com.alphbank.core.account.service.AccountService;
 import com.alphbank.core.account.service.model.Account;
-import com.alphbank.core.customer.service.model.Customer;
-import com.alphbank.core.rest.model.AccountDTO;
-import com.alphbank.core.rest.model.AccountSearchResponseDTO;
-import com.alphbank.core.rest.model.CreateAccountRequestDTO;
-import com.alphbank.core.rest.model.CustomerDTO;
+import com.alphbank.core.account.service.model.Transaction;
+import com.alphbank.core.rest.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.api.AccountApi;
@@ -63,8 +60,8 @@ public class AccountController implements AccountApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<AccountDTO>>> searchAccounts(String customerId, ServerWebExchange exchange) {
-        log.info("Search accounts by customerId {}", customerId);
+    public Mono<ResponseEntity<Flux<AccountDTO>>> searchAccounts(UUID customerId, ServerWebExchange exchange) {
+        log.info("Search accounts by customerId: {}", customerId);
 
         Flux<AccountDTO> customers = accountService.getAllAccountsByCustomerId(customerId)
                 .map(Account::toDTO);
@@ -72,4 +69,13 @@ public class AccountController implements AccountApi {
         return Mono.just(ResponseEntity.ok(customers));
     }
 
+    @Override
+    public Mono<ResponseEntity<Flux<TransactionDTO>>> getTransactionsList(UUID accountId, ServerWebExchange exchange) {
+        log.info("Search transactions by accountId: {}", accountId);
+
+        Flux<TransactionDTO> transactions = accountService.getTransactionsOrderedByExecutionDate(accountId)
+                .map(Transaction::toDTO);
+
+        return Mono.just(ResponseEntity.ok(transactions));
+    }
 }

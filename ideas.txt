@@ -5,13 +5,14 @@ Get back up to speed:
 	- Unit tests, integration tests, contract stub tests
 	- Testcontainers for RabbitMQ
 	- Make contract tests for all endpoints, with proper producer(), consumer()
+	- Implement pagination for payments list?
 - Banking core:
 	- Make contract tests for all endpoints, with proper producer(), consumer()
 	- Unit tests, integration tests
-	- Use consistent style. Builder, conversion methods, mapper classes, naming
+	- Write about general ledger, double bookkeping is only way to make transactions
+	- Create payment execution scheduled task
 
-- Make the openapi spec refer to fielderror on 4xx, and have a typemap in the generator
-- Mermaid diagram, both sequence and component. Draw.io flowcharts.
+- Mermaid diagram, both sequence and component. Draw.io flowcharts. 
 - Update README with examples of good practices, banking/fintech knowledge
 - Try out MVC + loom/virtual threads in loan service?
 - Can I use Rollback/transactional in tests to automatically clean up?
