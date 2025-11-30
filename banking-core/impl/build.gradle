@@ -1,0 +1,177 @@
+import org.springframework.cloud.contract.verifier.config.TestFramework
+import org.springframework.cloud.contract.verifier.config.TestMode
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'io.freefair.lombok' version '9.0.0'
+    id 'org.springframework.cloud.contract' version '4.3.0'
+    id 'org.openapi.generator' version '7.17.0'
+}
+
+java {
+    withSourcesJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', "2025.0.0")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+springBoot {
+    mainClass = 'com.alphbank.core.Application'
+}
+
+configurations {
+    yamlApi
+}
+
+dependencies {
+    // Base
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'io.projectreactor:reactor-core'
+
+    // Database
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.flywaydb:flyway-core:10.10.0'
+    implementation 'org.flywaydb:flyway-database-postgresql:10.10.0'
+    implementation 'org.postgresql:r2dbc-postgresql'
+    implementation 'org.postgresql:postgresql'
+
+    // Messaging
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
+    // Alph Bank starters
+    implementation 'com.alphbank:alph-spring-boot-starter-commons:0.0.24-SNAPSHOT'
+
+    // API
+    yamlApi "com.alphbank.core:BankingCore-API:${project.version}:openapi-spec@yaml"
+
+    // Others
+    implementation 'io.projectreactor.addons:reactor-extra:3.5.1'
+    implementation 'org.iban4j:iban4j:3.2.10-RELEASE'
+
+    // Testing
+    testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
+    testImplementation 'io.rest-assured:spring-web-test-client'
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:r2dbc'
+}
+
+tasks.register('copyYaml', Copy) {
+    from configurations.yamlApi
+    into "$buildDir/openapi"
+}
+
+tasks.named('contractTest') {
+    useJUnitPlatform()
+}
+
+contracts {
+    testMode = TestMode.WEBTESTCLIENT
+    testFramework = TestFramework.JUNIT5
+    baseClassMappings {
+        baseClassMapping "customer": "com.alphbank.core.customer.CustomerBase"
+        baseClassMapping "payment": "com.alphbank.core.payment.PaymentBase"
+    }
+}
+
+verifierStubsJar {
+    archiveClassifier.set('stubs')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact verifierStubsJar
+        }
+    }
+    repositories {
+        maven {
+            mavenLocal()
+        }
+    }
+}
+
+openApiGenerate {
+    inputSpec = file("$buildDir/openapi/BankingCore-API-${project.version}-openapi-spec.yaml").toURI().toString()
+    outputDir = "$buildDir/generated/banking-core".toString()
+    modelPackage = "com.alphbank.core.rest.model"
+    generatorName = "spring"
+    modelNameSuffix = "DTO"
+    typeMappings = [
+            "DateTime": "LocalDateTime",
+    ]
+    importMappings = [
+            "LocalDateTime": "java.time.LocalDateTime",
+    ]
+    configOptions = [
+            booleanGetterPrefix       : "is",
+            annotationLibrary         : "swagger2",
+            dateLibrary               : "java8",
+            useResponseEntity         : "true",
+            reactive                  : "true",
+            library                   : "spring-boot",
+            useSpringBoot3            : "true",
+            useSpringBuiltInValidation: "true",
+            interfaceOnly             : "true",
+            useJakartaEe              : "true",
+            containerDefaultToNull    : "true",
+            openApiNullable           : "false", // Otherwise it tries to use annotation that is not imported
+            generateBuilders          : "true"
+    ]
+}
+
+// Add the generated sources to the main compile classpath
+sourceSets {
+    main {
+        java {
+            srcDir("$buildDir/generated/banking-core/src/main/java")
+        }
+    }
+}
+
+tasks.openApiGenerate {
+    dependsOn tasks.copyYaml
+}
+
+tasks.sourcesJar {
+    dependsOn tasks.openApiGenerate
+}
+
+tasks.compileJava {
+    dependsOn tasks.openApiGenerate
+}
+
+// Ensure stubs jar is built and published
+tasks.publishToMavenLocal {
+    dependsOn verifierStubsJar
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+

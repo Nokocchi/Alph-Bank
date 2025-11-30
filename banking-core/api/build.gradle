@@ -1,0 +1,25 @@
+plugins {
+    id 'maven-publish'
+}
+
+repositories {
+    mavenLocal()
+}
+
+publishing {
+    publications {
+        yamlFile(MavenPublication) {
+            artifact("$projectDir/openapi.yaml") {
+                extension 'yaml'
+                classifier 'openapi-spec'
+            }
+        }
+    }
+    repositories {
+        maven {
+            mavenLocal()
+        }
+    }
+}
+
+

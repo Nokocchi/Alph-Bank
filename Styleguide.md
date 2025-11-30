@@ -24,6 +24,7 @@
 * APIs must be JSON-based and REST-like (Without HATEOAS :) )
 * APIs must be built spec-first, with a version-controlled OpenAPI spec in the repository
 * You must publish this OpenAPI spec and make sure it is versioned.
+* Your own API must be generated from the versioned published OpenAPI spec, to ensure that all changes to your API exist as a new version for consumers as well.
 * As part of the build step, you should auto generate the controller interfaces and controller models for your own API, 
 as well as models and client APIs for your dependencies, using their published OpenAPI spec.
 The generated code should be in a folder separate from the source code, and not checked into version control.
@@ -80,7 +81,7 @@ And they must be called from:
 * Service layer <-> Entity
   * In the service layer.
 
-### Concurrency and error handling
+### Error handling and transactions
 * Malformed request bodies, missing headers and missing query parameters must result in a 400 Bad Request with a clear error message. 
 * If any business logic requires a 4xx response, you must throw an exception, catch it in a Rest Error Handler, and return a standardized error object.
 * If multiple database-writes are done in a single transaction, it must be marked with @Transactional, and rollbacks must be covered by tests
@@ -144,6 +145,62 @@ you would get an unexpected result. So it is important to have some integration 
   * You should use @SpringBootTest, and TestContainers for repositories and message queues. 
   * External APIs should be manually mocked with Wiremock - not using stubs. In rare cases, if necessary, Mockito Spybeans can be used to verify calls to specific methods.
 * **Wiremock:** Mocking must be done in Java, in the test method the mock is needed. Don't use JSON-file mappings. These can be quite difficult to understand in large test suites.
+
+### Versioning
+
+#### Custom Spring Boot Starters
+
+The version number should consist of 5 digits separated by periods. The first three should be equal to the version of Spring Boot used.
+The fourth digit is the major version number of the starter, which is updated when there are breaking changes to the starter.
+Finally, the fifth digit is the path version of the starter, which is updated when the changes are backwards compatible.
+
+This allows us to version the code within the starter correctly, while also targeting multiple Spring Boot versions.
+
+#### Contract stubs & API Versions
+
+Alph Bank uses spec-first API development, which means that all changes must be made in the openapi.yaml file within the repository.
+The API of a service should not be generated directly from the openapi.yaml file in the repository, but instead from the published one.
+This ensures that the API of a service does not get out of sync with the generated client implementation in the consumers. 
+In other words: If your published openapi.yaml is good enough for consumers, it should be good enough for your own service to use as well.
+
+Additionally, this theoretically allows you to support multiple past API versions in your service.
+
+Contract stubs and API specs are always published with the same version, namely the version specified in `build.gradle`.
+This ensures that if your API has been updated, there will be corresponding contract stubs for the consumers of your API. Realistically,
+they will probably not specify a specific version of the contract stubs in their tests, but instead just fetch the newest, 
+which means that even if they forget or fail to update the version of your openapi.yaml spec, 
+their stub tests will still fail if your API has any breaking changes.
+
+#### Flyway migrations
+
+Let's be honest - does anybody ever use the major and minor version of Flyway migrations? For now, just increment the patch version indefinitely.
+In microservices with dedicated small databases, it is unlikely that you will have that many versions anyway.
+
+I suppose you could create a new baseline by exporting the current database structure as a new migration with an incremented major version,
+and delete the Flyway migration history in the database. This way, we have a fresh start and can delete the old migrations. 
+But that doesn't seem like the intended use case..
+
+
+### How to
+
+#### Publishing new version of the Alph Commons Spring Boot Starter
+
+Make the desired change in the Spring Boot starter, increment the version number in `build.gradle` and use the Gradle task `publishToMavenLocal`.
+
+#### Updating API in service
+
+TODO: Should maybe use the published openapi.yaml?
+
+Make a change in the openapi.yaml file. Then, to update the API in your own project, run the Gradle task `openApiGenerate`. 
+
+Also, run the Gradle Task `publishToMavenLocal` in order to publish your new version for consumers to use.
+
+In a real life scenario, this would be automated in the CI/CD pipeline.
+
+#### Publishing new version of contract stubs
+
+TODO
+
 
 ## Frontend
 
