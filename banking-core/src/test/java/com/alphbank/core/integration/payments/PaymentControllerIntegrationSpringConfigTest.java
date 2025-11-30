@@ -4,12 +4,14 @@ import com.alphbank.core.integration.IntegrationTestBase;
 import com.alphbank.core.rest.model.*;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PaymentControllerIntegrationSpringConfigTest extends IntegrationTestBase {
 
     @Test
-    public void testCreatePayment() {
+    public void testCreateInstantPaymentHappyPath_verifyAccountBalancesChanged() {
         CustomerDTO customer1 = webClient.post()
                 .uri(uri -> uri.path("/customers").build())
                 .bodyValue(createCustomerRequest(NATIONAL_ID_1))
@@ -45,8 +47,10 @@ public class PaymentControllerIntegrationSpringConfigTest extends IntegrationTes
                 .returnResult()
                 .getResponseBody();
 
-        CreatePaymentRequestDTO paymentRequest = createPaymentRequest(account1.getId(), account2.getIban());
+        assertThat(account1.getBalance().getAmount()).isEqualTo(BigDecimal.ZERO);
+        assertThat(account2.getBalance().getAmount()).isEqualTo(BigDecimal.ZERO);
 
+        CreatePaymentRequestDTO paymentRequest = createPaymentRequest(account1.getId(), account2.getIban());
         PaymentDTO payment = webClient.post()
                 .uri(uri -> uri.path("/payments").build())
                 .bodyValue(paymentRequest)
@@ -56,6 +60,23 @@ public class PaymentControllerIntegrationSpringConfigTest extends IntegrationTes
                 .getResponseBody();
 
         assertThat(payment.getFromAccountId()).isEqualTo(account1.getId());
+
+        AccountDTO account1AfterPayment = webClient.get()
+                .uri(uri -> uri.path("/accounts/{accountId}").build(account1.getId()))
+                .exchange()
+                .expectBody(AccountDTO.class)
+                .returnResult()
+                .getResponseBody();
+
+        AccountDTO account2AfterPayment = webClient.get()
+                .uri(uri -> uri.path("/accounts/{accountId}").build(account2.getId()))
+                .exchange()
+                .expectBody(AccountDTO.class)
+                .returnResult()
+                .getResponseBody();
+
+        assertThat(account1AfterPayment.getBalance().getAmount()).isEqualTo(BigDecimal.valueOf(-22));
+        assertThat(account2AfterPayment.getBalance().getAmount()).isEqualTo(BigDecimal.valueOf(22));
     }
 
 

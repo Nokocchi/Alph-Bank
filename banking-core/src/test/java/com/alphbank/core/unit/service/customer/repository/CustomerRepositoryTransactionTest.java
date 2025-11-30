@@ -6,7 +6,7 @@ import com.alphbank.core.customer.service.repository.AddressRepository;
 import com.alphbank.core.customer.service.repository.CustomerRepository;
 import com.alphbank.core.customer.service.repository.model.AddressEntity;
 import com.alphbank.core.customer.service.repository.model.CustomerEntity;
-import com.alphbank.core.unit.service.customer.CustomerUnitTestBase;
+import com.alphbank.core.unit.service.UnitTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 @Import(CustomerService.class)
 @DataR2dbcTest
-public class CustomerRepositoryTransactionTest extends CustomerUnitTestBase {
+public class CustomerRepositoryTransactionTest extends UnitTestBase {
 
     @Autowired
     CustomerRepository customerRepository;

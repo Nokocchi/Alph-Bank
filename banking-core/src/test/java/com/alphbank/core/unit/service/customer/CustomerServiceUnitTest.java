@@ -6,6 +6,7 @@ import com.alphbank.core.customer.service.model.Customer;
 import com.alphbank.core.customer.service.repository.AddressRepository;
 import com.alphbank.core.customer.service.repository.CustomerRepository;
 import com.alphbank.core.customer.service.repository.model.CustomerEntity;
+import com.alphbank.core.unit.service.UnitTestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CustomerServiceUnitTest extends CustomerUnitTestBase {
+public class CustomerServiceUnitTest extends UnitTestBase {
 
     @Mock
     CustomerRepository customerRepository;

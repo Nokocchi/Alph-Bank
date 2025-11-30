@@ -8,7 +8,6 @@ Get back up to speed:
 	- Implement pagination for payments list?
 - Banking core:
 	- Make contract tests for all endpoints, with proper producer(), consumer()
-	- Unit tests, integration tests
 	- Create payment execution scheduled job
 	- Finish up loans controller/service
 	- Could be fun to run some checks to see if the sum of all transactions is 0, and if it isn't, there should be some kind of alarm/way to view the offending transaction which does not have a counterpart.

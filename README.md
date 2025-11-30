@@ -9,14 +9,15 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 
 ## Features
 
-* Core banking functionality
-* Payments to and from other customers using both internal and PSD2 inspired APIs
+* [Core banking functionality](/banking-core)
+* Payments to and from other customers using both [internal and PSD2](/payment-service/) inspired APIs
 * Instant & scheduled single payments
 * Recurring payments
-* Double entry bookkeeping of account transactions
+* [Double entry bookkeeping of account transactions](/banking-core#double-entry-bookkeeping--account-transactions)
 * Simulated compliance-based nightly batch uploads to government entities
 * Personal Loan applications with fixed-rate interest
-* Simulated signing flow for authorizing payments and applying for loans, utilizing asynchronous callbacks when customer has signed
+* [Simulated signing flow](/signing-service/) for authorizing payments and applying for loans, utilizing asynchronous callbacks when customer has signed
+* Simulated Strong Customer Authentication via electronic identification (Simulated BankID flow)
 * Simulated credit worthiness checks for loan applications
 * Simulated AML and fraud checks for payments and loan applications, triggering reports to government entities
 * Know Your Customer (KYC) 
@@ -57,9 +58,9 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 
 [Backend Service Structure](/backendservicestructure.txt)
 
-[Alph Bank Backend Styleguide](/BackendStyleguide.md)
+[Alph Bank Backend Technical Overview & Styleguide](/BackendStyleguide.md)
 
-[Alph Bank Frontend Styleguide](/FrontendStyleguide.md)
+[Alph Bank Frontend Technical Overview & Styleguide](/FrontendStyleguide.md)
 
 [Bruno Collection](/bruno-collection/)
 
