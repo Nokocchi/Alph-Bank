@@ -15,7 +15,7 @@ For demonstration purposes, the core banking platform in Alph Bank has been impl
 
 ### Double entry bookkeeping & account transactions:
 
-[Example](/src/main/java/com/alphbank/core/shared/TransactionService.java)
+[Example](/banking-core/src/main/java/com/alphbank/core/shared/TransactionService.java)
 
 As is common practice in the banking sector, the fundamental principle of transactions and balances in Alph Bank
 is that:

@@ -24,6 +24,12 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 * Admin interface for manually processing and approving suspicious payments and loan applications
 * Supports multiple languages, countries and currencies
 
+## Technical Overview
+
+[Alph Bank Backend Technical Overview & Styleguide](/BackendStyleguide.md)
+
+[Alph Bank Frontend Technical Overview & Styleguide](/FrontendStyleguide.md)
+
 ### Concepts I am aware of, but have decided not to implement:
 * Proper/safe authentication and authorization
 * No proper deployment that can be tested. Local testing only
@@ -57,10 +63,6 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 ### Misc.
 
 [Backend Service Structure](/backendservicestructure.txt)
-
-[Alph Bank Backend Technical Overview & Styleguide](/BackendStyleguide.md)
-
-[Alph Bank Frontend Technical Overview & Styleguide](/FrontendStyleguide.md)
 
 [Bruno Collection](/bruno-collection/)
 
