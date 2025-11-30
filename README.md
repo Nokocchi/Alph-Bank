@@ -57,7 +57,9 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 
 [Backend Service Structure](/backendservicestructure.txt)
 
-[Alph Bank Styleguide](/Styleguide.md)
+[Alph Bank Backend Styleguide](/BackendStyleguide.md)
+
+[Alph Bank Frontend Styleguide](/FrontendStyleguide.md)
 
 [Bruno Collection](/bruno-collection/)
 

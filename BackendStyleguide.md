@@ -1,8 +1,6 @@
-# Alph Bank Styleguide
+# Alph Bank Backend Styleguide
 
-## Backend
-
-### Technologies used
+## Technologies used
 * **Production:**
   * Java 25
   * SpringBoot 3.5.7
@@ -13,41 +11,42 @@
   * Redis
 * **Testing:**
   * Wiremock
-  * Junit
+  * Junit 5
   * AssertJ
   * Mockito
   * Testcontainers
 * Custom Spring Boot Starters for common behavior
 * Use Maven local to publish contract stubs and OpenAPI specs.
 
-### APIs and code generation
+## APIs and code generation
 * APIs must be JSON-based and REST-like (Without HATEOAS :) )
-* APIs must be built spec-first, with a version-controlled OpenAPI spec in the repository
-* You must publish this OpenAPI spec and make sure it is versioned.
+* APIs must be built spec-first, with a hand-written OpenAPI spec in the repository, checked into version control.
+* You must publish this OpenAPI spec with a new version whenever the specification changes.
 * As part of the build step, you should auto generate the controller interfaces and controller models for your own API, 
 as well as models and client APIs for your dependencies, using their published OpenAPI spec.
-The generated code should be in a folder separate from the source code, and not checked into version control.
-Only the interface for your API should be generated, not the controller implementation itself.
+* The generated code should be in a folder separate from the source code, and not checked into version control.
+This is to discourage manual editing of the generated code, which would just be overwritten next time it is generated.
+* Only the interface for your API should be generated, not the controller implementation itself.
 
-### Naming
-* All naming is restricted to ASCII, using the English language.
+## Naming
+* All text in Alph Bank is restricted to ASCII, using the English language.
 * Enum values and final (static) string constants must use UPPERCASE_SNAKE_CASE.
 * Models
   * Service-layer models have no suffix or prefix. 
-    * Example: Payment.java
+    * Example: `Payment.java`
   * Rest-layer models are suffixed with -DTO. 
-    * Example: PaymentDTO.java
+    * Example: `PaymentDTO.java`
   * Repository-layer models are suffixed with -Entity. 
-    * Example: PaymentEntity.java
+    * Example: `PaymentEntity.java`
   * Models for dependent services are prefixed with the name of the service, and suffixed with -DTO. (TODO: Can we do this with OpenApi Generator?)
-    * Example: CoreBankingPaymentDTO.java
+    * Example: `CoreBankingPaymentDTO.java`
 * APIs
   * **Resources:** Use kebab-case, plural noun
   * **Path variables:** Use kebab-case, singular noun.
   * **Query parameters:** Use snake_case, noun
   * Example: http://localhost:8080/payments/{payment-id}/card-transactions?transaction_type=OUTGOING
 
-### Model conversion
+## Model conversion
 We should follow three core principles:
 1. The business logic in the service layer should not know about or depend on implementation details of the controller or repository layers.
 This means that we should theoretically be able to swap out the API implementation or database implementation without touching the service layer (or at least the business logic).
@@ -80,13 +79,13 @@ And they must be called from:
 * Service layer <-> Entity
   * In the service layer.
 
-### Concurrency and error handling
+## Error handling and transactions
 * Malformed request bodies, missing headers and missing query parameters must result in a 400 Bad Request with a clear error message. 
 * If any business logic requires a 4xx response, you must throw an exception, catch it in a Rest Error Handler, and return a standardized error object.
 * If multiple database-writes are done in a single transaction, it must be marked with @Transactional, and rollbacks must be covered by tests
 * If a function needs to perform a database-write and also publish a message on a message queue in the same transaction, then the database-write must be done first, and the function must be marked as @Transactional. Rollbacks must be covered by tests.
 
-### Testing
+## Testing
 
 Testing is of course important, but this is a hobby project and a human only lives so long, so I have decided to only add tests to the Banking Core and the Payment Service.
 
@@ -94,14 +93,14 @@ As we know from the testing pyramid, unit tests are the fastest, simplest and le
 integration tests, and beyond, the tests get bigger, slower and more brittle. The reason is that, in the case of
 integration tests that send a request to your service, you immediately run into some issues: 
 
-#### Alph Bank's stance on integration tests
+### Alph Bank's stance on integration tests
 
 1. Integration tests require setting up an entire Spring Application Context, web server, loading all the beans and dependencies, etc.,
 and this is very slow and resource intensive compared to a simple unit test. Add too many integration tests, and your test
 suite will quickly take several minutes. 
 2. Loading the entire application context means that you have a **lot** of dependencies.
 3. You cannot prepare data in your database
-by calling repository.save() directly from your test. The test and the request run in separate threads, and the changes in
+by calling `repository.save()` directly from your test. The test and the request run in separate threads, and the changes in
 the repository made from the test code are not committed before the request is handled. This can maybe be avoided with @Sql annotation,
 or some kind of @BeforeEach setup, but this is a lot to maintain long term and is not very elegant. This means that
 you often need to create the data in the database via requests to your service, which can be argued is the goal of integration tests
@@ -118,37 +117,100 @@ specific behavior of all this code.
    And, getting back to the speed of the test suite: It will take many, many minutes for them to fix and re-run these many slow tests.
 
 But it is also true that integration tests are the best guarantee you have that the individual parts of your service
-work together as intended. You can test that somewhere deep in your service layer you will throw CustomerNotFoundException 
+work together as intended. You can test that somewhere deep in your service layer you will throw `CustomerNotFoundException` 
 if the customer could not be found, and then you can test that your controller returns 404 Not Found if your service layer 
-is mocked to throw CustomerNotFoundException, but what if a coworker changes the code in between such that your request
-never hits the code that throws CustomerNotFoundException? Then all your tests would continue to pass, but in a real transaction,
+is mocked to throw `CustomerNotFoundException`, but what if a coworker changes the code in between such that your request
+never hits the code that throws `CustomerNotFoundException`? Then all your tests would continue to pass, but in a real transaction,
 you would get an unexpected result. So it is important to have some integration tests, but only just enough for basic sanity tests.
 
 
-#### Testing guidelines
+### Testing guidelines
 
 * **Unit tests:** 
   * The bulk of the testing must be done with unit tests. 
-  * Spring Application Context / webserver should not be run, so don't use @SpringBootTest. 
+  * Spring Application Context / webserver should not be run, so don't use `@SpringBootTest`. 
   * Unit tests usually only cover a small piece of code, preferably a single function, and have very few non-mocked dependencies, preferably none.
-  * Mockito must be used to mock dependencies and verify calls to these or lack thereof. These tests should run with just @ExtendWith(MockitoExtension.class) and @Mock/@InjectMocks annotations.
-  * If necessary, use test slices (@DataR2dbcTest, @DataMongoTest, DataJpaTest etc.), which only load the necessary minimal Spring beans. You can use @MockitoBean for dependencies, and @Import() the bean(s) that you need the real implementation of. 
+  * Mockito must be used to mock dependencies and verify calls to these or lack thereof. These tests should run with just `@ExtendWith(MockitoExtension.class)` and `@Mock`/`@InjectMocks` annotations.
+  * If necessary, use test slices (`@DataR2dbcTest`, `@DataMongoTest`, `@DataJpaTest` etc.), which only load the necessary minimal Spring beans. You can use `@MockitoBean` for dependencies, and `@Import()` the bean(s) that you need the real implementation of. 
   * There should be unit tests for client-implementations using the published contract stubs. This verifies that the requests and responses have the correct format, including headers, authorization, etc.
 * **Contract tests:** 
   * Must be implemented to ensure that API changes are non-breaking and backwards compatible. 
-  * Must be implemented in Groovy, and the test base class should not use @SpringBootTest unless absolutely necessary. Using @ExtendWith(MockitoExtension.class) and @Mock annotation on the service class should be enough in most cases,
+  * Must be implemented in Groovy, and the test base class should not use `@SpringBootTest` unless absolutely necessary. Using `@ExtendWith(MockitoExtension.class)` and `@Mock` annotation on the service class should be enough in most cases,
     unless you need some ObjectMapper or security configuration.
   * If you have any exceptions that are caught in your Rest Exception Handler, then just mock that the service class throws this exception.
 * **Integration tests:** 
   * Some few integration tests should be implemented, just to sanity check entire flows. 
-  * You should use @SpringBootTest, and TestContainers for repositories and message queues. 
+  * You should use `@SpringBootTest`, and TestContainers for repositories and message queues. 
   * External APIs should be manually mocked with Wiremock - not using stubs. In rare cases, if necessary, Mockito Spybeans can be used to verify calls to specific methods.
 * **Wiremock:** Mocking must be done in Java, in the test method the mock is needed. Don't use JSON-file mappings. These can be quite difficult to understand in large test suites.
 
-## Frontend
+## Versioning
 
-* Written in SvelteKit and Typescript
-* Must use file-system-(and slug)-based routing
-* Must use Zod for validating requests and responses
-* Must use Superforms for forms
-* Must use Typescript types/interfaces for all internal typing
+### Custom Spring Boot Starters
+
+The version number should consist of 5 digits separated by periods. The first three should be equal to the version of Spring Boot used.
+The fourth digit is the major version number of the starter, which is updated when there are breaking changes to the starter.
+Finally, the fifth digit is the path version of the starter, which is updated when the changes are backwards compatible.
+
+This allows us to version the code within the starter correctly, while also targeting multiple Spring Boot versions.
+
+### API Versions
+
+Alph Bank uses spec-first API development, which means that all changes must be made in the openapi.yaml file within the repository.
+
+The API specification is published to Maven local, using the version of the project as defined in `build.gradle`.
+
+The **ideal** scenario would be that the API of a service should not be generated directly from the openapi.yaml file in its own local repository, 
+but instead from the published one. 
+This ensures that the API of a service does not get out of sync with the generated client implementation in the consumers.
+In other words: If your published openapi.yaml is good enough for consumers, it should be good enough for your own service as well.
+
+This theoretically also allows you to support multiple past API versions in your service. And in your CI/CD pipeline, you could
+have automatic checks that the version of the service must be updated if the API specification changes, and you could have automatic 
+publishing of a new version to Maven when master branch is updated.
+
+In practice, this is not very elegant or easy to implement in the gradle build script. 
+It would cause a circular dependency if implemented naïvely which is not supported, so you either have to split your services
+up into two modules (API spec and implementation) and have the implementation depend on the API spec, or maybe do some clever hacks,
+or put your API specifications in a separate repository altogether. 
+
+This is only a hobby project, and I have decided to just put the API specification in the owning service's resources and generate the API
+directly from this file.
+
+### Contract stubs
+
+Contract stubs are published to Maven local, using the version of the project as defined in `build.gradle`.
+
+This means that contract stubs and API specs are always published with the same version.
+
+This ensures that if your API has been updated, there will be corresponding contract stubs for the consumers of your API. Realistically,
+they will probably not specify a specific version of the contract stubs in their tests, but instead just fetch the newest,
+which means that even if they forget or fail to update the version of your openapi.yaml spec,
+their stub tests will still fail if your API has any breaking changes.
+
+### Flyway migrations
+
+Let's be honest - does anybody ever use the major and minor version of Flyway migrations? For now, just increment the patch version indefinitely.
+In microservices with dedicated small databases, it is unlikely that you will have that many versions anyway.
+
+I suppose you could create a new baseline by exporting the current database structure as a new migration with an incremented major version,
+and delete the Flyway migration history in the database. This way, we have a fresh start and can delete the old migrations.
+But that doesn't seem like the intended use case..
+
+## How to
+
+### Publishing new version of the Alph Commons Spring Boot Starter
+
+Make the desired change in the Spring Boot starter, increment the version number in `build.gradle` and use the Gradle task `publishToMavenLocal`.
+
+### Updating API in service
+
+Make a change in the openapi.yaml file. Then, to update the API in your own project, run the Gradle task `openApiGenerate`.
+
+Also, run the Gradle task `publishToMavenLocal` in order to publish your new version for consumers to use.
+
+In a real life scenario, this would be automated in the CI/CD pipeline.
+
+### Publishing new version of contract stubs
+
+Run the Gradle task `publishToMavenLocal`

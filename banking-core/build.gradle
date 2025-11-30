@@ -12,7 +12,7 @@ plugins {
 }
 
 group = 'com.alphbank.core'
-version = '0.0.3-SNAPSHOT'
+version = '0.0.12-SNAPSHOT'
 
 java {
     withSourcesJar()
