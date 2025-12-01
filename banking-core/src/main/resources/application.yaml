@@ -6,16 +6,19 @@ logging:
     com:
       alphbank:
         core: DEBUG
-    org:
-      springframework:
-        web: DEBUG
-    reactor:
-      netty:
-        http:
-          client:
-            HttpClient: DEBUG
-          server:
-            HttpServer: DEBUG
+    org.springframework.cloud.contract: DEBUG
+    org.springframework.cloud.contract.verifier: DEBUG
+    org.springframework.web.reactive: DEBUG
+    org.springframework.web: DEBUG
+    reactor.netty:
+    reactor.netty.http:
+      client:
+        HttpClient: DEBUG
+      server:
+        HttpServer: DEBUG
+reactor:
+  trace:
+    operatorStacktrace: true
 
 alph-commons:
   wiretapEnabled: true

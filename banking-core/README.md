@@ -17,8 +17,8 @@ For demonstration purposes, the core banking platform in Alph Bank has been impl
 
 [Example](/banking-core/src/main/java/com/alphbank/core/shared/TransactionService.java)
 
-As is common practice in the banking sector, the fundamental principle of transactions and balances in Alph Bank
-is that:
+As is common practice in the banking sector, the fundamental principles of transactions and balances in Alph Bank
+are that:
 
 - All changes to the balance of an account is defined as two separate transactions in the database:
 A positive transaction for the creditor, and a negative transaction for the debtor. 
