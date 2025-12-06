@@ -32,6 +32,7 @@ public class TransactionService {
         // Debtor perspective
         TransactionEntity debtorTransaction = TransactionEntity.createBuilder(paymentEntity)
                 .accountId(debtorAccount.getId())
+                .amount(paymentEntity.getMonetaryValue().negate())
                 .message(paymentEntity.getMessageToSelf())
                 .newBalance(Utils.getAmount(debtorAccount.getBalance()).subtract(paymentEntity.getMonetaryValue()))
                 .build();
@@ -39,6 +40,7 @@ public class TransactionService {
         // Creditor perspective
         TransactionEntity creditorTransaction = TransactionEntity.createBuilder(paymentEntity)
                 .accountId(creditorAccount.getId())
+                .amount(paymentEntity.getMonetaryValue())
                 .message(paymentEntity.getMessageToRecipient())
                 .newBalance(Utils.getAmount(creditorAccount.getBalance()).add(paymentEntity.getMonetaryValue()))
                 .build();

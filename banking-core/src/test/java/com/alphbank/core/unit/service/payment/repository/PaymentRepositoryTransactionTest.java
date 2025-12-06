@@ -2,6 +2,7 @@ package com.alphbank.core.unit.service.payment.repository;
 
 import com.alphbank.core.account.service.AccountService;
 import com.alphbank.core.account.service.model.Account;
+import com.alphbank.core.integration.config.TestContainersConfiguration;
 import com.alphbank.core.payment.service.PaymentService;
 import com.alphbank.core.payment.service.model.Payment;
 import com.alphbank.core.payment.service.repository.PaymentRepository;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -21,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@Import(PaymentService.class)
+@Import({PaymentService.class, TestContainersConfiguration.class})
 @DataR2dbcTest
 public class PaymentRepositoryTransactionTest extends UnitTestBase {
 
@@ -56,10 +58,10 @@ public class PaymentRepositoryTransactionTest extends UnitTestBase {
                 .thenReturn(Mono.just(fromAccount));
 
         when(transactionService.executePaymentOnAccounts(any(Account.class), any(Account.class), any(PaymentEntity.class)))
-                .thenThrow(IllegalArgumentException.class);
+                .thenThrow(DataIntegrityViolationException.class);
 
         StepVerifier.create(paymentService.createPayment(payment))
-                .verifyError(IllegalArgumentException.class);
+                .verifyError(DataIntegrityViolationException.class);
 
         StepVerifier.create(paymentRepository.findAll())
                 .expectNextCount(0)

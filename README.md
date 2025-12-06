@@ -30,7 +30,7 @@ This is a personal project, simulating an entire banking ecosystem, which is int
 
 [Alph Bank Frontend Technical Overview & Styleguide](/FrontendStyleguide.md)
 
-### Concepts I am aware of, but have decided not to implement:
+## Concepts I am aware of, but have decided not to implement:
 * Proper/safe authentication and authorization
 * No proper deployment that can be tested. Local testing only
 * Mostly intended to show backend skills and banking knowledge, so the front-end is quite barebones and does not use or provide good accessibility, best practices, nice user experiences across devices and browsers etc.

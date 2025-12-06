@@ -6,6 +6,7 @@ import com.alphbank.core.customer.service.repository.AddressRepository;
 import com.alphbank.core.customer.service.repository.CustomerRepository;
 import com.alphbank.core.customer.service.repository.model.AddressEntity;
 import com.alphbank.core.customer.service.repository.model.CustomerEntity;
+import com.alphbank.core.integration.config.TestContainersConfiguration;
 import com.alphbank.core.unit.service.UnitTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@Import(CustomerService.class)
+@Import({CustomerService.class, TestContainersConfiguration.class})
 @DataR2dbcTest
 public class CustomerRepositoryTransactionTest extends UnitTestBase {
 
@@ -37,7 +38,7 @@ public class CustomerRepositoryTransactionTest extends UnitTestBase {
     AddressRepository addressRepository;
 
     @BeforeEach
-    void setup(){
+    void setup() {
         customerRepository.deleteAll().block();
     }
 

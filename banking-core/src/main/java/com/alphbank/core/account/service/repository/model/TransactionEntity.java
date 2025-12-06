@@ -63,7 +63,6 @@ public class TransactionEntity {
                 .createdFromId(paymentEntity.getId())
                 .createdFromType(TransactionCreatedByType.PAYMENT)
                 .executionDateTime(LocalDateTime.now())
-                .amount(paymentEntity.getMonetaryValue())
                 .currencyCode(paymentEntity.getCurrency());
     }
 }
